@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.delegate;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -18,10 +19,12 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
   }
 
   public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException {
-    // @formatter:off
     return objectMapper.readValue(inputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
-    // @formatter:on
+  }
+
+  public Boolean hasInputVariables(DelegateExecution execution) {
+    return Objects.nonNull(inputVariables) && Objects.nonNull(inputVariables.getValue(execution));
   }
 
   public void setInputVariables(Expression inputVariables) {

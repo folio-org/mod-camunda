@@ -23,34 +23,40 @@ public interface Output {
 
   public abstract void setOutputVariable(Expression outputVariable);
 
+  public abstract Boolean hasOutputVariable(DelegateExecution execution);
+
   public default void setOutput(DelegateExecution execution, Object output) throws JsonProcessingException {
-    EmbeddedVariable variable = getOutputVariable(execution);
-    Optional<String> key = Optional.ofNullable(variable.getKey());
-    if (key.isPresent()) {
-      if (Objects.nonNull(output)) {
-        Optional<VariableType> type = Optional.ofNullable(variable.getType());
-        Object value = variable.isSpin()
-          ? JSON(getObjectMapper().writeValueAsString(output))
-          : Variables.objectValue(output, variable.getAsTransient()).create();
-        if (type.isPresent()) {
-          switch (type.get()) {
-          case LOCAL:
-            execution.setVariableLocal(key.get(), value);
-            break;
-          case PROCESS:
-            execution.setVariable(key.get(), value);
-            break;
-          default:
-            break;
+    if (hasOutputVariable(execution)) {
+      EmbeddedVariable variable = getOutputVariable(execution);
+      Optional<String> key = Optional.ofNullable(variable.getKey());
+      if (key.isPresent()) {
+        if (Objects.nonNull(output)) {
+          Optional<VariableType> type = Optional.ofNullable(variable.getType());
+          Object value = variable.isSpin()
+            ? JSON(getObjectMapper().writeValueAsString(output))
+            : Variables.objectValue(output, variable.getAsTransient()).create();
+          if (type.isPresent()) {
+            switch (type.get()) {
+            case LOCAL:
+              execution.setVariableLocal(key.get(), value);
+              break;
+            case PROCESS:
+              execution.setVariable(key.get(), value);
+              break;
+            default:
+              break;
+            }
+          } else {
+            getLogger().warn("Variable type not present for {}", key.get());
           }
         } else {
-          getLogger().warn("Variable type not present for {}", key.get());
+          getLogger().warn("Output not present for {}", key.get());
         }
       } else {
-        getLogger().warn("Output not present for {}", key.get());
+        getLogger().warn("Output key is null");
       }
     } else {
-      getLogger().warn("Output key is null");
+      getLogger().warn("Output variable for execution {} is null", execution.getId());
     }
   }
 
