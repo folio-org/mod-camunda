@@ -18,10 +18,8 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
   }
 
   public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException {
-    // @formatter:off
     return objectMapper.readValue(inputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
-    // @formatter:on
   }
 
   public void setInputVariables(Expression inputVariables) {

@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-// This class probably should be called AbstractDatabaseIODelegate to align with AbstractWorkflowIODelegate.
-// Deferring refactor at this time in case it may cause breaking changes.
+/**
+ * This class probably should be called AbstractDatabaseIODelegate to align with AbstractWorkflowIODelegate.
+ *
+ * Deferring refactor at this time in case it may cause breaking changes.
+ */
 public abstract class AbstractDatabaseOutputDelegate extends AbstractWorkflowInputDelegate implements Output {
 
   Expression designation;
