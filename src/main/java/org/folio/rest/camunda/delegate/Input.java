@@ -23,61 +23,67 @@ public interface Input {
 
   public abstract Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException;
 
+  public abstract boolean hasInputVariables(DelegateExecution execution);
+
   public abstract void setInputVariables(Expression inputVariables);
 
   public default Map<String, Object> getInputs(DelegateExecution execution) throws JsonProcessingException {
     Map<String, Object> inputs = new HashMap<String, Object>();
-    for (EmbeddedVariable variable : getInputVariables(execution)) {
-      Optional<String> key = Optional.ofNullable(variable.getKey());
-      if (key.isPresent()) {
-        Optional<VariableType> type = Optional.ofNullable(variable.getType());
-        if (type.isPresent()) {
-          Optional<Object> value = Optional.empty();
-          switch (type.get()) {
-          case LOCAL:
-            value = Optional.ofNullable(execution.getVariableLocal(key.get()));
-            break;
-          case PROCESS:
-            value = Optional.ofNullable(execution.getVariable(key.get()));
-            break;
-          default:
-            break;
-          }
-          if (value.isPresent()) {
-            if (variable.isSpin()) {
-              JacksonJsonNode node = (JacksonJsonNode) value.get();
-              if (variable.getAsJson()) {
-                inputs.put(key.get(), getObjectMapper().writeValueAsString(((JacksonJsonNode) value.get()).unwrap()));
-              } else {
-                if (node.isObject()) {
-                  inputs.put(key.get(), getObjectMapper().convertValue(((JacksonJsonNode) value.get()).unwrap(),
-                      new TypeReference<Map<String, Object>>() {
-                      }));
-                } else if (node.isArray()) {
-                  inputs.put(key.get(), getObjectMapper().convertValue(((JacksonJsonNode) value.get()).unwrap(),
-                      new TypeReference<List<Object>>() {
-                      }));
-                } else if (node.isValue()) {
-                  try {
-                    // try read tree if value is JSON string
-                    inputs.put(key.get(), getObjectMapper().readTree((String) node.value()));
-                  } catch (Exception e) {
-                    inputs.put(key.get(), node.value());
+    if (hasInputVariables(execution)) {
+      for (EmbeddedVariable variable : getInputVariables(execution)) {
+        Optional<String> key = Optional.ofNullable(variable.getKey());
+        if (key.isPresent()) {
+          Optional<VariableType> type = Optional.ofNullable(variable.getType());
+          if (type.isPresent()) {
+            Optional<Object> value = Optional.empty();
+            switch (type.get()) {
+            case LOCAL:
+              value = Optional.ofNullable(execution.getVariableLocal(key.get()));
+              break;
+            case PROCESS:
+              value = Optional.ofNullable(execution.getVariable(key.get()));
+              break;
+            default:
+              break;
+            }
+            if (value.isPresent()) {
+              if (variable.isSpin()) {
+                JacksonJsonNode node = (JacksonJsonNode) value.get();
+                if (variable.getAsJson()) {
+                  inputs.put(key.get(), getObjectMapper().writeValueAsString(((JacksonJsonNode) value.get()).unwrap()));
+                } else {
+                  if (node.isObject()) {
+                    inputs.put(key.get(), getObjectMapper().convertValue(((JacksonJsonNode) value.get()).unwrap(),
+                        new TypeReference<Map<String, Object>>() {
+                        }));
+                  } else if (node.isArray()) {
+                    inputs.put(key.get(), getObjectMapper().convertValue(((JacksonJsonNode) value.get()).unwrap(),
+                        new TypeReference<List<Object>>() {
+                        }));
+                  } else if (node.isValue()) {
+                    try {
+                      // try read tree if value is JSON string
+                      inputs.put(key.get(), getObjectMapper().readTree((String) node.value()));
+                    } catch (Exception e) {
+                      inputs.put(key.get(), node.value());
+                    }
                   }
                 }
+              } else {
+                inputs.put(key.get(), value.get());
               }
             } else {
-              inputs.put(key.get(), value.get());
+              getLogger().warn("Could not find value for {} from {}", key, type);
             }
           } else {
-            getLogger().warn("Could not find value for {} from {}", key, type);
+            getLogger().warn("Variable type not present for {}", key.get());
           }
         } else {
-          getLogger().warn("Variable type not present for {}", key.get());
+          getLogger().warn("Input key is null");
         }
-      } else {
-        getLogger().warn("Output key is null");
       }
+    } else {
+      getLogger().warn("Input variables for execution {} is null", execution.getId());
     }
     return inputs;
   }
