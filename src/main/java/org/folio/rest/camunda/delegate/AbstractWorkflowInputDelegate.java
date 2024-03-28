@@ -14,7 +14,7 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
 
   private Expression inputVariables;
 
-  public AbstractWorkflowInputDelegate() {
+  protected AbstractWorkflowInputDelegate() {
     super();
   }
 
@@ -23,7 +23,7 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
         new TypeReference<Set<EmbeddedVariable>>() {});
   }
 
-  public Boolean hasInputVariables(DelegateExecution execution) {
+  public boolean hasInputVariables(DelegateExecution execution) {
     return Objects.nonNull(inputVariables) && Objects.nonNull(inputVariables.getValue(execution));
   }
 

@@ -11,7 +11,7 @@ public abstract class AbstractWorkflowIODelegate extends AbstractWorkflowInputDe
 
   private Expression outputVariable;
 
-  public AbstractWorkflowIODelegate() {
+  protected AbstractWorkflowIODelegate() {
     super();
   }
 
@@ -19,7 +19,7 @@ public abstract class AbstractWorkflowIODelegate extends AbstractWorkflowInputDe
     return objectMapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
   }
 
-  public Boolean hasOutputVariable(DelegateExecution execution) {
+  public boolean hasOutputVariable(DelegateExecution execution) {
     return Objects.nonNull(outputVariable) && Objects.nonNull(outputVariable.getValue(execution));
   }
 

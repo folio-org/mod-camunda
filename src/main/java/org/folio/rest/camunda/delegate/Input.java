@@ -23,7 +23,7 @@ public interface Input {
 
   public abstract Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException;
 
-  public abstract Boolean hasInputVariables(DelegateExecution execution);
+  public abstract boolean hasInputVariables(DelegateExecution execution);
 
   public abstract void setInputVariables(Expression inputVariables);
 

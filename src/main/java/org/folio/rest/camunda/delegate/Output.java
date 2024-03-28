@@ -23,7 +23,7 @@ public interface Output {
 
   public abstract void setOutputVariable(Expression outputVariable);
 
-  public abstract Boolean hasOutputVariable(DelegateExecution execution);
+  public abstract boolean hasOutputVariable(DelegateExecution execution);
 
   public default void setOutput(DelegateExecution execution, Object output) throws JsonProcessingException {
     if (hasOutputVariable(execution)) {

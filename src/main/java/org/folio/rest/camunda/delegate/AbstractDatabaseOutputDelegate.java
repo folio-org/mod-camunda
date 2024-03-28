@@ -28,7 +28,7 @@ public abstract class AbstractDatabaseOutputDelegate extends AbstractWorkflowInp
     this.designation = designation;
   }
 
-  public Boolean hasOutputVariable(DelegateExecution execution) {
+  public boolean hasOutputVariable(DelegateExecution execution) {
     return Objects.nonNull(outputVariable) && Objects.nonNull(outputVariable.getValue(execution));
   }
 
