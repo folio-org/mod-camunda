@@ -163,12 +163,12 @@ class DatabaseQueryDelegateTest {
   }
 
   @Test
-  void testExecuteThrowsException() {
+  void testExecuteThrowsException() throws JsonProcessingException, SQLException {
+    setupExecuteMocking();
+
+    doThrow(SQLException.class).when(connectionService).getConnection(anyString());
+
     assertThrows(Exception.class, () -> {
-      setupExecuteMocking();
-
-      doThrow(SQLException.class).when(connectionService).getConnection(anyString());
-
       databaseQueryDelegate.execute(delegateExecution);
     });
   }

@@ -133,7 +133,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
   private interface ResultOp {
     void next() throws SQLException, IOException;
 
-    void finish() throws JsonProcessingException, IOException;
+    void finish() throws IOException;
   }
 
   private class VariableResultOp implements ResultOp {
@@ -177,7 +177,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
 
     private final DatabaseResultTypeOp rowOp;
 
-    public FileResultOp(ResultSet results, String path, String resultType, Boolean includeHeader) throws SQLException, IOException {
+    public FileResultOp(ResultSet results, String path, String resultType, boolean includeHeader) throws SQLException, IOException {
       this.results = results;
       this.fw = new FileWriter(path);
       this.rowOp = DatabaseResultTypeOp.valueOf(resultType);
@@ -210,7 +210,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
     void process(FileWriter fw, ResultSet results) throws SQLException, IOException;
   }
 
-  private static String buildHeader(ResultSet results, String delimiter) throws SQLException, IOException {
+  private static String buildHeader(ResultSet results, String delimiter) throws SQLException {
     StringBuilder builder = new StringBuilder();
     ResultSetMetaData metadata = results.getMetaData();
     for (int count = 1; count <= metadata.getColumnCount(); ++count) {
@@ -257,7 +257,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
       }
     };
 
-    private static String processDelimited(ResultSet results, String delimiter) throws SQLException, IOException {
+    private static String processDelimited(ResultSet results, String delimiter) throws SQLException {
       StringBuilder builder = new StringBuilder();
       ResultSetMetaData metadata = results.getMetaData();
       for (int count = 1; count <= metadata.getColumnCount(); ++count) {

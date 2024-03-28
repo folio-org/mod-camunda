@@ -31,7 +31,6 @@ public class CamundaTenantInit implements HibernateTenantInit {
 
     try (Statement statement = connection.createStatement()) {
       statement.execute(sqlTemplateService.templateInitSql(SCHEMA_IMPORT_TENANT, TENANT_TEMPLATE_KEY, camundaTenant));
-      statement.close();
     }
   }
 
