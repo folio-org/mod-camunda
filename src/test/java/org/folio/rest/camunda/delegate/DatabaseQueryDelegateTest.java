@@ -10,14 +10,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -107,6 +106,8 @@ class DatabaseQueryDelegateTest {
     when(statement.getUpdateCount()).thenReturn(1);
 
     databaseQueryDelegate.execute(delegateExecution);
+
+    verify(statement).getUpdateCount();
   }
 
   @Test
@@ -125,6 +126,8 @@ class DatabaseQueryDelegateTest {
     setField(databaseQueryDelegate, "outputVariable", outputVariableExpression);
 
     databaseQueryDelegate.execute(delegateExecution);
+
+    verify(statement).getUpdateCount();
   }
 
   @Test
@@ -155,6 +158,8 @@ class DatabaseQueryDelegateTest {
     setField(databaseQueryDelegate, "outputVariable", outputVariableExpression);
 
     databaseQueryDelegate.execute(delegateExecution);
+
+    verify(statement).getUpdateCount();
   }
 
   @Test

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
@@ -48,15 +49,17 @@ class DatabaseDisconnectDelegateTest {
     doNothing().when(connectionService).destroyConnection(anyString());
 
     databaseDisconnectDelegate.execute(delegateExecution);
+
+    verify(connectionService).destroyConnection(anyString());
   }
 
   @Test
-  void testExecuteThrowsException() {
+  void testExecuteThrowsException() throws SQLException {
+    setupExecuteMocking();
+
+    doThrow(SQLException.class).when(connectionService).destroyConnection(anyString());
+
     assertThrows(Exception.class, () -> {
-      setupExecuteMocking();
-
-      doThrow(SQLException.class).when(connectionService).destroyConnection(anyString());
-
       databaseDisconnectDelegate.execute(delegateExecution);
     });
   }

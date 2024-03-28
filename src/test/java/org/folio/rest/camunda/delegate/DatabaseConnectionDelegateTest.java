@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -67,15 +68,17 @@ class DatabaseConnectionDelegateTest {
     doNothing().when(connectionService).createPool(anyString(), anyString(), any(Properties.class));
 
     databaseConnectionDelegate.execute(delegateExecution);
+
+    verify(connectionService).createPool(anyString(), anyString(), any(Properties.class));
   }
 
   @Test
-  void testExecuteThrowsException() {
+  void testExecuteThrowsException() throws SQLException {
+    setupExecuteMocking();
+
+    doThrow(SQLException.class).when(connectionService).createPool(anyString(), anyString(), any(Properties.class));
+
     assertThrows(Exception.class, () -> {
-      setupExecuteMocking();
-
-      doThrow(SQLException.class).when(connectionService).createPool(anyString(), anyString(), any(Properties.class));
-
       databaseConnectionDelegate.execute(delegateExecution);
     });
   }

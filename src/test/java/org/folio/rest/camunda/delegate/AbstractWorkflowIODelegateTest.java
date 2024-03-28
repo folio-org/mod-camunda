@@ -3,6 +3,7 @@ package org.folio.rest.camunda.delegate;
 import static org.folio.spring.test.mock.MockMvcConstant.JSON_OBJECT;
 import static org.folio.spring.test.mock.MockMvcConstant.KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -76,6 +77,18 @@ class AbstractWorkflowIODelegateTest {
     setField(abstractWorkflowIODelegate, "outputVariable", outputVariable);
 
     assertTrue(abstractWorkflowIODelegate.hasOutputVariable(delegateExecution));
+  }
+
+  @Test
+  void testHasOutputVariableReturnsFalse() {
+    when(outputVariable.getValue(any())).thenReturn(null);
+    setField(abstractWorkflowIODelegate, "outputVariable", outputVariable);
+
+    assertFalse(abstractWorkflowIODelegate.hasOutputVariable(delegateExecution));
+
+    setField(abstractWorkflowIODelegate, "outputVariable", null);
+
+    assertFalse(abstractWorkflowIODelegate.hasOutputVariable(delegateExecution));
   }
 
   @Test
