@@ -162,8 +162,8 @@ application:
     listener:
       events:
         concurrency: 1
-        topic-pattern: (${ENV:folio}\.)?(.*\.)?workflow.events
-        group-id: ${ENV:folio}-mod-camunda-workflow-events-group
+        topic-pattern: ${ENV:folio}.(.*\.)?workflow-engine.events
+        group-id: ${ENV:folio}-mod-workflow-engine-events-group
 
 tenant:
   header-name: X-Okapi-Tenant
