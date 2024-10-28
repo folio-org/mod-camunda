@@ -71,7 +71,7 @@ class CamundaApiServiceTest {
     lenient().when(repositoryService.createDeployment()).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.name(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.addModelInstance(anyString(), any(BpmnModelInstance.class)))
-        .thenReturn(deploymentBuilder);
+      .thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.source(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.tenantId(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.deploy()).thenReturn(deployment);
@@ -82,7 +82,8 @@ class CamundaApiServiceTest {
   void testDeployWorkflow() throws ScriptTaskDeserializeCodeFailure, WorkflowAlreadyActiveException {
     try (
         MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
-        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);) {
+        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+      ) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
@@ -101,15 +102,14 @@ class CamundaApiServiceTest {
   void testDeployWorkflowException() {
     try (
         MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
-        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);) {
+        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+    ) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
       when(deploymentBuilder.deploy()).thenThrow(new NotValidException());
 
-      assertThrows(NotValidException.class, () -> {
-        camundaApiService.deployWorkflow(workflow, TENANT);
-      });
+      assertThrows(NotValidException.class, () -> camundaApiService.deployWorkflow(workflow, TENANT));
     }
   }
 
@@ -117,9 +117,7 @@ class CamundaApiServiceTest {
   void testDeployWorkflowAlreadyActive() throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
     testDeployWorkflow();
 
-    assertThrows(WorkflowAlreadyActiveException.class, () -> {
-      camundaApiService.deployWorkflow(workflow, TENANT);
-    });
+    assertThrows(WorkflowAlreadyActiveException.class, () -> camundaApiService.deployWorkflow(workflow, TENANT));
   }
 
   @Test

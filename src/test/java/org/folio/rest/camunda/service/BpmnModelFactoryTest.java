@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.service;
 
 import static org.folio.spring.test.mock.MockMvcConstant.UUID;
+import static org.folio.spring.test.mock.MockMvcConstant.VALUE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,10 +12,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
 import org.camunda.bpm.model.bpmn.builder.EndEventBuilder;
@@ -48,6 +49,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class BpmnModelFactoryTest {
+
+  private final static String UUID_NODE_1 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+
+  private final static String UUID_NODE_2 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+
+  private final static String UUID_NODE_3 = "789ee60d-e24f-4c40-adcb-984d68fab24d";
 
   @Mock
   private BpmnModelInstance bpmnModelInstance;
@@ -90,12 +97,40 @@ class BpmnModelFactoryTest {
 
   private ProcessBuilder processBuilder;
 
+  private Node endNode;
+
+  private Node inputNode;
+
+  private Node simpleNode;
+
+  private Node startNode;
+
+  private List<Node> nodes;
+
   private Setup setup;
 
   private Workflow workflow;
 
   @BeforeEach
   void beforeEach() {
+    startNode = new StartEvent();
+    startNode.setId(UUID_NODE_1);
+    startNode.setName(VALUE);
+
+    inputNode = new InputTask();
+    inputNode.setId(UUID_NODE_2);
+    inputNode.setName(VALUE);
+
+    endNode = new EndEvent();
+    endNode.setId(UUID_NODE_3);
+    endNode.setName(VALUE);
+
+    simpleNode = new MyNode();
+    simpleNode.setId(UUID_NODE_1);
+    simpleNode.setName(VALUE);
+
+    nodes = new ArrayList<>();
+
     setup = new Setup();
 
     workflow = new Workflow();
@@ -106,10 +141,15 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflowException() throws ScriptTaskDeserializeCodeFailure {
+  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JsonProcessingException {
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
+
+      // The internal code will handle the exception and a non-NULL value should still be returned.
+      // This happens in setup() where a logger.warn prints "Failed to serialize processor scripts".
+      // There should be two warning log messages printed "Failed to serialize initial context" and "Failed to serialize processor scripts". 
+      when(objectMapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
 
       assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
     }
@@ -127,13 +167,7 @@ class BpmnModelFactoryTest {
 
   @Test
   void testFromWorkflowMustStartWithStartEvent() {
-
-    Node node = new InputTask();
-    node.setId("3b7060b9-523f-4279-86bd-e8ef1e4eff21");
-    node.setName("input");
-    List<Node> nodes = new ArrayList<>();
-    nodes.add(node);
-
+    nodes.add(simpleNode);
     workflow.setNodes(nodes);
 
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
@@ -151,24 +185,10 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflow() throws ScriptTaskDeserializeCodeFailure {
-    Node start = new StartEvent();
-    start.setId("8aeab6f7-5b51-42f2-bf79-819dc50253db");
-    start.setName("start");
-
-    Node input = new InputTask();
-    input.setId("789ee60d-e24f-4c40-adcb-984d68fab24d");
-    input.setName("input");
-
-    Node end = new EndEvent();
-    end.setId("ea99f40c-832d-4f2c-b81b-cf4c1638daa5");
-    end.setName("end");
-
-    List<Node> nodes = new ArrayList<>();
-    nodes.add(start);
-    nodes.add(input);
-    nodes.add(end);
-
+  void testFromWorkflowForFullProcess() throws ScriptTaskDeserializeCodeFailure {
+    nodes.add(startNode);
+    nodes.add(inputNode);
+    nodes.add(endNode);
     workflow.setNodes(nodes);
 
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
@@ -181,7 +201,7 @@ class BpmnModelFactoryTest {
         List<AbstractWorkflowDelegate> mockDelegates = new ArrayList<>();
         mockDelegates.add(new InputDelegate());
         return mockDelegates.stream();
-    });
+      });
 
       assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
     }
@@ -241,12 +261,28 @@ class BpmnModelFactoryTest {
    * A helper function for reducing repeated mock code between test functions.
    */
   private void commonMockingsBasic() {
-    when(bpmnModelInstance.newInstance(ExtensionElements.class))
-        .thenReturn(extensionElements);
-    when(bpmnModelInstance.newInstance(CamundaField.class))
-        .thenReturn(camundaField);
+    when(bpmnModelInstance.newInstance(ExtensionElements.class)).thenReturn(extensionElements);
+    when(bpmnModelInstance.newInstance(CamundaField.class)).thenReturn(camundaField);
     doNothing().when(extensionElements).addChildElement(any());
     when(bpmnModelInstance.getModelElementById(anyString())).thenReturn(modelElementInstance);
+  }
+
+  /**
+   * Provide an exception that exposes the string initializer for easy usage.
+   */
+  private class MyException extends JsonProcessingException {
+
+    private static final long serialVersionUID = -6261961424503639802L;
+
+    public MyException(String msg) {
+      super(msg);
+    }
+  }
+
+  /**
+   * Provide a non-abstract Node for easy instantiation.
+   */
+  private class MyNode extends Node {
   }
 
 }
