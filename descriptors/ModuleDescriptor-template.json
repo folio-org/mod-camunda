@@ -399,7 +399,7 @@
       { "name": "DB_CHARSET", "value": "UTF-8", "description": "Database charset." },
       { "name": "DB_MAXPOOLSIZE", "value": "16", "description": "Database max pool size." },
       { "name": "ENV", "value": "folio", "description": "The environment name." },
-      { "name": "KAFKA_HOST", "value": "kafka", "description": "Kafka broker host name" },
+      { "name": "KAFKA_HOST", "value": "http://kafka", "description": "Kafka broker URL." },
       { "name": "KAFKA_PORT", "value": "9092", "description": "Kafka broker port." },
       { "name": "KAFKA_SECURITY_PROTOCOL", "value": "PLAINTEXT", "description": "Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT)." },
       { "name": "KAFKA_SSL_KEYSTORE_LOCATION", "value": "", "description": "The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client." },
