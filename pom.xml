@@ -29,7 +29,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring-module-core.version>2.1.0-SNAPSHOT</spring-module-core.version>
     <workflow-components.version>1.2.0-SNAPSHOT</workflow-components.version>
-    <camunda.version>7.21.0-alpha2</camunda.version>
+    <folio-spring.version>8.1.0</folio-spring.version>
+    <camunda.version>7.21.0</camunda.version>
     <openapi.server.port>9000</openapi.server.port>
     <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
@@ -98,6 +99,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-base</artifactId>
+      <version>${folio-spring.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-rest</artifactId>
     </dependency>
@@ -105,6 +112,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-freemarker</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

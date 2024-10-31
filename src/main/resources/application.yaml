@@ -110,7 +110,10 @@ spring:
 camunda:
   # see: https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/
   bpm:
+    enabled: true
     webapp:
+      enabled: true
+      index-redirect-enabled: false
       application-path: ui
     auto-deployment-enabled: false
     database:
