@@ -27,7 +27,7 @@ public class EventConsumer {
   }
 
   @KafkaListener(
-    id = "mod-camunda-events-listener",
+    id = "mod-workflow-engine-events-listener",
     containerFactory = "kafkaListenerContainerFactory",
     topicPattern = "${application.kafka.listener.events.topic-pattern}",
     groupId = "${application.kafka.listener.events.group-id}",

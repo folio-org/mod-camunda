@@ -50,11 +50,11 @@ public class CamundaApiService {
       workflow.setDeploymentId(deploymentId);
     } catch (NotFoundException | NotValidException | ParseException | AuthorizationException e) {
       // TODO: find a way to write the stream to the logger rather than using System.out.
+      // Display the model while in debug mode to help identify model problems.
+      // This should never be displayed outside of debug and the exception is bubbled up.
       if (logger.isDebugEnabled()) {
         Bpmn.writeModelToStream(System.out, modelInstance);
       }
-
-      logger.error("Failed to deploy workflow {}:{}. {}", workflow.getId(), workflow.getName(), e.getMessage());
 
       throw e;
     }

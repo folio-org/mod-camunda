@@ -103,12 +103,15 @@ spring:
     mode: TEXT
     suffix: .sql
 
-  # this must be `camunda` to match module descriptor path patterns
+  # Set this to `camunda` to allow the admin ui (see `camunda.bpm.webapp.application-path`) along side the module descriptor paths.
+  # This is relative to the context path.
   jersey.application-path: camunda
 
 camunda:
-  # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/
+  # see: https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/
   bpm:
+    webapp:
+      application-path: ui
     auto-deployment-enabled: false
     database:
       schema-update: true
@@ -162,8 +165,8 @@ application:
     listener:
       events:
         concurrency: 1
-        topic-pattern: (${ENV:folio}\.)?(.*\.)?workflow.events
-        group-id: ${ENV:folio}-mod-camunda-workflow-events-group
+        topic-pattern: ${ENV:folio}.(.*\.)?camunda.events
+        group-id: ${ENV:folio}-mod-camunda-events-group
 
 tenant:
   header-name: X-Okapi-Tenant
