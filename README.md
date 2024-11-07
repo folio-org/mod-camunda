@@ -12,7 +12,7 @@ See the file ["LICENSE"](LICENSE) for more information.
 3. [Workflow Project Structure](#workflow-project-structure)
 4. [App Deployment](#deploy-and-run-the-application)
 5. [Camunda APIs](#camunda-apis)
-6. [ActiveMQ Message Broker](#activemq-message-broker)
+6. [Kafka Message Broker](#kafka-message-broker)
 7. [FOLIO Integration](#folio-integration)
 8. [Additional Information](#additional-information)
 9. [Issue Tracker](#issue-tracker)
@@ -101,7 +101,6 @@ Any Java code that is executed in the context of a process is usually written in
 
 ## Deploy and run the application
 1. Run the application `mvn clean spring-boot:run`
-    1. Note there is a hard dependency on ActiveMQ. If running without ActiveMQ, be sure to comment out `activemq.broker-url: tcp://localhost:61616` in the application.yml
 2. Deploy all the processes by running scripts/deploy.sh file
 3. Navigate to Camunda Portal `localhost:9000/app/welcome/default/#/welcome`
 4. Log in as admin username: `admin`, password: `admin`
@@ -143,8 +142,8 @@ Any Java code that is executed in the context of a process is usually written in
     * POST
         * /camunda/message
 
-## ActiveMQ Message Broker
-We are using ActiveMQ to consume messages. Currently we are only consuming, not producing messages. This is a hard dependency when running the application, so if you want to run the application without a message broker, comment out `activemq.broker-url: tcp://localhost:61616` in the application.yml
+## Kafka Message Broker
+We are using Kafka as the message broker.
 
 ## FOLIO Integration
 For detailed information to bring up a FOLIO instance refer to [https://github.com/folio-org/folio-ansible](https://github.com/folio-org/folio-ansible).
