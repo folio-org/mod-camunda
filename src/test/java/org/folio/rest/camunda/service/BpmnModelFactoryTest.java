@@ -50,11 +50,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BpmnModelFactoryTest {
 
-  private final static String UUID_NODE_1 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+  private static final String UUID_NODE_1 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
 
-  private final static String UUID_NODE_2 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+  private static final String UUID_NODE_2 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
 
-  private final static String UUID_NODE_3 = "789ee60d-e24f-4c40-adcb-984d68fab24d";
+  private static final String UUID_NODE_3 = "789ee60d-e24f-4c40-adcb-984d68fab24d";
 
   @Mock
   private BpmnModelInstance bpmnModelInstance;
