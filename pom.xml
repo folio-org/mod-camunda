@@ -280,12 +280,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.graalvm.js</groupId>
-      <artifactId>js-scriptengine</artifactId>
-      <version>${graalvm.polyglot.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.graalvm.polyglot</groupId>
       <artifactId>polyglot</artifactId>
       <version>${graalvm.polyglot.version}</version>
