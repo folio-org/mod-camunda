@@ -103,7 +103,7 @@ Any Java code that is executed in the context of a process is usually written in
 1. Run the application `mvn clean spring-boot:run`
 2. Deploy all the processes by running scripts/deploy.sh file
 3. Navigate to Camunda Portal `localhost:9000/app/welcome/default/#/welcome`
-4. Log in as admin username: `admin`, password: `admin`
+4. Log in as admin user: `admin`, password: `admin`
 
 ## Camunda APIs
 * Process/Decision Deployment
@@ -155,7 +155,7 @@ vagrant up
 # wait
 ```
 
-When finished Okapi will be running with mod-workflow and mod-camunda deployed under the diku tenant. mod-camunda will have its port forwarded for access to the Camunda webapps. FOLIO UI will be accessible at `http://localhost:3000`; username: `diku_admin`, password: `admin`.
+When finished Okapi will be running with mod-workflow and mod-camunda deployed under the diku tenant. mod-camunda will have its port forwarded for access to the Camunda webapps. FOLIO UI will be accessible at `http://localhost:3000`; `username`: `diku_admin`, `password`: `admin`.
 
 > Okapi is being built and redeployed from within this vagrant. Eventually this will not need to happen. If a specific branch of either mod-camunda or mod-workflow is desired to be deployed, modify the Vagrantfile `git checkout main` to the desired branch and restart vagrant. `vagrant destroy`, `vagrant up`
 
