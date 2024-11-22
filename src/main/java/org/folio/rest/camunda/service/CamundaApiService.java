@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CamundaApiService {
 
-  private final static Logger logger = LoggerFactory.getLogger(CamundaApiService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CamundaApiService.class);
 
   @Autowired
   private BpmnModelFactory bpmnModelFactory;
@@ -50,6 +50,8 @@ public class CamundaApiService {
       workflow.setDeploymentId(deploymentId);
     } catch (NotFoundException | NotValidException | ParseException | AuthorizationException e) {
       // TODO: find a way to write the stream to the logger rather than using System.out.
+      // Display the model while in debug mode to help identify model problems.
+      // This should never be displayed outside of debug and the exception is bubbled up.
       if (logger.isDebugEnabled()) {
         Bpmn.writeModelToStream(System.out, modelInstance);
       }

@@ -5,35 +5,41 @@ import static org.folio.spring.test.mock.MockMvcConstant.VALUE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
+import org.camunda.bpm.model.bpmn.builder.EndEventBuilder;
 import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
+import org.camunda.bpm.model.bpmn.builder.ServiceTaskBuilder;
 import org.camunda.bpm.model.bpmn.builder.StartEventBuilder;
+import org.camunda.bpm.model.bpmn.builder.UserTaskBuilder;
 import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
 import org.camunda.bpm.model.bpmn.instance.Process;
 import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
 import org.camunda.bpm.model.xml.instance.ModelElementInstance;
+import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
+import org.folio.rest.camunda.delegate.InputDelegate;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
+import org.folio.rest.workflow.model.EndEvent;
+import org.folio.rest.workflow.model.InputTask;
 import org.folio.rest.workflow.model.Node;
 import org.folio.rest.workflow.model.Setup;
+import org.folio.rest.workflow.model.StartEvent;
 import org.folio.rest.workflow.model.Workflow;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -44,8 +50,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class BpmnModelFactoryTest {
 
-  @Mock
-  private AbstractFlowNodeBuilder<?, ?> abstractFlowNodeBuilder;
+  private static final String UUID_NODE_1 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+
+  private static final String UUID_NODE_2 = "ea99f40c-832d-4f2c-b81b-cf4c1638daa5";
+
+  private static final String UUID_NODE_3 = "789ee60d-e24f-4c40-adcb-984d68fab24d";
 
   @Mock
   private BpmnModelInstance bpmnModelInstance;
@@ -68,15 +77,33 @@ class BpmnModelFactoryTest {
   @Mock
   private StartEventBuilder startEventBuilder;
 
+  @Mock
+  private ServiceTaskBuilder serviceTaskBuilder;
+
+  @Mock
+  private UserTaskBuilder userTaskBuilder;
+
+  @Mock
+  private EndEventBuilder endEventBuilder;
+
   @Spy
   private ObjectMapper objectMapper;
+
+  @Spy
+  private List<AbstractWorkflowDelegate> workflowDelegates;
 
   @InjectMocks
   private BpmnModelFactory bpmnModelFactory;
 
   private ProcessBuilder processBuilder;
 
-  private Node node;
+  private Node endNode;
+
+  private Node inputNode;
+
+  private Node simpleNode;
+
+  private Node startNode;
 
   private List<Node> nodes;
 
@@ -86,9 +113,23 @@ class BpmnModelFactoryTest {
 
   @BeforeEach
   void beforeEach() {
-    node = new MyNode();
+    startNode = new StartEvent();
+    startNode.setId(UUID_NODE_1);
+    startNode.setName(VALUE);
+
+    inputNode = new InputTask();
+    inputNode.setId(UUID_NODE_2);
+    inputNode.setName(VALUE);
+
+    endNode = new EndEvent();
+    endNode.setId(UUID_NODE_3);
+    endNode.setName(VALUE);
+
+    simpleNode = new MyNode();
+    simpleNode.setId(UUID_NODE_1);
+    simpleNode.setName(VALUE);
+
     nodes = new ArrayList<>();
-    nodes.add(node);
 
     setup = new Setup();
 
@@ -100,11 +141,14 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflowException() throws JsonProcessingException, ScriptTaskDeserializeCodeFailure {
+  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JsonProcessingException {
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
 
+      // The internal code will handle the exception and a non-NULL value should still be returned.
+      // This happens in setup() where a logger.warn prints "Failed to serialize processor scripts".
+      // There should be two warning log messages printed "Failed to serialize initial context" and "Failed to serialize processor scripts". 
       when(objectMapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
 
       assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
@@ -122,7 +166,8 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflowProcessBuilderGenericNodeThrowsException() {
+  void testFromWorkflowMustStartWithStartEvent() {
+    nodes.add(simpleNode);
     workflow.setNodes(nodes);
 
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
@@ -136,6 +181,29 @@ class BpmnModelFactoryTest {
 
       assertNotNull(exception);
       assertTrue(exception.getMessage().contains("Workflow must start with a start event"));
+    }
+  }
+
+  @Test
+  void testFromWorkflowForFullProcess() throws ScriptTaskDeserializeCodeFailure {
+    nodes.add(startNode);
+    nodes.add(inputNode);
+    nodes.add(endNode);
+    workflow.setNodes(nodes);
+
+    try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
+      commonMockedProcessBuilder(utility);
+      commonMockingsBasic();
+
+      when(processBuilderMocked.startEvent()).thenReturn(startEventBuilder);
+
+      when(workflowDelegates.stream()).thenAnswer(invocation -> {
+        List<AbstractWorkflowDelegate> mockDelegates = new ArrayList<>();
+        mockDelegates.add(new InputDelegate());
+        return mockDelegates.stream();
+      });
+
+      assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
     }
   }
 
@@ -160,6 +228,29 @@ class BpmnModelFactoryTest {
   private void commonMockedProcessBuilder(MockedStatic<Bpmn> utility) {
     utility.when(() -> Bpmn.createExecutableProcess()).thenReturn(processBuilderMocked);
 
+    lenient().when(startEventBuilder.id(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.name(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.message(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.timerWithCycle(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.signal(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.interrupting(anyBoolean())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.serviceTask(anyString())).thenReturn(serviceTaskBuilder);
+    lenient().when(startEventBuilder.done()).thenReturn(bpmnModelInstance);
+
+    lenient().when(serviceTaskBuilder.name(anyString())).thenReturn(serviceTaskBuilder);
+    lenient().when(serviceTaskBuilder.camundaDelegateExpression(anyString())).thenReturn(serviceTaskBuilder);
+    lenient().when(serviceTaskBuilder.userTask(anyString())).thenReturn(userTaskBuilder);
+    lenient().when(serviceTaskBuilder.done()).thenReturn(bpmnModelInstance);
+
+    lenient().when(userTaskBuilder.endEvent(anyString())).thenReturn(endEventBuilder);
+    lenient().when(userTaskBuilder.name(anyString())).thenReturn(userTaskBuilder);
+    lenient().when(userTaskBuilder.done()).thenReturn(bpmnModelInstance);
+
+    lenient().when(endEventBuilder.name(anyString())).thenReturn(endEventBuilder);
+    lenient().when(endEventBuilder.done()).thenReturn(bpmnModelInstance);
+
+    lenient().when(processBuilderMocked.startEvent()).thenReturn(startEventBuilder);
+
     lenient().when(processBuilderMocked.getElement()).thenReturn(process);
     lenient().when(processBuilderMocked.name(any())).thenReturn(processBuilderMocked);
     lenient().when(processBuilderMocked.camundaHistoryTimeToLive(anyInt())).thenReturn(processBuilderMocked);
@@ -170,7 +261,8 @@ class BpmnModelFactoryTest {
    * A helper function for reducing repeated mock code between test functions.
    */
   private void commonMockingsBasic() {
-    when(bpmnModelInstance.newInstance(ArgumentMatchers.<Class<ModelElementInstance>>any())).thenReturn(extensionElements, camundaField);
+    when(bpmnModelInstance.newInstance(ExtensionElements.class)).thenReturn(extensionElements);
+    when(bpmnModelInstance.newInstance(CamundaField.class)).thenReturn(camundaField);
     doNothing().when(extensionElements).addChildElement(any());
     when(bpmnModelInstance.getModelElementById(anyString())).thenReturn(modelElementInstance);
   }
@@ -192,4 +284,5 @@ class BpmnModelFactoryTest {
    */
   private class MyNode extends Node {
   }
+
 }

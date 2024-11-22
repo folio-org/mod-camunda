@@ -1,18 +1,18 @@
 package org.folio.rest.camunda.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import org.camunda.bpm.engine.exception.NotValidException;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.ProcessEngines;
 import org.camunda.bpm.engine.RepositoryService;
@@ -70,7 +70,8 @@ class CamundaApiServiceTest {
     lenient().when(processEngine.getRepositoryService()).thenReturn(repositoryService);
     lenient().when(repositoryService.createDeployment()).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.name(anyString())).thenReturn(deploymentBuilder);
-    lenient().when(deploymentBuilder.addModelInstance(anyString(), any(BpmnModelInstance.class))).thenReturn(deploymentBuilder);
+    lenient().when(deploymentBuilder.addModelInstance(anyString(), any(BpmnModelInstance.class)))
+      .thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.source(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.tenantId(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.deploy()).thenReturn(deployment);
@@ -80,16 +81,16 @@ class CamundaApiServiceTest {
   @Test
   void testDeployWorkflow() throws ScriptTaskDeserializeCodeFailure, WorkflowAlreadyActiveException {
     try (
-      MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
-      MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
-    ) {
+        MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
+        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+      ) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
       Workflow result = camundaApiService.deployWorkflow(workflow, TENANT);
 
       assertNotNull(result);
-      assertTrue(Boolean.TRUE.equals(result.getActive()));
+      assertEquals(true, result.getActive());
       assertEquals("deploymentId", result.getDeploymentId());
 
       verify(bpmnModelFactory).fromWorkflow(workflow);
@@ -98,12 +99,25 @@ class CamundaApiServiceTest {
   }
 
   @Test
+  void testDeployWorkflowException() {
+    try (
+        MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
+        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+    ) {
+      utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
+      utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
+
+      when(deploymentBuilder.deploy()).thenThrow(new NotValidException());
+
+      assertThrows(NotValidException.class, () -> camundaApiService.deployWorkflow(workflow, TENANT));
+    }
+  }
+
+  @Test
   void testDeployWorkflowAlreadyActive() throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
     testDeployWorkflow();
 
-    assertThrows(WorkflowAlreadyActiveException.class, () -> {
-      camundaApiService.deployWorkflow(workflow, TENANT);
-    });
+    assertThrows(WorkflowAlreadyActiveException.class, () -> camundaApiService.deployWorkflow(workflow, TENANT));
   }
 
   @Test
@@ -116,7 +130,7 @@ class CamundaApiServiceTest {
       Workflow result = camundaApiService.undeployWorkflow(workflow);
 
       assertNotNull(result);
-      assertFalse(Boolean.TRUE.equals(result.getActive()));
+      assertEquals(false, result.getActive());
       assertNull(result.getDeploymentId());
 
       verify(repositoryService).deleteDeployment("deploymentId", true);
@@ -131,7 +145,7 @@ class CamundaApiServiceTest {
       Workflow result = camundaApiService.undeployWorkflow(workflow);
 
       assertNotNull(result);
-      assertFalse(Boolean.TRUE.equals(result.getActive()));
+      assertEquals(false, result.getActive());
       assertNull(result.getDeploymentId());
 
       verify(repositoryService, never()).deleteDeployment(anyString(), anyBoolean());
