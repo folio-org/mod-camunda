@@ -62,6 +62,10 @@ import org.folio.StatisticalCode;
 import org.folio.StatisticalCodeType;
 import org.folio.Statisticalcodes;
 import org.folio.Statisticalcodetypes;
+import org.folio.SubjectSource;
+import org.folio.SubjectSources;
+import org.folio.SubjectType;
+import org.folio.SubjectTypes;
 import org.folio.processing.mapping.defaultmapper.MarcToInstanceMapper;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
@@ -101,6 +105,8 @@ public class MappingUtility {
   static final String CALL_NUMBER_TYPES_URL = "/call-number-types?limit=" + SETTING_LIMIT;
   static final String STATISTICAL_CODES_URL = "/statistical-codes?limit=" + SETTING_LIMIT;
   static final String STATISTICAL_CODE_TYPES_URL = "/statistical-code-types?limit=" + SETTING_LIMIT;
+  static final String SUBJECT_SOURCES_URL = "/subject-sources?limit=" + SETTING_LIMIT;
+  static final String SUBJECT_TYPES_URL = "/subject-types?limit=" + SETTING_LIMIT;
   static final String LOCATIONS_URL = "/locations?limit=" + SETTING_LIMIT;
   static final String MATERIAL_TYPES_URL = "/material-types?limit=" + SETTING_LIMIT;
   static final String ITEM_DAMAGED_STATUSES_URL = "/item-damaged-statuses?limit=" + SETTING_LIMIT;
@@ -164,6 +170,8 @@ public class MappingUtility {
       .withCallNumberTypes(getCallNumberTypes(okapiUrl, headers))
       .withStatisticalCodes(getStatisticalCodes(okapiUrl, headers))
       .withStatisticalCodeTypes(getStatisticalCodeTypes(okapiUrl, headers))
+      .withSubjectSources(getSubjectSources(okapiUrl, headers))
+      .withSubjectTypes(getSubjectTypes(okapiUrl, headers))
       .withLocations(getLocations(okapiUrl, headers))
       .withMaterialTypes(getMaterialTypes(okapiUrl, headers))
       .withItemDamagedStatuses(getItemDamagedStatuses(okapiUrl, headers))
@@ -316,6 +324,16 @@ public class MappingUtility {
     return body != null ? body.getStatisticalCodeTypes() : new ArrayList<>();
   }
 
+  private static List<SubjectSource> getSubjectSources(String okapiUrl, HttpHeaders headers) {
+    SubjectSources body = performGet(okapiUrl, headers, SUBJECT_SOURCES_URL, SubjectSource.class, SubjectSources.class);
+    return body != null ? body.getSubjectSources() : new ArrayList<>();
+  }
+
+  private static List<SubjectType> getSubjectTypes(String okapiUrl, HttpHeaders headers) {
+    SubjectTypes body = performGet(okapiUrl, headers, SUBJECT_TYPES_URL, SubjectType.class, SubjectTypes.class);
+    return body != null ? body.getSubjectTypes() : new ArrayList<>();
+  }
+
   private static List<Location> getLocations(String okapiUrl, HttpHeaders headers) {
     HttpEntity<Locations> entity = new HttpEntity<>(headers);
     String url = okapiUrl + LOCATIONS_URL;
@@ -385,6 +403,25 @@ public class MappingUtility {
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.set("X-Okapi-Tenant", tenant);
     return headers;
+  }
+
+  /**
+   * Helper function for performing the GET requests.
+   *
+   * @param <T> The type.
+   * @param <L> The list of type.
+   * @param okapiUrl The OKAPI URL.
+   * @param headers The request headers.
+   * @param url The partial path representing the data to GET.
+   * @param typeClazz The type class.
+   * @param listClazz The list of type class.
+   *
+   * @return The response body as a list.
+   */
+  private static <T, L> L performGet(String okapiUrl, HttpHeaders headers, String url, Class<T> typeClazz, Class<L> listClazz) {
+    HttpEntity<T> entity = new HttpEntity<>(headers);
+    ResponseEntity<L> response = restTemplate.exchange(okapiUrl + url, HttpMethod.GET, entity, listClazz);
+    return response.getBody();
   }
 
 }
