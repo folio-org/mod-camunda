@@ -44,8 +44,8 @@ public class MappingUtility {
   private static String mapRecordToInsance(OkapiRestTemplate restTemplate, String marcJson)
       throws JsonProcessingException {
     JsonObject parsedRecord = new JsonObject(marcJson);
-    JsonObject mappingRules = MappingParametersBuilder.fetchRules(restTemplate);
-    MappingParameters mappingParameters = MappingParametersBuilder.getMappingParamaters(restTemplate);
+    JsonObject mappingRules = MappingParametersUtility.fetchRules(restTemplate);
+    MappingParameters mappingParameters = MappingParametersUtility.getMappingParamaters(restTemplate);
     Instance instance = marcToInstanceMapper.mapRecord(parsedRecord, mappingParameters, mappingRules);
 
     return objectMapper.writeValueAsString(instance);
