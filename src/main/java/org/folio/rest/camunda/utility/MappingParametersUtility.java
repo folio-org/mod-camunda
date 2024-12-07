@@ -60,11 +60,34 @@ import org.folio.SubjectTypes;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 
+/**
+ * Utility class for managing mapping parameters and fetching configuration data
+ * for various library-related types in a library management system.
+ *
+ * This class provides methods to retrieve mapping rules and parameters for different
+ * library-specific entities such as alternative title types, contributor types,
+ * instance formats, and more.
+ *
+ * The utility uses an {@link OkapiRestTemplate} to fetch data from predefined REST endpoints,
+ * and maintains a static mapping of parameter types to their respective descriptors
+ * and endpoint paths.
+ *
+ * @see MappingParametersDescriptor
+ * @see MappingParameters
+ */
 public class MappingParametersUtility {
 
+  /**
+   * Maximum limit for fetching parameters from endpoints.
+   * This constant ensures that parameter retrieval does not exceed 1000 items.
+   */
   private static final int LIMIT = 1000;
 
+  /**
+   * Base path for mapping rules related to MARC bibliographic records.
+   */
   static final String MAPPING_RULES_PATH = "/mapping-rules/marc-bib";
 
   static final String ALTERNATIVE_TITLE_TYPES_PATH = "/alternative-title-types?limit=" + LIMIT;
@@ -95,6 +118,13 @@ public class MappingParametersUtility {
   static final String SUBJECT_SOURCES_PATH = "/subject-sources?limit=" + LIMIT;
   static final String SUBJECT_TYPES_PATH = "/subject-types?limit=" + LIMIT;
 
+  /**
+   * A static map that associates parameter classes with their corresponding
+   * mapping parameter descriptors and endpoint paths.
+   *
+   * This map is used to dynamically retrieve parameters for various library
+   * entity types during initialization.
+   */
   public static final Map<Class<?>, MappingParametersDescriptor<?,?>> PARAMETER_DESCRIPTOR_MAP = new HashMap<>();
 
   static {
@@ -127,12 +157,30 @@ public class MappingParametersUtility {
     PARAMETER_DESCRIPTOR_MAP.put(SubjectType.class, MappingParametersDescriptor.of(SubjectTypes.class, SUBJECT_TYPES_PATH));
   }
 
+  /**
+   * Fetches the mapping rules from the predefined REST endpoint.
+   *
+   * @param restTemplate The REST template used to make the HTTP request
+   * @return A {@link JsonObject} containing the mapping rules
+   * @throws RestClientException if there's an error fetching the rules
+   */
   public static JsonObject fetchRules(OkapiRestTemplate restTemplate) {
     ResponseEntity<String> response = restTemplate.getForEntity(MAPPING_RULES_PATH, String.class);
 
-    return new JsonObject(response.getBody());
+    return response.hasBody()
+      ? new JsonObject(response.getBody())
+      : new JsonObject();
   }
 
+  /**
+   * Retrieves comprehensive mapping parameters for various library entity types.
+   *
+   * This method fetches parameters for multiple types such as alternative title types,
+   * contributor types, instance formats, and more using the provided REST template.
+   *
+   * @param restTemplate The REST template used to fetch parameters from different endpoints
+   * @return A fully initialized {@link MappingParameters} object with all parameters
+   */
   public static MappingParameters getMappingParamaters(OkapiRestTemplate restTemplate) {
     return new MappingParameters()
         .withInitializedState(true)
@@ -165,10 +213,25 @@ public class MappingParametersUtility {
         .withSubjectTypes(((SubjectTypes) getParameters(restTemplate, SubjectType.class)).getSubjectTypes());
   }
 
+  /**
+   * Generic method to retrieve parameters for a specific type using the
+   * pre-configured parameter descriptor map.
+   *
+   * @param <C> The type of the collection or parameters to be returned
+   * @param <P> The type of the parameter class
+   * @param okapiRestRemplate The REST template used to fetch parameters
+   * @param parametersType The class of the parameters to retrieve
+   * @return Parameters of the specified type
+   * @throws IllegalArgumentException if no descriptor is found for the given type
+   */
   @SuppressWarnings("unchecked")
-  public static <P, C> C getParameters(OkapiRestTemplate okapiRestRemplate, P parametersType) {
-    return (C) PARAMETER_DESCRIPTOR_MAP.get(parametersType)
-        .getParameters(okapiRestRemplate);
+  public static <C, P> C getParameters(OkapiRestTemplate okapiRestRemplate, P parametersType) {
+    MappingParametersDescriptor<C, P> descriptor = (MappingParametersDescriptor<C, P>) PARAMETER_DESCRIPTOR_MAP.get(parametersType);
+    if (descriptor == null) {
+        throw new IllegalArgumentException("No descriptor found for type: " + parametersType);
+    }
+
+    return descriptor.getParameters(okapiRestRemplate);
   }
 
 }
