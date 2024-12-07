@@ -83,40 +83,12 @@ public class MappingParametersUtility {
    * Maximum limit for fetching parameters from endpoints.
    * This constant ensures that parameter retrieval does not exceed 1000 items.
    */
-  private static final int LIMIT = 1000;
+  public static final int LIMIT = 1000;
 
   /**
    * Base path for mapping rules related to MARC bibliographic records.
    */
   static final String MAPPING_RULES_PATH = "/mapping-rules/marc-bib";
-
-  static final String ALTERNATIVE_TITLE_TYPES_PATH = "/alternative-title-types?limit=" + LIMIT;
-  static final String CALL_NUMBER_TYPES_PATH = "/call-number-types?limit=" + LIMIT;
-  static final String CLASSIFICATION_TYPES_PATH = "/classification-types?limit=" + LIMIT;
-  static final String CONTRIBUTOR_NAME_TYPES_PATH = "/contributor-name-types?limit=" + LIMIT;
-  static final String CONTRIBUTOR_TYPES_PATH = "/contributor-types?limit=" + LIMIT;
-  static final String ELECTRONIC_ACCESS_PATH = "/electronic-access-relationships?limit=" + LIMIT;
-  static final String HOLDINGS_NOTE_TYPES_PATH = "/holdings-note-types?limit=" + LIMIT;
-  static final String HOLDINGS_TYPES_PATH = "/holdings-types?limit=" + LIMIT;
-  static final String IDENTIFIER_TYPES_PATH = "/identifier-types?limit=" + LIMIT;
-  static final String ILL_POLICIES_PATH = "/ill-policies?limit=" + LIMIT;
-  static final String INSTANCE_FORMATS_PATH = "/instance-formats?limit=" + LIMIT;
-  static final String INSTANCE_NOTE_TYPES_PATH = "/instance-note-types?limit=" + LIMIT;
-  static final String INSTANCE_RELATIONSHIP_TYPES_PATH = "/instance-relationship-types?limit=" + LIMIT;
-  static final String INSTANCE_STATUSES_PATH = "/instance-statuses?limit=" + LIMIT;
-  static final String INSTANCE_TYPES_PATH = "/instance-types?limit=" + LIMIT;
-  static final String ISSUANCE_MODES_PATH = "/modes-of-issuance?limit=" + LIMIT;
-  static final String ITEM_DAMAGED_STATUSES_PATH = "/item-damaged-statuses?limit=" + LIMIT;
-  static final String ITEM_NOTE_TYPES_PATH = "/item-note-types?limit=" + LIMIT;
-  static final String LOAN_TYPES_PATH = "/loan-types?limit=" + LIMIT;
-  static final String LOCATIONS_PATH = "/locations?limit=" + LIMIT;
-  static final String MARC_FIELD_PROTECTION_SETTINGS_PATH = "/field-protection-settings/marc?limit=" + LIMIT;
-  static final String MATERIAL_TYPES_PATH = "/material-types?limit=" + LIMIT;
-  static final String NATURE_OF_CONTENT_TERMS_PATH = "/nature-of-content-terms?limit=" + LIMIT;
-  static final String STATISTICAL_CODE_TYPES_PATH = "/statistical-code-types?limit=" + LIMIT;
-  static final String STATISTICAL_CODES_PATH = "/statistical-codes?limit=" + LIMIT;
-  static final String SUBJECT_SOURCES_PATH = "/subject-sources?limit=" + LIMIT;
-  static final String SUBJECT_TYPES_PATH = "/subject-types?limit=" + LIMIT;
 
   /**
    * A static map that associates parameter classes with their corresponding
@@ -128,33 +100,9 @@ public class MappingParametersUtility {
   public static final Map<Class<?>, MappingParametersDescriptor<?,?>> PARAMETER_DESCRIPTOR_MAP = new HashMap<>();
 
   static {
-    PARAMETER_DESCRIPTOR_MAP.put(AlternativeTitleType.class, MappingParametersDescriptor.of(Alternativetitletypes.class, ALTERNATIVE_TITLE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(CallNumberType.class, MappingParametersDescriptor.of(Callnumbertypes.class, CALL_NUMBER_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ClassificationType.class, MappingParametersDescriptor.of(Classificationtypes.class, CLASSIFICATION_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ContributorNameType.class, MappingParametersDescriptor.of(Contributornametypes.class, CONTRIBUTOR_NAME_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ContributorType.class, MappingParametersDescriptor.of(Contributortypes.class, CONTRIBUTOR_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ElectronicAccessRelationship.class, MappingParametersDescriptor.of(Electronicaccessrelationships.class, ELECTRONIC_ACCESS_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(HoldingsNoteType.class, MappingParametersDescriptor.of(Holdingsnotetypes.class, HOLDINGS_NOTE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(HoldingsType.class, MappingParametersDescriptor.of(Holdingstypes.class, HOLDINGS_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(IdentifierType.class, MappingParametersDescriptor.of(Identifiertypes.class, IDENTIFIER_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(IllPolicy.class, MappingParametersDescriptor.of(Illpolicies.class, ILL_POLICIES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(InstanceFormat.class, MappingParametersDescriptor.of(Instanceformats.class, INSTANCE_FORMATS_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(InstanceNoteType.class, MappingParametersDescriptor.of(Instancenotetypes.class, INSTANCE_NOTE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(InstanceRelationshipType.class, MappingParametersDescriptor.of(Instancerelationshiptypes.class, INSTANCE_RELATIONSHIP_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(InstanceStatus.class, MappingParametersDescriptor.of(Instancestatuses.class, INSTANCE_STATUSES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(InstanceType.class, MappingParametersDescriptor.of(Instancetypes.class, INSTANCE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(IssuanceMode.class, MappingParametersDescriptor.of(Issuancemodes.class, ISSUANCE_MODES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ItemDamageStatus.class, MappingParametersDescriptor.of(Itemdamagedstatuses.class, ITEM_DAMAGED_STATUSES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(ItemNoteType.class, MappingParametersDescriptor.of(Itemnotetypes.class, ITEM_NOTE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(Loantype.class, MappingParametersDescriptor.of(Loantypes.class, LOAN_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(Location.class, MappingParametersDescriptor.of(Locations.class, LOCATIONS_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(MarcFieldProtectionSetting.class, MappingParametersDescriptor.of(MarcFieldProtectionSettingsCollection.class, MARC_FIELD_PROTECTION_SETTINGS_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(Mtype.class, MappingParametersDescriptor.of(Materialtypes.class, MATERIAL_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(NatureOfContentTerm.class, MappingParametersDescriptor.of(Natureofcontentterms.class, NATURE_OF_CONTENT_TERMS_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(StatisticalCodeType.class, MappingParametersDescriptor.of(Statisticalcodetypes.class, STATISTICAL_CODE_TYPES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(StatisticalCode.class, MappingParametersDescriptor.of(Statisticalcodes.class, STATISTICAL_CODES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(SubjectSource.class, MappingParametersDescriptor.of(SubjectSources.class, SUBJECT_SOURCES_PATH));
-    PARAMETER_DESCRIPTOR_MAP.put(SubjectType.class, MappingParametersDescriptor.of(SubjectTypes.class, SUBJECT_TYPES_PATH));
+    for (MappingParametersType type : MappingParametersType.values()) {
+      PARAMETER_DESCRIPTOR_MAP.put(type.getParametersType(), MappingParametersDescriptor.of(type.getCollectionType(), type.getPath(LIMIT)));
+    }
   }
 
   /**
