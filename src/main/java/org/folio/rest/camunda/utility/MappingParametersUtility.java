@@ -97,12 +97,16 @@ public class MappingParametersUtility {
    * This map is used to dynamically retrieve parameters for various library
    * entity types during initialization.
    */
-  public static final Map<Class<?>, MappingParametersDescriptor<?,?>> PARAMETER_DESCRIPTOR_MAP = new HashMap<>();
+  private static final Map<Class<?>, MappingParametersDescriptor<?,?>> PARAMETER_DESCRIPTORS = new HashMap<>();
 
   static {
     for (MappingParametersType type : MappingParametersType.values()) {
-      PARAMETER_DESCRIPTOR_MAP.put(type.getParametersType(), MappingParametersDescriptor.of(type.getCollectionType(), type.getPath(LIMIT)));
+      PARAMETER_DESCRIPTORS.put(type.getParametersType(), MappingParametersDescriptor.of(type.getCollectionType(), type.getPath(LIMIT)));
     }
+  }
+
+  private MappingParametersUtility() {
+
   }
 
   /**
@@ -174,7 +178,7 @@ public class MappingParametersUtility {
    */
   @SuppressWarnings("unchecked")
   public static <C, P> C getParameters(OkapiRestTemplate okapiRestRemplate, P parametersType) {
-    MappingParametersDescriptor<C, P> descriptor = (MappingParametersDescriptor<C, P>) PARAMETER_DESCRIPTOR_MAP.get(parametersType);
+    MappingParametersDescriptor<C, P> descriptor = (MappingParametersDescriptor<C, P>) PARAMETER_DESCRIPTORS.get(parametersType);
     if (descriptor == null) {
         throw new IllegalArgumentException("No descriptor found for type: " + parametersType);
     }
