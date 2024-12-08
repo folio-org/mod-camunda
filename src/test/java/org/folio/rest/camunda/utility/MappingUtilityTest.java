@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.vertx.core.json.DecodeException;
 import org.folio.Alternativetitletypes;
@@ -88,7 +89,7 @@ class MappingUtilityTest {
 
   @BeforeEach
   void beforeEach() throws RestClientException, IOException {
-    mockJsonResponse("rules.json", MAPPING_RULES_PATH, String.class);
+    mockJsonResponse("rules.json", MAPPING_RULES_PATH, JsonNode.class);
 
     mockJsonResponse("Alternativetitletypes.json", ALTERNATIVE_TITLE_TYPES.getPath(LIMIT), Alternativetitletypes.class);
     mockJsonResponse("Callnumbertypes.json", CALL_NUMBER_TYPES.getPath(LIMIT), Callnumbertypes.class);

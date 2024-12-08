@@ -3,6 +3,8 @@ package org.folio.rest.camunda.utility;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.micrometer.common.lang.NonNull;
 import io.vertx.core.json.JsonObject;
 import org.folio.AlternativeTitleType;
 import org.folio.Alternativetitletypes;
@@ -110,18 +112,18 @@ public class MappingParametersUtility {
   }
 
   /**
-   * Fetches the mapping rules from the predefined REST endpoint.
+   * Fetches mapping rules from a predefined REST endpoint.
    *
    * @param restTemplate The REST template used to make the HTTP request
    * @return A {@link JsonObject} containing the mapping rules
    * @throws RestClientException if there's an error fetching the rules
    */
-  public static JsonObject fetchRules(OkapiRestTemplate restTemplate) {
-    ResponseEntity<String> response = restTemplate.getForEntity(MAPPING_RULES_PATH, String.class);
+  public static JsonObject fetchRules(@NonNull OkapiRestTemplate restTemplate) {
+    ResponseEntity<JsonNode> response = restTemplate.getForEntity(MAPPING_RULES_PATH, JsonNode.class);
 
     return response.hasBody()
-      ? new JsonObject(response.getBody())
-      : new JsonObject();
+      ? JsonObject.mapFrom(response.getBody())
+      : JsonObject.of();
   }
 
   /**
