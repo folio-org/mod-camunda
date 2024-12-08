@@ -1,7 +1,6 @@
 package org.folio.rest.camunda.utility;
 
-import java.util.HashMap;
-import java.util.Map;
+import static java.lang.String.format;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.micrometer.common.lang.NonNull;
@@ -65,75 +64,97 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
 /**
- * Utility class for managing mapping parameters and fetching configuration data
- * for various library-related types in a library management system.
+ * Utility class for managing and retrieving mapping parameters in a library
+ * management system.
  *
- * This class provides methods to retrieve mapping rules and parameters for different
- * library-specific entities such as alternative title types, contributor types,
- * instance formats, and more.
+ * This utility provides centralized methods for fetching configuration data and
+ * mapping rules for various library-specific entities. It supports retrieving
+ * comprehensive parameters for:
+ * <ul>
+ *   <li>Alternative title types</li>
+ *   <li>Contributor types</li>
+ *   <li>Instance formats</li>
+ *   <li>And many other library-related type configurations</li>
+ * </ul>
  *
- * The utility uses an {@link OkapiRestTemplate} to fetch data from predefined REST endpoints,
- * and maintains a static mapping of parameter types to their respective descriptors
- * and endpoint paths.
+ * The class utilizes an {@link OkapiRestTemplate} to dynamically fetch
+ * parameters from predefined REST endpoints, supporting a flexible and
+ * extensible approach to parameter management.
  *
- * @see MappingParametersDescriptor
+ * Key features:
+ * <ul>
+ *   <li>Generic parameter retrieval for different entity types</li>
+ *   <li>Centralized mapping rules fetching</li>
+ *   <li>Comprehensive parameter collection initialization</li>
+ * </ul>
+ *
  * @see MappingParameters
+ * @see MappingParametersType
+ * @see OkapiRestTemplate
  */
 public class MappingParametersUtility {
 
   /**
    * Maximum limit for fetching parameters from endpoints.
-   * This constant ensures that parameter retrieval does not exceed 1000 items.
+   * This constant ensures that parameter retrieval does not exceed 1000 items,
+   * preventing excessive data transfer and potential performance issues.
    */
   public static final int LIMIT = 1000;
 
   /**
    * Base path for mapping rules related to MARC bibliographic records.
+   * Used as a constant endpoint for retrieving mapping configuration specific to
+   * MARC bibliographic records.
    */
   static final String MAPPING_RULES_PATH = "/mapping-rules/marc-bib";
-
-  /**
-   * A static map that associates parameter classes with their corresponding
-   * mapping parameter descriptors and endpoint paths.
-   *
-   * This map is used to dynamically retrieve parameters for various library
-   * entity types during initialization.
-   */
-  private static final Map<Class<?>, MappingParametersDescriptor<?,?>> PARAMETER_DESCRIPTORS = new HashMap<>();
-
-  static {
-    for (MappingParametersType type : MappingParametersType.values()) {
-      PARAMETER_DESCRIPTORS.put(type.getParametersType(), MappingParametersDescriptor.of(type.getCollectionType(), type.getPath(LIMIT)));
-    }
-  }
 
   private MappingParametersUtility() {
 
   }
 
   /**
-   * Fetches mapping rules from a predefined REST endpoint.
+   * Fetches mapping rules from a predefined REST endpoint for MARC bibliographic
+   * records.
+   *
+   * This method retrieves the mapping rules using the provided REST template,
+   * handling potential empty responses gracefully.
    *
    * @param restTemplate The REST template used to make the HTTP request
-   * @return A {@link JsonObject} containing the mapping rules
-   * @throws RestClientException if there's an error fetching the rules
+   *                     (must not be null)
+   * @return A {@link JsonObject} containing the mapping rules, or an empty
+   *         JsonObject if no body is present
+   * @throws RestClientException if there's an error communicating with the
+   *                             endpoint
    */
   public static JsonObject fetchRules(@NonNull OkapiRestTemplate restTemplate) {
     ResponseEntity<JsonNode> response = restTemplate.getForEntity(MAPPING_RULES_PATH, JsonNode.class);
 
     return response.hasBody()
-      ? JsonObject.mapFrom(response.getBody())
-      : JsonObject.of();
+        ? JsonObject.mapFrom(response.getBody())
+        : JsonObject.of();
   }
 
   /**
    * Retrieves comprehensive mapping parameters for various library entity types.
    *
-   * This method fetches parameters for multiple types such as alternative title types,
-   * contributor types, instance formats, and more using the provided REST template.
+   * This method performs a bulk retrieval of parameters for multiple
+   * library-specific entity types, including:
+   * <ul>
+   *   <li>Alternative title types</li>
+   *   <li>Contributor types</li>
+   *   <li>Instance formats</li>
+   *   <li>Holdings types</li>
+   *   <li>And many more library configuration parameters</li>
+   * </ul>
    *
-   * @param restTemplate The REST template used to fetch parameters from different endpoints
-   * @return A fully initialized {@link MappingParameters} object with all parameters
+   * The method uses the provided REST template to fetch parameters from different
+   * endpoints and constructs a fully initialized {@link MappingParameters}
+   * object.
+   *
+   * @param restTemplate The REST template used to fetch parameters from different
+   *                     endpoints
+   * @return A fully initialized {@link MappingParameters} object containing all
+   *         retrieved parameters
    */
   public static MappingParameters getMappingParamaters(OkapiRestTemplate restTemplate) {
     return new MappingParameters()
@@ -168,24 +189,70 @@ public class MappingParametersUtility {
   }
 
   /**
-   * Generic method to retrieve parameters for a specific type using the
-   * pre-configured parameter descriptor map.
+   * Generic method to retrieve parameters for a specific library entity type.
    *
-   * @param <C> The type of the collection or parameters to be returned
-   * @param <P> The type of the parameter class
-   * @param okapiRestRemplate The REST template used to fetch parameters
+   * This method dynamically fetches parameters based on the provided parameter
+   * type, using a pre-configured mapping of parameter types to their respective
+   * endpoints and collection types.
+   *
+   * Key features:
+   * <ul>
+   * <li>Supports retrieval of various library entity type parameters</li>
+   * <li>Dynamically determines the appropriate endpoint and collection type</li>
+   * <li>Handles potential retrieval failures</li>
+   * </ul>
+   *
+   * @param <C>            The type of the collection or parameters to be returned
+   * @param <P>            The type of the parameter class
+   * @param restTemplate   The REST template used to fetch parameters
    * @param parametersType The class of the parameters to retrieve
    * @return Parameters of the specified type
-   * @throws IllegalArgumentException if no descriptor is found for the given type
+   * @throws IllegalArgumentException     if no descriptor is found for the given
+   *                                      type
+   * @throws ParametersRetrievalException if parameters cannot be retrieved
    */
-  @SuppressWarnings("unchecked")
-  public static <C, P> C getParameters(OkapiRestTemplate okapiRestRemplate, P parametersType) {
-    MappingParametersDescriptor<C, P> descriptor = (MappingParametersDescriptor<C, P>) PARAMETER_DESCRIPTORS.get(parametersType);
-    if (descriptor == null) {
-        throw new IllegalArgumentException("No descriptor found for type: " + parametersType);
+  public static <C, P> C getParameters(OkapiRestTemplate restTemplate, Class<P> parametersType) {
+    MappingParametersType type = MappingParametersType.fromParametersType(parametersType);
+    String path = type.getPath(LIMIT);
+
+    Class<C> collectionType = type.getCollectionType();
+    ResponseEntity<C> response = restTemplate.getForEntity(path, collectionType);
+
+    if (!response.hasBody()) {
+      throw new ParametersRetrievalException(type);
     }
 
-    return descriptor.getParameters(okapiRestRemplate);
+    return response.getBody();
+  }
+
+  /**
+   * Custom exception indicating a failure in retrieving library configuration
+   * parameters.
+   *
+   * @see RuntimeException
+   * @see MappingParametersType
+   */
+  private static class ParametersRetrievalException extends RuntimeException {
+
+    /**
+     * Template for generating detailed error messages about parameter retrieval
+     * failures.
+     * Includes placeholders for the parameter type and the endpoint path.
+     */
+    private static final String MESSAGE_TEMPLATE = "Failed to retrieve %s parameters from path %s";
+
+    /**
+     * Constructs a new {@code ParametersRetrievalException} with a detailed error
+     * message based on the specific mapping parameters type that failed to
+     * retrieve.
+     *
+     * @param type The {@link MappingParametersType} that failed to retrieve
+     *             parameters
+     */
+    public ParametersRetrievalException(MappingParametersType type) {
+      super(format(MESSAGE_TEMPLATE, type.getCollectionType().getSimpleName(), type.getPath(LIMIT)));
+    }
+
   }
 
 }

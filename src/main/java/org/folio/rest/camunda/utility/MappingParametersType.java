@@ -1,5 +1,12 @@
 package org.folio.rest.camunda.utility;
 
+import static java.lang.String.format;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.folio.AlternativeTitleType;
 import org.folio.Alternativetitletypes;
 import org.folio.CallNumberType;
@@ -163,6 +170,9 @@ public enum MappingParametersType {
   /** The API endpoint path for retrieving this mapping type's data. */
   private final String path;
 
+  private static final Map<Class<?>, MappingParametersType> BY_PARAMETERS_TYPE = Arrays.stream(values())
+      .collect(Collectors.toMap(MappingParametersType::getParametersType, Function.identity()));
+
   /**
    * Constructs a MappingParametersType with the specified parameter type,
    * collection type, and API path.
@@ -193,8 +203,9 @@ public enum MappingParametersType {
    *
    * @return The class representing the collection of this parameter type
    */
-  public Class<?> getCollectionType() {
-    return collectionType;
+  @SuppressWarnings("unchecked")
+  public <C> Class<C> getCollectionType() {
+    return (Class<C>) collectionType;
   }
 
   /**
@@ -214,6 +225,50 @@ public enum MappingParametersType {
    */
   public String getPath(int limit) {
     return path + "?limit=" + limit;
+  }
+
+  /**
+   * Retrieves the MappingParametersType associated with the given parameters type
+   * class.
+   *
+   * @param parametersType The class representing the parameters type to look up
+   * @return The corresponding MappingParametersType for the given class
+   * @throws ParametersTypeLookupException if no MappingParametersType is found
+   *                                       for the provided class
+   */
+  public static MappingParametersType fromParametersType(Class<?> parametersType) {
+    if (!BY_PARAMETERS_TYPE.containsKey(parametersType)) {
+      throw new ParametersTypeLookupException(parametersType);
+    }
+
+    return BY_PARAMETERS_TYPE.get(parametersType);
+  }
+
+  /**
+   * Custom exception indicating a failure in looking up parameters type.
+   *
+   * @see RuntimeException
+   */
+  private static class ParametersTypeLookupException extends RuntimeException {
+
+    /**
+     * Template for generating detailed error messages about parameters type lookup
+     * failures.
+     * Includes placeholders for the parameter type and the endpoint path.
+     */
+    private static final String MESSAGE_TEMPLATE = "Invalid parameters type:  %s";
+
+    /**
+     * Constructs a new {@code ParametersTypeLookupException} with a detailed error
+     * message based on the specific mapping parameters type that failed to
+     * retrieve.
+     *
+     * @param parametersType The {@link Class} that failed to retrieve parameters
+     */
+    public ParametersTypeLookupException(Class<?> parametersType) {
+      super(format(MESSAGE_TEMPLATE, parametersType));
+    }
+
   }
 
 }
