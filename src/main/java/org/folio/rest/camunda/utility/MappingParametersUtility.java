@@ -123,8 +123,7 @@ public class MappingParametersUtility {
    *                     (must not be null)
    * @return A {@link JsonObject} containing the mapping rules, or an empty
    *         JsonObject if no body is present
-   * @throws RestClientException if there's an error communicating with the
-   *                             endpoint
+   * @throws RestClientException if there's an error communicating
    */
   public static JsonObject fetchRules(@NonNull OkapiRestTemplate restTemplate) {
     ResponseEntity<JsonNode> response = restTemplate.getForEntity(MAPPING_RULES_PATH, JsonNode.class);
@@ -155,6 +154,10 @@ public class MappingParametersUtility {
    *                     endpoints
    * @return A fully initialized {@link MappingParameters} object containing all
    *         retrieved parameters
+   * @throws ParametersTypeLookupException if no descriptor is found for the given
+   *                                       parameters type
+   * @throws ParametersRetrievalException  if parameters cannot be retrieved
+   * @throws RestClientException if there's an error communicating
    */
   public static MappingParameters getMappingParamaters(OkapiRestTemplate restTemplate) {
     return new MappingParameters()
@@ -207,9 +210,10 @@ public class MappingParametersUtility {
    * @param restTemplate   The REST template used to fetch parameters
    * @param parametersType The class of the parameters to retrieve
    * @return Parameters of the specified type
-   * @throws IllegalArgumentException     if no descriptor is found for the given
-   *                                      type
-   * @throws ParametersRetrievalException if parameters cannot be retrieved
+   * @throws ParametersTypeLookupException if no descriptor is found for the given
+   *                                       parameters type
+   * @throws ParametersRetrievalException  if parameters cannot be retrieved
+   * @throws RestClientException if there's an error communicating
    */
   public static <C, P> C getParameters(OkapiRestTemplate restTemplate, Class<P> parametersType) {
     MappingParametersType type = MappingParametersType.fromParametersType(parametersType);
