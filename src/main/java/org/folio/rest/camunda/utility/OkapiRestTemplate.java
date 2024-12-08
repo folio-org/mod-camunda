@@ -12,6 +12,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -73,12 +74,12 @@ public class OkapiRestTemplate extends RestTemplate {
    * </ul>
    * </p>
    *
-   * @param tenant the Okapi tenant identifier
-   * @param token the authentication token
+   * @param tenant the Okapi tenant identifier (must not be null)
+   * @param token the authentication token (must not be null)
    * @return the configured {@code OkapiRestTemplate} instance
    * @throws IllegalArgumentException if tenant or token is null or empty
    */
-  public OkapiRestTemplate with(String tenant, String token) {
+  public OkapiRestTemplate with(@NonNull String tenant, @NonNull String token) {
     this.setInterceptors(Collections.singletonList(new ClientHttpRequestInterceptor() {
       @Override
       public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
@@ -104,11 +105,11 @@ public class OkapiRestTemplate extends RestTemplate {
    * <p>This method sets up a {@link DefaultUriBuilderFactory} with the provided
    * Okapi URL, which will be used as the base for all subsequent REST requests.</p>
    *
-   * @param okapiUrl the base URL for the Okapi service
+   * @param okapiUrl the base URL for the Okapi service (must not be null)
    * @return the configured {@code OkapiRestTemplate} instance
    * @throws IllegalArgumentException if the provided URL is invalid
    */
-  public OkapiRestTemplate at(String okapiUrl) {
+  public OkapiRestTemplate at(@NonNull String okapiUrl) {
     DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(okapiUrl);
     this.setUriTemplateHandler(factory);
 

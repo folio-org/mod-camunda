@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.vertx.core.json.DecodeException;
 import org.folio.Alternativetitletypes;
 import org.folio.Callnumbertypes;
 import org.folio.Classificationtypes;
@@ -128,7 +127,7 @@ class MappingUtilityTest {
     String marcJson = data.input;
     String okapiUrl = OKAPI_URL;
     String tenant = "diku";
-    String token = "";
+    String token = "token";
 
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(),
@@ -154,8 +153,8 @@ class MappingUtilityTest {
    */
   static Stream<Parameters<String, String>> testMapRecordToInsanceStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of("", null, new DecodeException()),
+        Parameters.of(null, null, new IllegalArgumentException()),
+        Parameters.of("", null, new IllegalArgumentException()),
         Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json"), i("/folio/instances/54-008008027.json")),
         Parameters.of(i("/marc4j/54-56-008008027-1.mrc.json"), i("/folio/instances/55-008008027.json")),
         Parameters.of(i("/marc4j/54-56-008008027-2.mrc.json"), i("/folio/instances/56-008008027.json")),
