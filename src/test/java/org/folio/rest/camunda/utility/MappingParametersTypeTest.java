@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import org.folio.AlternativeTitleType;
 import org.folio.Alternativetitletypes;
 import org.folio.CallNumberType;
@@ -56,10 +55,6 @@ import org.folio.StatisticalCode;
 import org.folio.StatisticalCodeType;
 import org.folio.Statisticalcodes;
 import org.folio.Statisticalcodetypes;
-import org.folio.SubjectSource;
-import org.folio.SubjectSources;
-import org.folio.SubjectType;
-import org.folio.SubjectTypes;
 import org.folio.rest.camunda.utility.MappingParametersType.ParametersTypeLookupException;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -103,9 +98,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.MATERIAL_TYPES, Mtype.class),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, NatureOfContentTerm.class),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, StatisticalCodeType.class),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class),
-      Arguments.of(MappingParametersType.SUBJECT_SOURCES, SubjectSource.class),
-      Arguments.of(MappingParametersType.SUBJECT_TYPES, SubjectType.class));
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class));
   }
 
   @ParameterizedTest
@@ -140,9 +133,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.MATERIAL_TYPES, Materialtypes.class),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, Natureofcontentterms.class),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, Statisticalcodetypes.class),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, Statisticalcodes.class),
-      Arguments.of(MappingParametersType.SUBJECT_SOURCES, SubjectSources.class),
-      Arguments.of(MappingParametersType.SUBJECT_TYPES, SubjectTypes.class));
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, Statisticalcodes.class));
   }
 
   @ParameterizedTest
@@ -177,9 +168,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.MATERIAL_TYPES, "/material-types"),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, "/nature-of-content-terms"),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, "/statistical-code-types"),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, "/statistical-codes"),
-      Arguments.of(MappingParametersType.SUBJECT_SOURCES, "/subject-sources"),
-      Arguments.of(MappingParametersType.SUBJECT_TYPES, "/subject-types"));
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, "/statistical-codes"));
   }
 
   @ParameterizedTest
@@ -214,9 +203,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.MATERIAL_TYPES, "/material-types?limit=" + LIMIT),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, "/nature-of-content-terms?limit=" + LIMIT),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, "/statistical-code-types?limit=" + LIMIT),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, "/statistical-codes?limit=" + LIMIT),
-      Arguments.of(MappingParametersType.SUBJECT_SOURCES, "/subject-sources?limit=" + LIMIT),
-      Arguments.of(MappingParametersType.SUBJECT_TYPES, "/subject-types?limit=" + LIMIT));
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, "/statistical-codes?limit=" + LIMIT));
   }
 
   @ParameterizedTest
@@ -258,9 +245,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.MATERIAL_TYPES, Mtype.class, null),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, NatureOfContentTerm.class, null),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, StatisticalCodeType.class, null),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class, null),
-      Arguments.of(MappingParametersType.SUBJECT_SOURCES, SubjectSource.class, null),
-      Arguments.of(MappingParametersType.SUBJECT_TYPES, SubjectType.class, null));
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class, null));
   }
 
 }

@@ -54,11 +54,8 @@ import org.folio.StatisticalCode;
 import org.folio.StatisticalCodeType;
 import org.folio.Statisticalcodes;
 import org.folio.Statisticalcodetypes;
-import org.folio.SubjectSource;
-import org.folio.SubjectSources;
-import org.folio.SubjectType;
-import org.folio.SubjectTypes;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
+import org.folio.rest.camunda.utility.MappingParametersType.ParametersTypeLookupException;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
@@ -187,9 +184,7 @@ public class MappingParametersUtility {
       .withMaterialTypes(((Materialtypes) getParameters(restTemplate, Mtype.class)).getMtypes())
       .withNatureOfContentTerms(((Natureofcontentterms) getParameters(restTemplate, NatureOfContentTerm.class)).getNatureOfContentTerms())
       .withStatisticalCodes(((Statisticalcodes) getParameters(restTemplate, StatisticalCode.class)).getStatisticalCodes())
-      .withStatisticalCodeTypes(((Statisticalcodetypes) getParameters(restTemplate, StatisticalCodeType.class)).getStatisticalCodeTypes())
-      .withSubjectSources(((SubjectSources) getParameters(restTemplate, SubjectSource.class)).getSubjectSources())
-      .withSubjectTypes(((SubjectTypes) getParameters(restTemplate, SubjectType.class)).getSubjectTypes());
+      .withStatisticalCodeTypes(((Statisticalcodetypes) getParameters(restTemplate, StatisticalCodeType.class)).getStatisticalCodeTypes());
   }
 
   /**
@@ -240,6 +235,7 @@ public class MappingParametersUtility {
   private static class ParametersRetrievalException extends RuntimeException {
 
     private static final long serialVersionUID = 717934762826254910L;
+
     /**
      * Template for generating detailed error messages about parameter retrieval
      * failures.
