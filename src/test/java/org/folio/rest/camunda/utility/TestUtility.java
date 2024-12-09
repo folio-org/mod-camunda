@@ -27,8 +27,8 @@ public class TestUtility {
   /**
    * Build input from file as class type wrapped by ResponseEntity.
    *
-   * @param <T>       generic input type
-   * @param path      path to mock resource JSON
+   * @param <T> generic input type
+   * @param path path to mock resource JSON
    * @param valueType type of generic object to map to
    * @return ResponseEntity for a expected type to test with
    * @throws IOException when reading file or object mapping fails
@@ -51,15 +51,15 @@ public class TestUtility {
   /**
    * Build input from two files as an array of String.
    *
-   * @param path           input file
+   * @param path input file
    * @param additionalPath path to additional file
    * @return array of strings from the file input
    * @throws IOException
    */
   public static String[] i(String path, String additionalPath) throws IOException {
     return new String[] {
-        IOUtils.resourceToString(path, StandardCharsets.UTF_8),
-        IOUtils.resourceToString(additionalPath, StandardCharsets.UTF_8)
+      IOUtils.resourceToString(path, StandardCharsets.UTF_8),
+      IOUtils.resourceToString(additionalPath, StandardCharsets.UTF_8)
     };
   }
 
