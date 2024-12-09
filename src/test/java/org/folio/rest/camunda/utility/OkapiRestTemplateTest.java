@@ -59,7 +59,7 @@ public class OkapiRestTemplateTest {
     restTemplate = restTemplate.with(tenant, token);
 
     verify(restTemplate, times(1))
-        .setInterceptors(any(List.class));
+      .setInterceptors(any(List.class));
 
     List<ClientHttpRequestInterceptor> interceptor = restTemplate.getInterceptors();
 
