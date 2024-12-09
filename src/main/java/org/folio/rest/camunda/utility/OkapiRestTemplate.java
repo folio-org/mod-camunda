@@ -96,7 +96,7 @@ public class OkapiRestTemplate extends RestTemplate {
         headers.setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));
         headers.setContentType(APPLICATION_JSON);
 
-        LOG.info("Sending Okapi request: {} {}\nTenant: {}\nToken: {}", request.getMethod(), request.getURI(), tenant, token);
+        LOG.debug("Sending Okapi request for tenant {}: {} {}", tenant, request.getMethod(), request.getURI());
 
         return execution.execute(request, body);
       }
