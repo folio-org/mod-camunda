@@ -249,7 +249,7 @@ public enum MappingParametersType {
    *
    * @see RuntimeException
    */
-  private static class ParametersTypeLookupException extends RuntimeException {
+  protected static class ParametersTypeLookupException extends RuntimeException {
 
     /**
      * Template for generating detailed error messages about parameters type lookup
