@@ -77,9 +77,9 @@ public class MappingUtility {
     CsvSchema csvSchema = CsvSchema.emptySchema().withHeader();
     CsvMapper csvMapper = new CsvMapper();
     MappingIterator<Map<String, String>> mappingIterator = csvMapper.reader()
-        .forType(Map.class)
-        .with(csvSchema)
-        .readValues(csv);
+      .forType(Map.class)
+      .with(csvSchema)
+      .readValues(csv);
 
     return objectMapper.writeValueAsString(mappingIterator.readAll());
   }

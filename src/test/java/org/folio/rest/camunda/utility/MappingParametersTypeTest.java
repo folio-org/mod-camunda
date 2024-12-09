@@ -210,7 +210,7 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.ITEM_NOTE_TYPES, "/item-note-types?limit=" + LIMIT),
       Arguments.of(MappingParametersType.LOAN_TYPES, "/loan-types?limit=" + LIMIT),
       Arguments.of(MappingParametersType.LOCATIONS, "/locations?limit=" + LIMIT),
-      Arguments.of(MappingParametersType.MARC_FIELD_PROTECTION_SETTINGS,
+      Arguments.of(MappingParametersType.MARC_FIELD_PROTECTION_SETTINGS, "/field-protection-settings/marc?limit=" + LIMIT),
       Arguments.of(MappingParametersType.MATERIAL_TYPES, "/material-types?limit=" + LIMIT),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, "/nature-of-content-terms?limit=" + LIMIT),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, "/statistical-code-types?limit=" + LIMIT),

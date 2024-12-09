@@ -48,9 +48,9 @@ class FormatUtilityTest {
    */
   static Stream<TestData> sqlStream() {
     return Stream.of(
-        new TestData(null, null),
-        new TestData("", ""),
-        new TestData("'", "''")
+      new TestData(null, null),
+      new TestData("", ""),
+      new TestData("'", "''")
     );
   }
 
