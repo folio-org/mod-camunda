@@ -44,7 +44,7 @@ public class OkapiRestTemplateTest {
     restTemplate = restTemplate.at(okapiUrl);
 
     verify(restTemplate, times(1))
-        .setUriTemplateHandler(any(DefaultUriBuilderFactory.class));
+      .setUriTemplateHandler(any(DefaultUriBuilderFactory.class));
 
     assertTrue(((DefaultUriBuilderFactory) restTemplate.getUriTemplateHandler()).hasBaseUri());
   }
