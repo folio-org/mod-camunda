@@ -159,6 +159,7 @@ public class MappingParametersUtility {
    * @throws ParametersRetrievalException  if parameters cannot be retrieved
    * @throws RestClientException if there's an error communicating
    */
+  @SuppressWarnings("java:S2259") // A "NullPointerException" could be thrown; "getParameters" is nullable here. This is a false negative.
   public static MappingParameters getMappingParamaters(OkapiRestTemplate restTemplate) {
     return new MappingParameters()
         .withInitializedState(true)
