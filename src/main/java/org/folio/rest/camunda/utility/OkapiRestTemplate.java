@@ -90,8 +90,8 @@ public class OkapiRestTemplate extends RestTemplate {
           throws IOException {
         HttpHeaders headers = request.getHeaders();
 
-        headers.set(OKAPI_TOKEN_HEADER, token);
         headers.set(OKAPI_TENENT_HEADER, tenant);
+        headers.set(OKAPI_TOKEN_HEADER, token);
 
         headers.setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));
         headers.setContentType(APPLICATION_JSON);
