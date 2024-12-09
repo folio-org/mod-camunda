@@ -251,6 +251,7 @@ public enum MappingParametersType {
    */
   private static class ParametersTypeLookupException extends RuntimeException {
 
+    private static final long serialVersionUID = -9152302641261345898L;
     /**
      * Template for generating detailed error messages about parameters type lookup
      * failures.

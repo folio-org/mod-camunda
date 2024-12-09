@@ -238,6 +238,7 @@ public class MappingParametersUtility {
    */
   private static class ParametersRetrievalException extends RuntimeException {
 
+    private static final long serialVersionUID = 717934762826254910L;
     /**
      * Template for generating detailed error messages about parameter retrieval
      * failures.
