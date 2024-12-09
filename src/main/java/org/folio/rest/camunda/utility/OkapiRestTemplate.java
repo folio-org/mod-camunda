@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -39,6 +41,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
  * @see ClientHttpRequestInterceptor
  */
 public class OkapiRestTemplate extends RestTemplate {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OkapiRestTemplate.class);
 
   /**
    * HTTP header name for specifying the Okapi tenant identifier.
@@ -91,6 +95,8 @@ public class OkapiRestTemplate extends RestTemplate {
 
         headers.setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));
         headers.setContentType(APPLICATION_JSON);
+
+        LOG.info("Sending Okapi request: {} {}\nTenant: {}\nToken: {}", request.getMethod(), request.getURI(), tenant, token);
 
         return execution.execute(request, body);
       }
