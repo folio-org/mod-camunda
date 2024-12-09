@@ -129,8 +129,8 @@ public class MappingParametersUtility {
     ResponseEntity<JsonNode> response = restTemplate.getForEntity(MAPPING_RULES_PATH, JsonNode.class);
 
     return response.hasBody()
-        ? JsonObject.mapFrom(response.getBody())
-        : JsonObject.of();
+      ? JsonObject.mapFrom(response.getBody())
+      : JsonObject.of();
   }
 
   /**

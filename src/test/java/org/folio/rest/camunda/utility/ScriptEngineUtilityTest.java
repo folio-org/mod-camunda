@@ -43,9 +43,9 @@ class ScriptEngineUtilityTest {
     ScriptEngineUtility seu = new ScriptEngineUtility();
 
     Exception thrown = assertThrows(
-        JSONException.class,
-        () -> seu.decodeJson(input.json),
-        "decodeJson(json) did not throw exception as expected");
+      JSONException.class,
+      () -> seu.decodeJson(input.json),
+      "decodeJson(json) did not throw exception as expected");
 
     assertEquals(input.message, thrown.getMessage());
   }
