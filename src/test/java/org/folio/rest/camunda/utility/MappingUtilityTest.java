@@ -25,8 +25,6 @@ import static org.folio.rest.camunda.utility.MappingParametersType.MATERIAL_TYPE
 import static org.folio.rest.camunda.utility.MappingParametersType.NATURE_OF_CONTENT_TERMS;
 import static org.folio.rest.camunda.utility.MappingParametersType.STATISTICAL_CODES;
 import static org.folio.rest.camunda.utility.MappingParametersType.STATISTICAL_CODE_TYPES;
-import static org.folio.rest.camunda.utility.MappingParametersType.SUBJECT_SOURCES;
-import static org.folio.rest.camunda.utility.MappingParametersType.SUBJECT_TYPES;
 import static org.folio.rest.camunda.utility.MappingParametersUtility.LIMIT;
 import static org.folio.rest.camunda.utility.MappingParametersUtility.MAPPING_RULES_PATH;
 import static org.folio.rest.camunda.utility.TestUtility.i;
@@ -35,13 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Stream;
 import org.folio.Alternativetitletypes;
 import org.folio.Callnumbertypes;
 import org.folio.Classificationtypes;
@@ -67,8 +64,6 @@ import org.folio.Materialtypes;
 import org.folio.Natureofcontentterms;
 import org.folio.Statisticalcodes;
 import org.folio.Statisticalcodetypes;
-import org.folio.SubjectSources;
-import org.folio.SubjectTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -114,8 +109,6 @@ class MappingUtilityTest {
     mockJsonResponse("Natureofcontentterms.json", NATURE_OF_CONTENT_TERMS.getPath(LIMIT), Natureofcontentterms.class);
     mockJsonResponse("Statisticalcodes.json", STATISTICAL_CODES.getPath(LIMIT), Statisticalcodes.class);
     mockJsonResponse("Statisticalcodetypes.json", STATISTICAL_CODE_TYPES.getPath(LIMIT), Statisticalcodetypes.class);
-    mockJsonResponse("Subjectsources.json", SUBJECT_SOURCES.getPath(LIMIT), SubjectSources.class);
-    mockJsonResponse("Subjecttypes.json", SUBJECT_TYPES.getPath(LIMIT), SubjectTypes.class);
 
     MappingUtility.restTemplate = mockRestTemplate;
   }

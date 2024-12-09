@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.folio.AlternativeTitleType;
 import org.folio.Alternativetitletypes;
 import org.folio.CallNumberType;
@@ -56,10 +55,6 @@ import org.folio.StatisticalCode;
 import org.folio.StatisticalCodeType;
 import org.folio.Statisticalcodes;
 import org.folio.Statisticalcodetypes;
-import org.folio.SubjectSource;
-import org.folio.SubjectSources;
-import org.folio.SubjectType;
-import org.folio.SubjectTypes;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
 
 /**
@@ -153,13 +148,7 @@ public enum MappingParametersType {
   STATISTICAL_CODE_TYPES(StatisticalCodeType.class, Statisticalcodetypes.class, "/statistical-code-types"),
 
   /** Mapping type for statistical codes. */
-  STATISTICAL_CODES(StatisticalCode.class, Statisticalcodes.class, "/statistical-codes"),
-
-  /** Mapping type for subject sources. */
-  SUBJECT_SOURCES(SubjectSource.class, SubjectSources.class, "/subject-sources"),
-
-  /** Mapping type for subject types. */
-  SUBJECT_TYPES(SubjectType.class, SubjectTypes.class, "/subject-types");
+  STATISTICAL_CODES(StatisticalCode.class, Statisticalcodes.class, "/statistical-codes");
 
   /** The specific parameter type class for this mapping type. */
   private final Class<?> parametersType;
@@ -252,6 +241,7 @@ public enum MappingParametersType {
   protected static class ParametersTypeLookupException extends RuntimeException {
 
     private static final long serialVersionUID = -9152302641261345898L;
+
     /**
      * Template for generating detailed error messages about parameters type lookup
      * failures.
