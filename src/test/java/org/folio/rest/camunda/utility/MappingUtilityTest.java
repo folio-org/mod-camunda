@@ -33,7 +33,6 @@ import static org.folio.rest.camunda.utility.TestUtility.i;
 import static org.folio.rest.camunda.utility.TestUtility.om;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
 import java.io.IOException;
@@ -180,7 +179,7 @@ class MappingUtilityTest {
   private void mockJsonResponse(String name, String path, Class<?> clazz) throws RestClientException, IOException {
     lenient()
       .doReturn(i("/folio/settings/" + name, clazz))
-      .when(mockRestTemplate).getForEntity(eq(path), eq(clazz));
+      .when(mockRestTemplate).getForEntity(path, clazz);
   }
 
 }
