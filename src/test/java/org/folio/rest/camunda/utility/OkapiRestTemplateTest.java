@@ -27,7 +27,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @ExtendWith(MockitoExtension.class)
-public class OkapiRestTemplateTest {
+class OkapiRestTemplateTest {
 
   @Test
   void testBuild() {
