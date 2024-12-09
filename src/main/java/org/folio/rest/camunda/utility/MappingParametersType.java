@@ -249,7 +249,7 @@ public enum MappingParametersType {
    *
    * @see RuntimeException
    */
-  private static class ParametersTypeLookupException extends RuntimeException {
+  protected static class ParametersTypeLookupException extends RuntimeException {
 
     private static final long serialVersionUID = -9152302641261345898L;
     /**
