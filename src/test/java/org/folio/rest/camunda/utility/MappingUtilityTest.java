@@ -130,7 +130,7 @@ class MappingUtilityTest {
 
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(),
-          () -> MappingUtility.mapRecordToInsance(marcJson, okapiUrl, tenant, token));
+        () -> MappingUtility.mapRecordToInsance(marcJson, okapiUrl, tenant, token));
     } else {
       ObjectNode expected = (ObjectNode) om(data.expected);
       expected.remove("id");
@@ -152,13 +152,13 @@ class MappingUtilityTest {
    */
   static Stream<Parameters<String, String>> testMapRecordToInsanceStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new IllegalArgumentException()),
-        Parameters.of("", null, new IllegalArgumentException()),
-        Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json"), i("/folio/instances/54-008008027.json")),
-        Parameters.of(i("/marc4j/54-56-008008027-1.mrc.json"), i("/folio/instances/55-008008027.json")),
-        Parameters.of(i("/marc4j/54-56-008008027-2.mrc.json"), i("/folio/instances/56-008008027.json")),
-        Parameters.of(i("/marc4j/54-56-008008027-3.mrc.json"), i("/folio/instances/57-008008027.json")),
-        Parameters.of(i("/marc4j/54-56-008008027-4.mrc.json"), i("/folio/instances/58-008008027.json")));
+      Parameters.of(null, null, new IllegalArgumentException()),
+      Parameters.of("", null, new IllegalArgumentException()),
+      Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json"), i("/folio/instances/54-008008027.json")),
+      Parameters.of(i("/marc4j/54-56-008008027-1.mrc.json"), i("/folio/instances/55-008008027.json")),
+      Parameters.of(i("/marc4j/54-56-008008027-2.mrc.json"), i("/folio/instances/56-008008027.json")),
+      Parameters.of(i("/marc4j/54-56-008008027-3.mrc.json"), i("/folio/instances/57-008008027.json")),
+      Parameters.of(i("/marc4j/54-56-008008027-4.mrc.json"), i("/folio/instances/58-008008027.json")));
   }
 
   /**
@@ -178,8 +178,8 @@ class MappingUtilityTest {
    */
   private void mockJsonResponse(String name, String path, Class<?> clazz) throws RestClientException, IOException {
     lenient()
-        .doReturn(i("/folio/settings/" + name, clazz))
-        .when(mockRestTemplate).getForEntity(path, clazz);
+      .doReturn(i("/folio/settings/" + name, clazz))
+      .when(mockRestTemplate).getForEntity(path, clazz);
   }
 
 }
