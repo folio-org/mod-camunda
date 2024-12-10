@@ -6,7 +6,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import org.folio.rest.camunda.config.TenantConfig;
+import org.folio.rest.camunda.config.CamundaTenantInit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -45,11 +45,6 @@ public class OkapiRestTemplate extends RestTemplate {
   private static final Logger LOG = LoggerFactory.getLogger(OkapiRestTemplate.class);
 
   /**
-   * HTTP header name for providing the authentication token.
-   */
-  private static final String OKAPI_TOKEN_HEADER = "X-Okapi-Token";
-
-  /**
    * Constructor.
    */
   public OkapiRestTemplate() {
@@ -81,8 +76,8 @@ public class OkapiRestTemplate extends RestTemplate {
           throws IOException {
         HttpHeaders headers = request.getHeaders();
 
-        headers.set(TenantConfig.getHeaderName(), tenant);
-        headers.set(OKAPI_TOKEN_HEADER, token);
+        headers.set(CamundaTenantInit.getHeaderName(), tenant);
+        headers.set(CamundaTenantInit.OKAPI_TOKEN_HEADER, token);
 
         headers.setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));
         headers.setContentType(APPLICATION_JSON);
