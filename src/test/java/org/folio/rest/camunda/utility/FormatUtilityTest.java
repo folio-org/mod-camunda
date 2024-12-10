@@ -48,9 +48,9 @@ class FormatUtilityTest {
    */
   static Stream<TestData> sqlStream() {
     return Stream.of(
-        new TestData(null, null),
-        new TestData("", ""),
-        new TestData("'", "''")
+      new TestData(null, null),
+      new TestData("", ""),
+      new TestData("'", "''")
     );
   }
 
@@ -64,29 +64,29 @@ class FormatUtilityTest {
    */
   static Stream<TestData> cqlStream() {
     return Stream.of(
-        new TestData(null, "\"\""),
-        new TestData("", "\"\""),
-        new TestData("simple", "\"simple\""),
-        new TestData("hello*world", "\"hello\\*world\""),
-        new TestData("question?", "\"question\\?\""),
-        new TestData("caret^symbol", "\"caret\\^symbol\""),
-        new TestData("quote\"test", "\"quote\\\"test\""),
-        new TestData("ampersand&sign", "\"ampersand%26sign\""),
-        new TestData("special&*^?\\", "\"special%26\\*\\^\\?\\\\\""),
-        new TestData("text with spaces", "\"text with spaces\""),
-        new TestData("*&^%$#@!", "\"\\*%26\\^%$#@!\""),
-        new TestData("newline\ntext", "\"newline\ntext\""),
-        new TestData("tab\ttext", "\"tab\ttext\""),
-        new TestData("混合文本", "\"混合文本\""),
-        new TestData("text:\"apple\"", "\"text:\\\"apple\\\"\""),
-        new TestData("\"red apple\"", "\"\\\"red apple\\\"\""),
-        new TestData("text:\"apple\" AND color:\"red\"", "\"text:\\\"apple\\\" AND color:\\\"red\\\"\""),
-        new TestData("text:\"apple\" NEAR/2 \"pie\"", "\"text:\\\"apple\\\" NEAR/2 \\\"pie\\\"\""),
-        new TestData("title:\"apple\" AND author:\"John\"", "\"title:\\\"apple\\\" AND author:\\\"John\\\"\""),
-        new TestData("price:[10 TO 100]", "\"price:[10 TO 100]\""),
-        new TestData("text:\"appl~\"", "\"text:\\\"appl~\\\"\""),
-        new TestData("(text:\"apple\" OR text:\"orange\") AND NOT color:\"green\"",
-            "\"(text:\\\"apple\\\" OR text:\\\"orange\\\") AND NOT color:\\\"green\\\"\"")
+      new TestData(null, "\"\""),
+      new TestData("", "\"\""),
+      new TestData("simple", "\"simple\""),
+      new TestData("hello*world", "\"hello\\*world\""),
+      new TestData("question?", "\"question\\?\""),
+      new TestData("caret^symbol", "\"caret\\^symbol\""),
+      new TestData("quote\"test", "\"quote\\\"test\""),
+      new TestData("ampersand&sign", "\"ampersand%26sign\""),
+      new TestData("special&*^?\\", "\"special%26\\*\\^\\?\\\\\""),
+      new TestData("text with spaces", "\"text with spaces\""),
+      new TestData("*&^%$#@!", "\"\\*%26\\^%$#@!\""),
+      new TestData("newline\ntext", "\"newline\ntext\""),
+      new TestData("tab\ttext", "\"tab\ttext\""),
+      new TestData("混合文本", "\"混合文本\""),
+      new TestData("text:\"apple\"", "\"text:\\\"apple\\\"\""),
+      new TestData("\"red apple\"", "\"\\\"red apple\\\"\""),
+      new TestData("text:\"apple\" AND color:\"red\"", "\"text:\\\"apple\\\" AND color:\\\"red\\\"\""),
+      new TestData("text:\"apple\" NEAR/2 \"pie\"", "\"text:\\\"apple\\\" NEAR/2 \\\"pie\\\"\""),
+      new TestData("title:\"apple\" AND author:\"John\"", "\"title:\\\"apple\\\" AND author:\\\"John\\\"\""),
+      new TestData("price:[10 TO 100]", "\"price:[10 TO 100]\""),
+      new TestData("text:\"appl~\"", "\"text:\\\"appl~\\\"\""),
+      new TestData("(text:\"apple\" OR text:\"orange\") AND NOT color:\"green\"",
+        "\"(text:\\\"apple\\\" OR text:\\\"orange\\\") AND NOT color:\\\"green\\\"\"")
     );
   }
 
@@ -100,11 +100,11 @@ class FormatUtilityTest {
    */
   static Stream<TestData> postalCodeStream() {
     return Stream.of(
-        new TestData("75201", "75201"),
-        new TestData("10001-", "10001"),
-        new TestData("60601-4321", "60601-4321"),
-        new TestData("981013333", "98101-3333"),
-        new TestData("", "")
+      new TestData("75201", "75201"),
+      new TestData("10001-", "10001"),
+      new TestData("60601-4321", "60601-4321"),
+      new TestData("981013333", "98101-3333"),
+      new TestData("", "")
     );
   }
 
@@ -118,25 +118,25 @@ class FormatUtilityTest {
    */
   static Stream<TestData> phoneNumberStream() {
     return Stream.of(
-        new TestData("+1 650-253-0000", "(650) 253-0000"),
-        new TestData("16502530001", "(650) 253-0001"),
-        new TestData("650-253-0002", "(650) 253-0002"),
-        new TestData("(650) 253-0003", "(650) 253-0003"),
-        new TestData("+44 20 7031 3000", "+44 20 7031 3000"),
-        new TestData("+91 22 2778 2778", "+91 22 2778 2778"),
-        new TestData("442070313000", "442070313000"),
-        new TestData("912227782778", "912227782778"),
-        new TestData("#12345", "#12345"),
-        new TestData("*12345", "*12345"),
-        new TestData("#9876*", "#9876*"),
-        new TestData("*#7890", "*#7890"),
-        new TestData("abcdef", "abcdef"),
-        new TestData("123", "123"),
-        new TestData("phone number", "phone number"),
-        new TestData("", ""),
-        new TestData(null, null),
-        new TestData("650-253-0000 ext. 123", "(650) 253-0000 ext. 123"),
-        new TestData("+1-800-FLOWERS", "(800) 356-9377")
+      new TestData("+1 650-253-0000", "(650) 253-0000"),
+      new TestData("16502530001", "(650) 253-0001"),
+      new TestData("650-253-0002", "(650) 253-0002"),
+      new TestData("(650) 253-0003", "(650) 253-0003"),
+      new TestData("+44 20 7031 3000", "+44 20 7031 3000"),
+      new TestData("+91 22 2778 2778", "+91 22 2778 2778"),
+      new TestData("442070313000", "442070313000"),
+      new TestData("912227782778", "912227782778"),
+      new TestData("#12345", "#12345"),
+      new TestData("*12345", "*12345"),
+      new TestData("#9876*", "#9876*"),
+      new TestData("*#7890", "*#7890"),
+      new TestData("abcdef", "abcdef"),
+      new TestData("123", "123"),
+      new TestData("phone number", "phone number"),
+      new TestData("", ""),
+      new TestData(null, null),
+      new TestData("650-253-0000 ext. 123", "(650) 253-0000 ext. 123"),
+      new TestData("+1-800-FLOWERS", "(800) 356-9377")
     );
   }
 

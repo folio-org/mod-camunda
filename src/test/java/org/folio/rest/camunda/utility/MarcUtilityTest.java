@@ -220,10 +220,10 @@ class MarcUtilityTest {
    */
   static Stream<Parameters<String, String>> testMarcJsonToRawMarcStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of("", null, new MarcException()),
-        Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json"), i("/marc4j/54-56-008008027-0.mrc"))
-      );
+      Parameters.of(null, null, new NullPointerException()),
+      Parameters.of("", null, new MarcException()),
+      Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json"), i("/marc4j/54-56-008008027-0.mrc"))
+    );
   }
 
   /**
@@ -237,10 +237,10 @@ class MarcUtilityTest {
    */
   static Stream<Parameters<String, String>> testRawMarcToMarcJsonStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of("", null, new MarcException()),
-        Parameters.of(i("/marc4j/54-56-008008027-0.mrc"), i("/marc4j/54-56-008008027-0.mrc.json"))
-      );
+      Parameters.of(null, null, new NullPointerException()),
+      Parameters.of("", null, new MarcException()),
+      Parameters.of(i("/marc4j/54-56-008008027-0.mrc"), i("/marc4j/54-56-008008027-0.mrc.json"))
+    );
   }
 
   /**
@@ -254,10 +254,10 @@ class MarcUtilityTest {
    */
   static Stream<Parameters<String, List<String>>> testSplitRawMarcToMarcJsonRecordsStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of("", List.of()),
-        Parameters.of(i("/marc4j/54-56-008008027.mrc"), il("/marc4j/54-56-008008027.mrc.json"))
-      );
+      Parameters.of(null, null, new NullPointerException()),
+      Parameters.of("", List.of()),
+      Parameters.of(i("/marc4j/54-56-008008027.mrc"), il("/marc4j/54-56-008008027.mrc.json"))
+    );
   }
 
   /**
@@ -271,10 +271,10 @@ class MarcUtilityTest {
    */
   static Stream<Parameters<Object, String>> testGetFieldsFromRawMarcStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of(new String[] { "", "[]" }, null, new MarcException()),
-        Parameters.of(i("/marc4j/54-56-008008027-0.mrc", "/marc4j/tags/050090245947980.json"), i("/marc4j/fields/54-56-008008027 050090245947980.json"))
-      );
+      Parameters.of(null, null, new NullPointerException()),
+      Parameters.of(new String[] { "", "[]" }, null, new MarcException()),
+      Parameters.of(i("/marc4j/54-56-008008027-0.mrc", "/marc4j/tags/050090245947980.json"), i("/marc4j/fields/54-56-008008027 050090245947980.json"))
+    );
   }
 
   /**
@@ -288,10 +288,10 @@ class MarcUtilityTest {
    */
   static Stream<Parameters<Object, String>> testGetFieldsFromMarcJsonStream() throws IOException {
     return Stream.of(
-        Parameters.of(null, null, new NullPointerException()),
-        Parameters.of(new String[] { "", "[]" }, null, new MarcException()),
-        Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json", "/marc4j/tags/050090245947980.json"), i("/marc4j/fields/54-56-008008027 050090245947980.json"))
-      );
+      Parameters.of(null, null, new NullPointerException()),
+      Parameters.of(new String[] { "", "[]" }, null, new MarcException()),
+      Parameters.of(i("/marc4j/54-56-008008027-0.mrc.json", "/marc4j/tags/050090245947980.json"), i("/marc4j/fields/54-56-008008027 050090245947980.json"))
+    );
   }
 
 }
