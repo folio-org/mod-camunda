@@ -6,7 +6,7 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-
+import org.folio.rest.camunda.config.TenantConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -45,23 +45,14 @@ public class OkapiRestTemplate extends RestTemplate {
   private static final Logger LOG = LoggerFactory.getLogger(OkapiRestTemplate.class);
 
   /**
-   * HTTP header name for specifying the Okapi tenant identifier.
-   */
-  private static final String OKAPI_TENENT_HEADER = "X-Okapi-Tenant";
-
-  /**
    * HTTP header name for providing the authentication token.
    */
   private static final String OKAPI_TOKEN_HEADER = "X-Okapi-Token";
 
   /**
-   * Private constructor to enforce the use of the {@link #build()} method
-   * for creating instances.
-   *
-   * <p>This ensures that instances are created through a controlled,
-   * configurable process.</p>
+   * Constructor.
    */
-  private OkapiRestTemplate() {
+  public OkapiRestTemplate() {
 
   }
 
@@ -90,7 +81,7 @@ public class OkapiRestTemplate extends RestTemplate {
           throws IOException {
         HttpHeaders headers = request.getHeaders();
 
-        headers.set(OKAPI_TENENT_HEADER, tenant);
+        headers.set(TenantConfig.getHeaderName(), tenant);
         headers.set(OKAPI_TOKEN_HEADER, token);
 
         headers.setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));
@@ -120,27 +111,6 @@ public class OkapiRestTemplate extends RestTemplate {
     this.setUriTemplateHandler(factory);
 
     return this;
-  }
-
-  /**
-   * Creates a new instance of {@code OkapiRestTemplate}.
-   *
-   * <p>This static factory method provides a fluent way to create and
-   * configure an Okapi-specific REST template. It follows the builder pattern,
-   * allowing method chaining for configuration.</p>
-   *
-   * <p>Example usage:
-   * <pre>{@code
-   * OkapiRestTemplate restTemplate = OkapiRestTemplate.build()
-   *     .with("tenant-id", "auth-token")
-   *     .at("https://okapi.example.edu");
-   * }</pre>
-   * </p>
-   *
-   * @return a new, unconfigured {@code OkapiRestTemplate} instance
-   */
-  public static OkapiRestTemplate build() {
-    return new OkapiRestTemplate();
   }
 
 }

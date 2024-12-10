@@ -15,10 +15,13 @@ import static org.springframework.http.MediaType.TEXT_PLAIN;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-
+import org.folio.rest.camunda.config.TenantConfig;
+import org.folio.spring.tenant.properties.TenantProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -26,12 +29,13 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+@SpringBootTest(classes = { TenantConfig.class, TenantProperties.class }, webEnvironment = WebEnvironment.MOCK)
 @ExtendWith(MockitoExtension.class)
 class OkapiRestTemplateTest {
 
   @Test
   void testBuild() {
-    OkapiRestTemplate restTemplate = OkapiRestTemplate.build();
+    OkapiRestTemplate restTemplate = new OkapiRestTemplate();
     assertNotNull(restTemplate);
   }
 
@@ -79,7 +83,7 @@ class OkapiRestTemplateTest {
 
     interceptor.get(0).intercept(request, body, execution);
 
-    verify(headers).set("X-Okapi-Tenant", tenant);
+    verify(headers).set(TenantConfig.getHeaderName(), tenant);
     verify(headers).set("X-Okapi-Token", token);
 
     verify(headers).setAccept(Arrays.asList(APPLICATION_JSON, TEXT_PLAIN));

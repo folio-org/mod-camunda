@@ -1,14 +1,13 @@
 package org.folio.rest.camunda.utility;
 
-import java.io.IOException;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import io.vertx.core.json.JsonObject;
+import java.io.IOException;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.Instance;
 import org.folio.processing.mapping.defaultmapper.MarcToInstanceMapper;
@@ -47,7 +46,7 @@ public class MappingUtility {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /** Rest template for making Okapi-based REST calls. */
-  static OkapiRestTemplate restTemplate = OkapiRestTemplate.build();
+  static OkapiRestTemplate restTemplate = new OkapiRestTemplate();
 
   /**
    * Private constructor to prevent instantiation of utility class.
