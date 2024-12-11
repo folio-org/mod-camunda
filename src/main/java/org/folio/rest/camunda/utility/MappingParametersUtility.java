@@ -103,6 +103,7 @@ public class MappingParametersUtility {
    * Used as a constant endpoint for retrieving mapping configuration specific to
    * MARC bibliographic records.
    */
+  @SuppressWarnings("java:S1075") // SonarQube path false positive.
   static final String MAPPING_RULES_PATH = "/mapping-rules/marc-bib";
 
   private MappingParametersUtility() {

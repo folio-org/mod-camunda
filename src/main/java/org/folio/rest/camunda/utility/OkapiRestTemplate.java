@@ -46,6 +46,8 @@ public class OkapiRestTemplate extends RestTemplate {
 
   /**
    * Constructor.
+   *
+   * Provide the standard constructor.
    */
   public OkapiRestTemplate() {
 

@@ -35,6 +35,7 @@ public class CamundaTenantInit implements HibernateTenantInit {
     this.tenantProperties = tenantProperties;
   }
 
+  @SuppressWarnings("java:S2696") // SonarQube static assignment from non-static method.
   @PostConstruct
   public void initializeStaticTenantHeader() {
     tenantHeaderName = tenantProperties.getHeaderName();
