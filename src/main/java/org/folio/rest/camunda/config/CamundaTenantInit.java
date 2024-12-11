@@ -23,7 +23,7 @@ public class CamundaTenantInit implements HibernateTenantInit {
 
   private static final String TENANT_TEMPLATE_KEY = "tenant";
 
-  private static String TENANT_HEADER_NAME;
+  private static String tenantHeaderName;
 
   private SqlTemplateService sqlTemplateService;
 
@@ -37,7 +37,7 @@ public class CamundaTenantInit implements HibernateTenantInit {
 
   @PostConstruct
   public void initializeStaticTenantHeader() {
-    TENANT_HEADER_NAME = tenantProperties.getHeaderName();
+    tenantHeaderName = tenantProperties.getHeaderName();
   }
 
   @Override
@@ -65,7 +65,7 @@ public class CamundaTenantInit implements HibernateTenantInit {
    * @return the tenant header.
    */
   public static String getHeaderName() {
-    return TENANT_HEADER_NAME;
+    return tenantHeaderName;
   }
 
   public class CamundaTenant {
