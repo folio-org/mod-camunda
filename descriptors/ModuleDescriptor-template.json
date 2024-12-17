@@ -384,7 +384,7 @@
       }
     },
     "env": [
-      { "name": "JAVA_OPTIONS", "value": "-XX:MaxRAMPercentage=66.0", "description": "Java options." },
+      { "name": "JAVA_OPTIONS", "value": "-XX:MaxRAMPercentage=90.0", "description": "Java options." },
       { "name": "CAMUNDA_BPM_ADMINUSER_EMAIL", "value": "admin@localhost", "description": "The e-mail address of the Camunda administration user." },
       { "name": "CAMUNDA_BPM_ADMINUSER_ID", "value": "admin", "description": "The account name of the Camunda administration user." },
       { "name": "CAMUNDA_BPM_ADMINUSER_PASSWORD", "value": "admin", "description": "The password of the Camunda administration user." },
