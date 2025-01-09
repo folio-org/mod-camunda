@@ -204,18 +204,6 @@
       </exclusions>
     </dependency>
 
-   <!-- Security: Override version coming from commons-vfs2, remove this and exclusion once commons-vfs2 is updated.-->
-   <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <version>3.4.1</version>
-   </dependency>
-   <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs-client</artifactId>
-      <version>3.4.1</version>
-   </dependency>
-
     <dependency>
       <groupId>com.github.mwiede</groupId>
       <artifactId>jsch</artifactId>
