@@ -32,7 +32,7 @@
     <camunda.version>7.21.0</camunda.version>
     <openapi.server.port>9000</openapi.server.port>
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <graalvm.polyglot.version>24.1.1</graalvm.polyglot.version>
+    <graalvm.polyglot.version>24.1.2</graalvm.polyglot.version>
   </properties>
 
   <packaging>jar</packaging>
