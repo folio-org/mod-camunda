@@ -32,7 +32,7 @@
     <camunda.version>7.21.0</camunda.version>
     <openapi.server.port>9000</openapi.server.port>
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <graalvm.polyglot.version>24.1.1</graalvm.polyglot.version>
+    <graalvm.polyglot.version>24.1.2</graalvm.polyglot.version>
   </properties>
 
   <packaging>jar</packaging>
@@ -85,7 +85,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>data-import-processing-core</artifactId>
-      <version>4.3.1</version>
+      <version>4.3.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.folio</groupId>
@@ -235,13 +235,12 @@
     <dependency>
       <groupId>org.marc4j</groupId>
       <artifactId>marc4j</artifactId>
-      <version>2.9.1</version>
+      <version>2.9.6</version>
     </dependency>
 
     <dependency>
       <groupId>com.oracle.database.jdbc</groupId>
-      <artifactId>ojdbc10</artifactId>
-      <version>19.14.0.0</version>
+      <artifactId>ojdbc11</artifactId>
     </dependency>
 
     <dependency>
