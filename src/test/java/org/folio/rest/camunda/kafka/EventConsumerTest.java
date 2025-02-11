@@ -5,12 +5,11 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.HashMap;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.stream.Stream;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -24,18 +23,20 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class EventConsumerTest {
 
-  @SpyBean
+  @MockitoSpyBean
   private ObjectMapper objectMapper;
 
-  @MockBean
+  @MockitoBean
   private RuntimeService runtimeService;
 
   @Mock
@@ -46,6 +47,16 @@ class EventConsumerTest {
 
   @InjectMocks
   private EventConsumer eventConsumer;
+
+  // Provide a bean for `@MockitoSpyBean` above to work without requiring a full spring boot runner.
+  @Configuration
+  static class Config {
+
+    @Bean
+    ObjectMapper objectMapper() {
+      return new ObjectMapper();
+    }
+  }
 
   @ParameterizedTest
   @MethodSource("eventStream")
