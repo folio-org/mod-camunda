@@ -23,7 +23,7 @@ name: api-lint
 env:
   API_TYPES: 'OAS'
   API_DIRECTORIES: 'src/main/resources'
-  API_EXCLUDES: ''
+  API_EXCLUDES: 'application.yaml'
   API_WARNINGS: false
 
 on:

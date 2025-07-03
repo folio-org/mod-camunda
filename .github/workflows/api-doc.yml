@@ -19,7 +19,7 @@ name: api-doc
 env:
   API_TYPES: 'OAS'
   API_DIRECTORIES: 'src/main/resources'
-  API_EXCLUDES: ''
+  API_EXCLUDES: 'application.yaml'
   OUTPUT_DIR: 'folio-api-docs'
   AWS_S3_BUCKET: 'foliodocs'
   AWS_S3_FOLDER: 'api'
