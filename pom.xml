@@ -262,7 +262,7 @@
 
     <dependency>
       <groupId>org.graalvm.js</groupId>
-      <artifactId>js-community</artifactId>
+      <artifactId>js</artifactId>
       <version>${graalvm.polyglot.version}</version>
       <type>pom</type>
     </dependency>
@@ -275,14 +275,14 @@
 
     <dependency>
       <groupId>org.graalvm.python</groupId>
-      <artifactId>python-community</artifactId>
+      <artifactId>python</artifactId>
       <version>${graalvm.polyglot.version}</version>
       <type>pom</type>
     </dependency>
 
     <dependency>
       <groupId>org.graalvm.ruby</groupId>
-      <artifactId>ruby-community</artifactId>
+      <artifactId>ruby</artifactId>
       <version>${graalvm.polyglot.version}</version>
       <type>pom</type>
     </dependency>
