@@ -1,7 +1,6 @@
 package org.folio.rest.camunda.config;
 
 import javax.script.ScriptEngineManager;
-import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.spring.boot.starter.configuration.CamundaProcessEngineConfiguration;
 import org.camunda.bpm.spring.boot.starter.configuration.Ordering;
@@ -13,17 +12,9 @@ import org.springframework.stereotype.Component;
 @Order(Ordering.DEFAULT_ORDER + 1)
 public class CamundaEngineConfig implements CamundaProcessEngineConfiguration  {
 
-    @Override
-    public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
-        processEngineConfiguration.setScriptEngineResolver(new ScriptEngineResolver(new ScriptEngineManager()));
-    }
-
-    @Override
-    public void postInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
-    }
-
-    @Override
-    public void postProcessEngineBuild(ProcessEngine processEngine) {
-    }
+  @Override
+  public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
+    processEngineConfiguration.setScriptEngineResolver(new ScriptEngineResolver(new ScriptEngineManager()));
+  }
 
 }
