@@ -17,21 +17,21 @@ import org.graalvm.polyglot.Engine;
  */
 public class ScriptEngineResolver extends DefaultScriptEngineResolver {
 
-    public ScriptEngineResolver(ScriptEngineManager scriptEngineManager) {
-        super(scriptEngineManager);
-    }
+  public ScriptEngineResolver(ScriptEngineManager scriptEngineManager) {
+    super(scriptEngineManager);
+  }
 
-    @Override
-    protected ScriptEngine getJavaScriptScriptEngine(String language) {
-        Engine engine = Engine.newBuilder()
-            .allowExperimentalOptions(true)
-            .option("engine.WarnInterpreterOnly", "false")
-            .build();
+  @Override
+  protected ScriptEngine getJavaScriptScriptEngine(String language) {
+    Engine engine = Engine.newBuilder()
+      .allowExperimentalOptions(true)
+      .option("engine.WarnInterpreterOnly", "false")
+      .build();
 
-        Context.Builder builder = Context.newBuilder("js")
-          // Make sure GraalVM JS can provide access to the host and can lookup classes.
-          .allowHostClassLookup(s -> true);
+    Context.Builder builder = Context.newBuilder("js")
+      // Make sure GraalVM JS can provide access to the host and can lookup classes.
+      .allowHostClassLookup(s -> true);
 
-        return GraalJSScriptEngine.create(engine, builder);
-    }
+    return GraalJSScriptEngine.create(engine, builder);
+  }
 }
