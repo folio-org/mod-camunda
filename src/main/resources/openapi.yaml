@@ -611,3 +611,4 @@ components:
           type: string
         templated:
           type: boolean
+
