@@ -221,6 +221,9 @@ The following is a summary of many of them.
 | KAFKA_SSL_TRUSTSTORE_LOCATION     |             -               | The location of the Kafka trust store file.
 | KAFKA_SSL_TRUSTSTORE_PASSWORD     |             -               | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.
 | OKAPI_URL                         |     `http://okapi:9130`     | OKAPI URL used to login system user, required (can be used to point directly to `mod-workflow`).
+| OKAPI_AUTH_ACCESSCOOKIENAME       |     `folioAccessToken`      | The OKAPI cookie name for the Access token; This is generally never changed.
+| OKAPI_AUTH_REFRESHCOOKIENAME      |     `folioRefreshToken`     | The OKAPI cookie name for the Refresh token; This is generally never changed.
+| OKAPI_AUTH_TOKENHEADERNAME        |     `x-okapi-token`         | The OKAPI header token name; This is generally never changed.
 | SERVER_PORT                       |           8081              | The port the `mod-camunda` service listens on.
 | SERVER_SERVLET_CONTEXTPATH        |           `/`               | The context path, or base path, to host at.
 | SPRING_FLYWAY_ENABLED             |           false             | Database migration support via Spring Flyway.
