@@ -49,7 +49,7 @@ public class TokenConfig {
   /**
    * Provide a static way get the refresh cookie name value.
    *
-   * The yaml file names this `tokapi.auth.refreshCookieName`.
+   * The yaml file names this `okapi.auth.refreshCookieName`.
    * The environment variable for this is `OKAPI_AUTH_REFRESHCOOKIENAME`.
    *
    * The OkapiRestTemplate design prevents auto-injection because non-Java code will run the static methods via the TokenUtility.
