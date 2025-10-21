@@ -13,10 +13,9 @@ See the file ["LICENSE"](LICENSE) for more information.
 2. [Manual Build and Run](#manual-build-and-run)
 3. [Camunda Module Dependencies](#camunda-module-dependencies)
 4. [Workflow Project Structure](#workflow-project-structure)
-5. [App Deployment](#deploy-and-run-the-application)
-6. [Camunda APIs](#camunda-apis)
-7. [Kafka Message Broker](#kafka-message-broker)
-8. [Issue Tracker](#issue-tracker)
+5. [Camunda APIs](#camunda-apis)
+6. [Kafka Message Broker](#kafka-message-broker)
+7. [Issue Tracker](#issue-tracker)
 
 
 ## Docker deployment
