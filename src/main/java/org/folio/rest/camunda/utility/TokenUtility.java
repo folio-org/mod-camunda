@@ -22,27 +22,6 @@ public final class TokenUtility {
   }
 
   /**
-   * Get the Access token from an array of cookie headers.
-   *
-   * @param headers An array of cookie headers. This is usually `Set-Cookie` headers.
-   *
-   * @return The Access token, if found, or NULL otherwise.
-   */
-  public static String getAccessToken(String[] headers) {
-    if (headers != null) {
-      for (String header : headers) {
-        final String token = getAccessToken(header);
-
-        if (token != null) {
-          return token;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Get the Access token from a single cookie header.
    *
    * @param header The cookie header to parse. This is usually a `Set-Cookie` header.
@@ -56,16 +35,16 @@ public final class TokenUtility {
   }
 
   /**
-   * Get the Refresh token from an array of cookie headers.
+   * Get first Access token from an array of cookie headers.
    *
    * @param headers An array of cookie headers. This is usually `Set-Cookie` headers.
    *
-   * @return The Refresh token, if found, or NULL otherwise.
+   * @return The Access token, if found, or NULL otherwise.
    */
-  public static String getRefreshToken(String[] headers) {
+  public static String getAccessTokens(String[] headers) {
     if (headers != null) {
       for (String header : headers) {
-        final String token = getRefreshToken(header);
+        final String token = getAccessToken(header);
 
         if (token != null) {
           return token;
@@ -90,19 +69,19 @@ public final class TokenUtility {
   }
 
   /**
-   * Parse an array of cookie header and return the first Access Cookie.
+   * Get the first Refresh token from an array of cookie headers.
    *
    * @param headers An array of cookie headers. This is usually `Set-Cookie` headers.
    *
-   * @return A HttpCookie object, if found, or NULL otherwise.
+   * @return The Refresh token, if found, or NULL otherwise.
    */
-  public static HttpCookie parseAccessCookie(String[] headers) {
+  public static String getRefreshTokens(String[] headers) {
     if (headers != null) {
       for (String header : headers) {
-        final HttpCookie cookie = parseAccessCookie(header);
+        final String token = getRefreshToken(header);
 
-        if (cookie != null) {
-          return cookie;
+        if (token != null) {
+          return token;
         }
       }
     }
@@ -122,16 +101,16 @@ public final class TokenUtility {
   }
 
   /**
-   * Parse an array of cookie header and return the first Refresh Cookie.
+   * Parse an array of cookie header and return the first Access Cookie.
    *
    * @param headers An array of cookie headers. This is usually `Set-Cookie` headers.
    *
    * @return A HttpCookie object, if found, or NULL otherwise.
    */
-  public static HttpCookie parseRefreshCookie(String[] headers) {
+  public static HttpCookie parseAccessCookies(String[] headers) {
     if (headers != null) {
       for (String header : headers) {
-        final HttpCookie cookie = parseRefreshCookie(header);
+        final HttpCookie cookie = parseAccessCookie(header);
 
         if (cookie != null) {
           return cookie;
@@ -154,6 +133,27 @@ public final class TokenUtility {
   }
 
   /**
+   * Parse an array of cookie header and return the first Refresh Cookie.
+   *
+   * @param headers An array of cookie headers. This is usually `Set-Cookie` headers.
+   *
+   * @return A HttpCookie object, if found, or NULL otherwise.
+   */
+  public static HttpCookie parseRefreshCookies(String[] headers) {
+    if (headers != null) {
+      for (String header : headers) {
+        final HttpCookie cookie = parseRefreshCookie(header);
+
+        if (cookie != null) {
+          return cookie;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Parse a single cookie header and return the cookie object that matches the given name.
    *
    * @param name The cookie name to check for and return.
@@ -163,7 +163,7 @@ public final class TokenUtility {
    * @return A HttpCookie object, if found, or NULL otherwise.
    */
   public static HttpCookie parseCookieName(String header, String name) {
-    if (header != null) {
+    if (header != null && !header.isBlank()) {
       final List<HttpCookie> cookies = HttpCookie.parse(header);
 
       if (cookies != null) {

@@ -53,8 +53,8 @@ class TokenUtilityCustomSettingsTest extends TestTokenUtilityBase {
    *     - HttpCookie expect (the expected result).
    */
   @SuppressWarnings("unused")
-  private static Stream<Arguments> provideMultipleAccessHeaderSets() {
-    return buildProvideMultipleAccessHeaderSets(new TokenUtilityCustomSettingsTest());
+  private static Stream<Arguments> provideMultipleAccessHeaders() {
+    return buildProvideMultipleAccessHeaders(new TokenUtilityCustomSettingsTest());
   }
 
   /**
@@ -68,8 +68,38 @@ class TokenUtilityCustomSettingsTest extends TestTokenUtilityBase {
    *     - HttpCookie expect (the expected result).
    */
   @SuppressWarnings("unused")
-  private static Stream<Arguments> provideMultipleRefreshHeaderSets() {
-    return buildProvideMultipleRefreshHeaderSets(new TokenUtilityCustomSettingsTest());
+  private static Stream<Arguments> provideMultipleRefreshHeaders() {
+    return buildProvideMultipleRefreshHeaders(new TokenUtilityCustomSettingsTest());
+  }
+
+  /**
+   * Stream parameters for testing access header.
+   *
+   * NOTE: This has "unused" suppress warnings because it is used via MethodSource in the abstract class.
+   *
+   * @return
+   *   The test method parameters:
+   *     - String header (the single header).
+   *     - HttpCookie expect (the expected result).
+   */
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideSingleAccessHeader() {
+    return buildProvideSingleAccessHeader(new TokenUtilityCustomSettingsTest());
+  }
+
+  /**
+   * Stream parameters for testing refresh header.
+   *
+   * NOTE: This has "unused" suppress warnings because it is used via MethodSource in the abstract class.
+   *
+   * @return
+   *   The test method parameters:
+   *     - String header (the single header).
+   *     - HttpCookie expect (the expected result).
+   */
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideSingleRefreshHeader() {
+    return buildProvideSingleRefreshHeader(new TokenUtilityCustomSettingsTest());
   }
 
 }

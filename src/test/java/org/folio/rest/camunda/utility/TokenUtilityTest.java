@@ -48,8 +48,8 @@ class TokenUtilityTest extends TestTokenUtilityBase {
    *     - HttpCookie expect (the expected result).
    */
   @SuppressWarnings("unused")
-  private static Stream<Arguments> provideMultipleAccessHeaderSets() {
-    return buildProvideMultipleAccessHeaderSets(new TokenUtilityTest());
+  private static Stream<Arguments> provideMultipleAccessHeaders() {
+    return buildProvideMultipleAccessHeaders(new TokenUtilityTest());
   }
 
   /**
@@ -63,8 +63,38 @@ class TokenUtilityTest extends TestTokenUtilityBase {
    *     - HttpCookie expect (the expected result).
    */
   @SuppressWarnings("unused")
-  private static Stream<Arguments> provideMultipleRefreshHeaderSets() {
-    return buildProvideMultipleRefreshHeaderSets(new TokenUtilityTest());
+  private static Stream<Arguments> provideMultipleRefreshHeaders() {
+    return buildProvideMultipleRefreshHeaders(new TokenUtilityTest());
+  }
+
+  /**
+   * Stream parameters for testing access header.
+   *
+   * NOTE: This has "unused" suppress warnings because it is used via MethodSource in the abstract class.
+   *
+   * @return
+   *   The test method parameters:
+   *     - String header (the single header).
+   *     - HttpCookie expect (the expected result).
+   */
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideSingleAccessHeader() {
+    return buildProvideSingleAccessHeader(new TokenUtilityTest());
+  }
+
+  /**
+   * Stream parameters for testing refresh header.
+   *
+   * NOTE: This has "unused" suppress warnings because it is used via MethodSource in the abstract class.
+   *
+   * @return
+   *   The test method parameters:
+   *     - String header (the single header).
+   *     - HttpCookie expect (the expected result).
+   */
+  @SuppressWarnings("unused")
+  private static Stream<Arguments> provideSingleRefreshHeader() {
+    return buildProvideSingleRefreshHeader(new TokenUtilityTest());
   }
 
 }
