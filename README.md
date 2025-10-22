@@ -116,14 +116,9 @@ The [pom.xml](pom.xml) described these versions and dependencies.
 
 ## Workflow Project Structure
 
-Business Process Models and Decision Models are built using the [Camunda Modeler](https://camunda.com/products/modeler/) which impelements BPMN 2.0 and DMN 1.1 specifications.
+Business Process Models and Decision Models are built using the [Camunda Modeler](https://camunda.com/products/modeler/) which implements **BPMN 2.0** and **DMN 1.1** specifications.
 
 The UI module [ui-workflow](https://github.com/folio-org/ui-workflow) provides a way to facilitate building, activating, and running individual workflows.
-
-There are also local resources that can be used to manually perform this process.
-
-- The local resources for `.bpmn` files are stored in `src/main/resources/workflows`
-- The local resources for `.dmn` files are stored in `src/main/resources/decisions`
 
 Any Java code that is executed in the context of a process is usually written in a Java Delegate.
 These classes are stored in `src/main/java/org/folio/rest/camunda/delegate`.
@@ -132,9 +127,8 @@ These classes are stored in `src/main/java/org/folio/rest/camunda/delegate`.
 ## Accessing the Application
 
 1. Start `mod-camunda` either through the Docker interface or through the manual `mvn clean spring-boot:run` command.
-2. Deploy all the processes, such as by running `scripts/deploy.sh` file.
-3. Navigate to Camunda Portal, such as `https://localhost:9000/ui/welcome/default/#/welcome` for a local execution.
-4. Log in as admin user: `admin`, password: `admin` (which can be changed using environment variables or by tweaking the `application.yml` file).
+2. Navigate to the Camunda Portal, such as `https://localhost:9000/ui/welcome/default/#/welcome` for a local execution.
+3. Log in as admin user: `admin`, password: `admin` (which can be changed using environment variables or by tweaking the `application.yml` file).
 
 
 ## Camunda APIs
