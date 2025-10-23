@@ -214,50 +214,50 @@ class FileDelegateTest {
     String inputVariables = "[]";
     String outputVariable = "{}";
     String files = "src/test/resources/files";
-    String plain_txt = files + "/plain.txt";
+    String plainTxt = files + "/plain.txt";
     String zero = "0";
     String one = "1";
     String no_path = "";
 
     // Must match an input variable key or target file path.
-    String no_target = "";
-    String data_target = "data";
-    String simple_target = "simple";
-    String temp_plain_txt = files + "/temp/plain.txt";
-    String temp_output = files + "/temp/output";
+    String noTarget = "";
+    String dataTarget = "data";
+    String simpleTarget = "simple";
+    String tempPlainTxt = files + "/temp/plain.txt";
+    String tempOutput = files + "/temp/output";
 
     // Arguments for whether to expect exception thrown.
     String noException = null;
 
     return Stream.of(
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), files, zero, FileOp.LIST.toString(), no_target, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plain_txt, zero, FileOp.READ.toString(), no_target, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plain_txt, zero, FileOp.LINE_COUNT.toString(), no_target, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plain_txt, one, FileOp.READ_LINE.toString(), no_target, noException),
-      Arguments.of(i("/input/file_task/write.json"), outputVariable, temp_output, zero, FileOp.WRITE.toString(), data_target, noException),
-      Arguments.of(i("/input/file_task/write_simple.json"), outputVariable, temp_output, zero, FileOp.WRITE.toString(), simple_target, noException),
+      Arguments.of(inputVariables, i("/output/file_task/data.json"), files, zero, FileOp.LIST.toString(), noTarget, noException),
+      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, zero, FileOp.READ.toString(), noTarget, noException),
+      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, zero, FileOp.LINE_COUNT.toString(), noTarget, noException),
+      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, one, FileOp.READ_LINE.toString(), noTarget, noException),
+      Arguments.of(i("/input/file_task/write.json"), outputVariable, tempOutput, zero, FileOp.WRITE.toString(), dataTarget, noException),
+      Arguments.of(i("/input/file_task/write_simple.json"), outputVariable, tempOutput, zero, FileOp.WRITE.toString(), simpleTarget, noException),
 
       // Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.PUSH.toString(), no_target, noException),
       // Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.POP.toString(), no_target, noException),
 
       // fails silently
-      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.COPY.toString(), temp_plain_txt, noException),
+      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.COPY.toString(), tempPlainTxt, noException),
       // fails silently
-      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.MOVE.toString(), temp_plain_txt, noException),
+      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.MOVE.toString(), tempPlainTxt, noException),
 
       // must be done last
 
       // copy file
-      Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.COPY.toString(), temp_plain_txt, noException),
+      Arguments.of(inputVariables, outputVariable, plainTxt, zero, FileOp.COPY.toString(), tempPlainTxt, noException),
 
       // delete a file
-      Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.DELETE.toString(), no_target, noException),
+      Arguments.of(inputVariables, outputVariable, plainTxt, zero, FileOp.DELETE.toString(), noTarget, noException),
 
       // move file
-      Arguments.of(inputVariables, outputVariable, temp_plain_txt, zero, FileOp.MOVE.toString(), plain_txt, noException),
+      Arguments.of(inputVariables, outputVariable, tempPlainTxt, zero, FileOp.MOVE.toString(), plainTxt, noException),
 
       // delete temp_output
-      Arguments.of(inputVariables, outputVariable, temp_output, zero, FileOp.DELETE.toString(), no_target, noException)
+      Arguments.of(inputVariables, outputVariable, tempOutput, zero, FileOp.DELETE.toString(), noTarget, noException)
     );
   }
 
