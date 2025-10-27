@@ -19,7 +19,6 @@ import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
 import org.folio.spring.web.service.HttpService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -42,7 +41,6 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
 
   private Expression headerOutputVariables;
 
-  @Autowired
   public RequestDelegate(HttpService httpService) {
     this.httpService = httpService;
   }
