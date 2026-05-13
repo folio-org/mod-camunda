@@ -1,6 +1,5 @@
 package org.folio.rest.camunda.delegate;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
@@ -10,6 +9,7 @@ import org.folio.rest.workflow.model.ProcessorTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 @Service
 @Scope("prototype")

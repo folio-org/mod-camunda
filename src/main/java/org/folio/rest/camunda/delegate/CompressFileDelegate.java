@@ -28,6 +28,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+/**
+ * Compress file delegate.
+ */
 @Service
 @Scope("prototype")
 public class CompressFileDelegate extends AbstractWorkflowIODelegate {
@@ -128,7 +131,7 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
             BufferedInputStream input = new BufferedInputStream(inputFile);
             FileOutputStream outputFile = new FileOutputStream(destinationFile);
             BufferedOutputStream output = new BufferedOutputStream(outputFile);
-            CompressorOutputStream compress = new CompressorStreamFactory()
+            CompressorOutputStream<?> compress = new CompressorStreamFactory()
               .createCompressorOutputStream(formatType, output);
           ) {
               IOUtils.copy(input, compress);
@@ -137,7 +140,7 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
           FileOutputStream outputFile = new FileOutputStream(destinationFile);
           BufferedOutputStream output = new BufferedOutputStream(outputFile);
 
-          CompressorOutputStream compress = new CompressorStreamFactory()
+          CompressorOutputStream<?>compress = new CompressorStreamFactory()
             .createCompressorOutputStream(formatType, output);
 
           TarArchiveOutputStream tar = new TarArchiveOutputStream(compress, BLOCK_SIZE, ENCODING);

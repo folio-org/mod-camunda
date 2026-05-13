@@ -5,23 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graalvm.shadowed.org.json.JSONException;
 import org.graalvm.shadowed.org.json.JSONObject;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class ScriptEngineUtilityTest {
 
   @ParameterizedTest
   @MethodSource("validJsonStream")
-  void testDecodeAndEncodeValidJson(TestInput input) throws JsonProcessingException {
+  void testDecodeAndEncodeValidJson(TestInput input) throws JacksonException {
     ScriptEngineUtility seu = new ScriptEngineUtility();
 
     JSONObject decoded = seu.decodeJson(input.json);
@@ -30,7 +30,7 @@ class ScriptEngineUtilityTest {
 
     String encoded = seu.encodeJson(decoded);
 
-    ObjectMapper om = new ObjectMapper();
+    ObjectMapper om = JsonMapper.builder().build();
     JsonNode expected = om.readValue(input.json, JsonNode.class);
     JsonNode actual = om.readValue(encoded, JsonNode.class);
 

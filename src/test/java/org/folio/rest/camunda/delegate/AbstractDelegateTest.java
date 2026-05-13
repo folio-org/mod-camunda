@@ -3,24 +3,28 @@ package org.folio.rest.camunda.delegate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractDelegateTest {
 
-  @Mock
   private ObjectMapper objectMapper;
 
   @Spy
   private Impl abstractDelegate;
+
+  public void beforeEach() {
+    objectMapper = Mockito.spy(JsonMapper.builder().build());
+  }
 
   @Test
   void getExpressionWorksTest() {

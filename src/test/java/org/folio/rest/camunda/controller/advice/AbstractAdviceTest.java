@@ -4,30 +4,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractAdviceTest {
 
   private static final RuntimeException runtimeException = new RuntimeException("A runtime failure.");
 
-  @Mock
   private ObjectMapper objectMapper;
 
   private MockAdvice abstractAdvice;
 
   @BeforeEach
   void beforeEach() {
+    objectMapper = Mockito.spy(JsonMapper.builder().build());
     abstractAdvice = new MockAdvice();
   }
 
@@ -40,8 +41,8 @@ class AbstractAdviceTest {
   }
 
   @Test
-  void handleBuildErrorThrowsJsonProcessingExceptionTest() throws JsonProcessingException {
-    when(objectMapper.writeValueAsString(any())).thenThrow(new MockJsonProcessingException());
+  void handleBuildErrorThrowsJacksonExceptionTest() throws JacksonException {
+    when(objectMapper.writeValueAsString(any())).thenThrow(new MockJacksonException());
 
     ResponseEntity<String> response = abstractAdvice.handleException(runtimeException);
 
@@ -69,15 +70,15 @@ class AbstractAdviceTest {
   }
 
   /**
-   * Provide a way to throw a type of JsonProcessingException.
+   * Provide a way to throw a type of JacksonException.
    *
-   * The JsonProcessingException does not have a public initializer.
+   * The JacksonException does not have a public initializer.
    */
-  private class MockJsonProcessingException extends JsonProcessingException {
+  private class MockJacksonException extends JacksonException {
 
     private static final long serialVersionUID = 812355666324245L;
 
-    public MockJsonProcessingException() {
+    public MockJacksonException() {
       super("mock");
     }
 

@@ -2,8 +2,6 @@ package org.folio.rest.camunda.utility;
 
 import static java.lang.String.format;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import io.micrometer.common.lang.NonNull;
 import io.vertx.core.json.JsonObject;
 import org.folio.AlternativeTitleType;
 import org.folio.Alternativetitletypes;
@@ -57,8 +55,10 @@ import org.folio.Statisticalcodetypes;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
 import org.folio.rest.camunda.utility.MappingParametersType.ParametersTypeLookupException;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Utility class for managing and retrieving mapping parameters in a library

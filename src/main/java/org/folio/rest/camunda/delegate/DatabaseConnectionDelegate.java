@@ -7,6 +7,9 @@ import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+/**
+ * Database connection delegate.
+ */
 @Service
 @Scope("prototype")
 public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {

@@ -10,12 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
@@ -35,6 +29,12 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -125,10 +125,10 @@ class ProcessorDelegateTest {
    *         - input variables (JSON map of <String, EmbeddedVariable>)
    *         - output variable (JSON of EmbeddedVariable)
    *         - exception that is expected to be thrown for inputs
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
-  private static Stream<Arguments> executionStream() throws JsonProcessingException {
-    ObjectMapper om = new ObjectMapper();
+  private static Stream<Arguments> executionStream() throws JacksonException {
+    ObjectMapper om = JsonMapper.builder().build();
 
     EmbeddedProcessor jsTest = new EmbeddedProcessor();
     jsTest.setScriptType(ScriptType.JS);

@@ -13,9 +13,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
@@ -37,6 +34,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -224,7 +223,7 @@ class FtpDelegateTest {
    *         - port
    *         - username
    *         - password
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
   private static Stream<Arguments> executionStream() {
     // arguments required for delegate expression

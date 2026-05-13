@@ -1,8 +1,5 @@
 package org.folio.rest.camunda.delegate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,20 +10,26 @@ import org.camunda.spin.impl.json.jackson.JacksonJsonNode;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.slf4j.Logger;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
+/**
+ * Input type.
+ */
 public interface Input {
 
   public abstract Logger getLogger();
 
   public abstract ObjectMapper getObjectMapper();
 
-  public abstract Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException;
+  public abstract Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JacksonException;
 
   public abstract boolean hasInputVariables(DelegateExecution execution);
 
   public abstract void setInputVariables(Expression inputVariables);
 
-  public default Map<String, Object> getInputs(DelegateExecution execution) throws JsonProcessingException {
+  public default Map<String, Object> getInputs(DelegateExecution execution) throws JacksonException {
     Map<String, Object> inputs = new HashMap<>();
 
     if (!hasInputVariables(execution)) {
@@ -62,9 +65,9 @@ public interface Input {
    * @param value The not-null value.
    * @param inputs The inputs array to append the value to.
    *
-   * @throws JsonProcessingException Failed to process JSON.
+   * @throws JacksonException Failed to process JSON.
    */
-  private void defaultGetInputsLoop(EmbeddedVariable variable, String key, VariableType type, Object value, Map<String, Object> inputs) throws JsonProcessingException {
+  private void defaultGetInputsLoop(EmbeddedVariable variable, String key, VariableType type, Object value, Map<String, Object> inputs) throws JacksonException {
     if (Boolean.FALSE.equals(variable.getSpin())) {
       inputs.put(key, value);
       return;

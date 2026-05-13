@@ -14,8 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
@@ -36,6 +34,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class RequestDelegateTest {
@@ -76,8 +77,8 @@ class RequestDelegateTest {
   private HttpHeaders httpHeaders;
 
   @BeforeEach
-  void beforeEach() throws JsonProcessingException {
-    mapper = new ObjectMapper();
+  void beforeEach() throws JacksonException {
+    mapper = JsonMapper.builder().build();
 
     request = new Request();
     request.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -230,9 +231,9 @@ class RequestDelegateTest {
    *
    * @param hasKey Set to TRUE if key is present; FALSE otherwise.
    *
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
-  private void setupExecuteMocking(boolean hasKey) throws JsonProcessingException {
+  private void setupExecuteMocking(boolean hasKey) throws JacksonException {
     setField(requestDelegate, "headerOutputVariables", headerOutputVariablesExpression);
     setField(requestDelegate, "httpService", httpService);
     setField(requestDelegate, "request", requestExpression);

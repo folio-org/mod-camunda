@@ -1,8 +1,5 @@
 package org.folio.rest.camunda.delegate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.FileWriter;
@@ -22,10 +19,16 @@ import org.folio.rest.workflow.model.DatabaseQueryTask;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
+/**
+ * Database query delegate.
+ */
 @Service
 @Scope("prototype")
-public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
+public class DatabaseQueryDelegate extends AbstractDatabaseIODelegate {
 
   private Expression query;
 
@@ -154,7 +157,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
     }
 
     @Override
-    public void finish() throws JsonProcessingException {
+    public void finish() throws JacksonException {
       setOutput(execution, output);
     }
 

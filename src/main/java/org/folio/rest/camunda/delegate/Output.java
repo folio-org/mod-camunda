@@ -2,28 +2,31 @@ package org.folio.rest.camunda.delegate;
 
 import static org.camunda.spin.Spin.JSON;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.variable.Variables;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.slf4j.Logger;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
+/**
+ * Output type.
+ */
 public interface Output {
 
   public abstract Logger getLogger();
 
   public abstract ObjectMapper getObjectMapper();
 
-  public abstract EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JsonProcessingException;
+  public abstract EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JacksonException;
 
   public abstract void setOutputVariable(Expression outputVariable);
 
   public abstract boolean hasOutputVariable(DelegateExecution execution);
 
-  public default void setOutput(DelegateExecution execution, Object output) throws JsonProcessingException {
+  public default void setOutput(DelegateExecution execution, Object output) throws JacksonException {
     if (!hasOutputVariable(execution)) {
       getLogger().warn("Output variable for execution {} is null", execution.getId());
       return;

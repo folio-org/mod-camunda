@@ -23,9 +23,6 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.model.bpmn.instance.FlowElement;
@@ -38,6 +35,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseQueryDelegateTest {
@@ -94,7 +94,7 @@ class DatabaseQueryDelegateTest {
     resultSet = mock(ResultSet.class);
     resultSetMetaData = mock(ResultSetMetaData.class);
 
-    objectMapper = new ObjectMapper();
+    objectMapper = JsonMapper.builder().build();
   }
 
   @Test
@@ -176,7 +176,7 @@ class DatabaseQueryDelegateTest {
   }
 
   @Test
-  void testExecuteThrowsException() throws JsonProcessingException, SQLException {
+  void testExecuteThrowsException() throws JacksonException, SQLException {
     setupExecuteMocking();
 
     doThrow(SQLException.class).when(connectionService).getConnection(anyString());
@@ -226,9 +226,9 @@ class DatabaseQueryDelegateTest {
   /**
    * Provide common mocking behavior for the execute() method.
    *
-   * @throws JsonProcessingException On JSON processing error.
+   * @throws JacksonException On JSON processing error.
    */
-  private void setupExecuteMocking() throws JsonProcessingException {
+  private void setupExecuteMocking() throws JacksonException {
     final Set<EmbeddedVariable> inputs = new HashSet<>(List.of(new EmbeddedVariable()));
 
     when(delegateExecution.getBpmnModelElementInstance()).thenReturn(flowElementBpmn);

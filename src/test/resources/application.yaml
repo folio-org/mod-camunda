@@ -20,9 +20,6 @@ server:
   port: 9100
   servlet:
     context-path: /
-    encoding:
-      charset: UTF-8
-      enabled: true
 
 spring:
   application.name: mod-camunda
@@ -39,6 +36,11 @@ spring:
     allow-circular-references: false
     banner-mode: console
     log-startup-info: true
+
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
 
   sql:
     init:

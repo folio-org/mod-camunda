@@ -1,9 +1,6 @@
 package org.folio.rest.camunda.kafka;
 
 import java.util.Map;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.RuntimeService;
 import org.folio.spring.messaging.model.Event;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
@@ -11,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class EventConsumer {

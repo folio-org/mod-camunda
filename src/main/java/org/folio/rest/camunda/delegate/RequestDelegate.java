@@ -2,8 +2,6 @@ package org.folio.rest.camunda.delegate;
 
 import static org.camunda.spin.Spin.JSON;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import java.util.ArrayList;
@@ -27,6 +25,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
 @Service
 @Scope("prototype")
@@ -98,14 +98,14 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
         VariableType type = headerOutputVariable.getType();
         String key = headerOutputVariable.getKey();
 
-        if (response.getHeaders().containsKey(key)) {
+        if (response.getHeaders().containsHeader(key)) {
           if (type != null) {
             Object value = null;
 
             if (headerOutputVariable.getAsArray()) {
               List<String> valueList = new ArrayList<>();
 
-              if (response.getHeaders().containsKey(key)) {
+              if (response.getHeaders().containsHeader(key)) {
                 valueList.addAll(response.getHeaders().get(key));
               }
 
@@ -151,7 +151,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
     return RequestTask.class;
   }
 
-  public Set<EmbeddedVariable> getHeaderOutputVariables(DelegateExecution execution) throws JsonProcessingException {
+  public Set<EmbeddedVariable> getHeaderOutputVariables(DelegateExecution execution) throws JacksonException {
     // @formatter:off
     return objectMapper.readValue(headerOutputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
@@ -171,7 +171,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
   private Object spinValue(EmbeddedVariable variable, Object value) throws DelegateSpinFailure {
     try {
       return variable.getSpin() ? JSON(objectMapper.writeValueAsString(value)) : value;
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new DelegateSpinFailure(variable.getKey(), RequestDelegate.class.getName(), e);
     }
   }

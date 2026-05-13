@@ -12,8 +12,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -40,12 +38,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class BpmnModelFactoryTest {
@@ -86,13 +86,11 @@ class BpmnModelFactoryTest {
   @Mock
   private EndEventBuilder endEventBuilder;
 
-  @Spy
   private ObjectMapper objectMapper;
 
   @Spy
   private List<AbstractWorkflowDelegate> workflowDelegates;
 
-  @InjectMocks
   private BpmnModelFactory bpmnModelFactory;
 
   private ProcessBuilder processBuilder;
@@ -113,6 +111,10 @@ class BpmnModelFactoryTest {
 
   @BeforeEach
   void beforeEach() {
+    objectMapper = Mockito.spy(JsonMapper.builder().build());
+
+    bpmnModelFactory = new BpmnModelFactory(objectMapper, workflowDelegates);
+
     startNode = new StartEvent();
     startNode.setId(UUID_NODE_1);
     startNode.setName(VALUE);
@@ -141,7 +143,7 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JsonProcessingException {
+  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JacksonException {
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
@@ -270,7 +272,7 @@ class BpmnModelFactoryTest {
   /**
    * Provide an exception that exposes the string initializer for easy usage.
    */
-  private class MyException extends JsonProcessingException {
+  private class MyException extends JacksonException {
 
     private static final long serialVersionUID = -6261961424503639802L;
 

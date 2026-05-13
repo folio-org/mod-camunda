@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test utility for various input methods for parameterized testing of
@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
  */
 public class TestUtility {
 
-  private static final ObjectMapper om = new ObjectMapper();
+  private static final ObjectMapper om = JsonMapper.builder().build();
 
   private TestUtility() {
 
@@ -90,7 +90,7 @@ public class TestUtility {
   public static JsonNode om(String json) {
     try {
       return om.readTree(json);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       e.printStackTrace();
       throw new RuntimeException();
     }

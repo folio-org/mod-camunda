@@ -1,12 +1,14 @@
 package org.folio.rest.camunda.delegate;
 
+import java.util.Objects;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import tools.jackson.core.JacksonException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.util.Objects;
-
+/**
+ * Abstract workflow output delegate.
+ */
 public abstract class AbstractWorkflowOutputDelegate extends AbstractWorkflowDelegate implements Output {
 
   private Expression outputVariable;
@@ -15,7 +17,7 @@ public abstract class AbstractWorkflowOutputDelegate extends AbstractWorkflowDel
     super();
   }
 
-  public EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JsonProcessingException {
+  public EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JacksonException {
     return objectMapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
   }
 

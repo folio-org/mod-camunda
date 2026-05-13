@@ -33,9 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -71,6 +68,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @ExtendWith(MockitoExtension.class)
 class MappingUtilityTest {
@@ -115,7 +115,7 @@ class MappingUtilityTest {
 
   @ParameterizedTest
   @MethodSource("testMapRecordToInsanceStream")
-  void testMapRecordToInsance(Parameters<String, String> data) throws JsonProcessingException {
+  void testMapRecordToInsance(Parameters<String, String> data) throws JacksonException {
     String marcJson = data.input;
     String okapiUrl = OKAPI_URL;
     String tenant = "diku";
@@ -127,6 +127,7 @@ class MappingUtilityTest {
     } else {
       ObjectNode expected = (ObjectNode) om(data.expected);
       expected.remove("id");
+
       ObjectNode actual = (ObjectNode) om(MappingUtility.mapRecordToInsance(marcJson, okapiUrl, tenant, token));
       actual.remove("id");
 

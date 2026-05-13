@@ -10,18 +10,20 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractWorkflowOutputDelegateTest {
@@ -32,14 +34,18 @@ class AbstractWorkflowOutputDelegateTest {
   @Mock
   private Expression outputVariable;
 
-  @InjectMocks
   private ObjectMapper objectMapper;
 
   @Spy
   private Impl abstractWorkflowOutputDelegate;
 
+  @BeforeEach
+  public void beforeEach() {
+    objectMapper = Mockito.spy(JsonMapper.builder().build());
+  }
+
   @Test
-  void testGetOutputVariableWorks() throws JsonProcessingException {
+  void testGetOutputVariableWorks() throws JacksonException {
     final EmbeddedVariable embeddedVariable = new EmbeddedVariable();
     embeddedVariable.setKey(KEY);
     embeddedVariable.setAsJson(true);
@@ -47,7 +53,9 @@ class AbstractWorkflowOutputDelegateTest {
     embeddedVariable.setSpin(true);
     embeddedVariable.setType(VariableType.LOCAL);
 
-    when(outputVariable.getValue(any())).thenReturn(objectMapper.writeValueAsString(embeddedVariable));
+    final String embeddedValue = objectMapper.writeValueAsString(embeddedVariable);
+
+    when(outputVariable.getValue(any())).thenReturn(embeddedValue);
     setField(abstractWorkflowOutputDelegate, "outputVariable", outputVariable);
     setField(abstractWorkflowOutputDelegate, "objectMapper", objectMapper);
 

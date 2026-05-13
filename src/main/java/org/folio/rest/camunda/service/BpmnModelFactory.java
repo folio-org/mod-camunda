@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.model.bpmn.Bpmn;
@@ -55,8 +51,10 @@ import org.folio.rest.workflow.model.components.Task;
 import org.folio.rest.workflow.model.components.Wait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class BpmnModelFactory {
@@ -65,20 +63,28 @@ public class BpmnModelFactory {
 
   private static final String SETUP_TASK_ID = "setup_task_98832611_3d33_476b_adcc_fcb6c4e8718b";
 
-  // @formatter:off
   private static final Class<?>[] SERIALIZABLE_TYPES = new Class<?>[] {
     String.class,
     Number.class,
     Boolean.class,
     Enum.class
   };
-  // @formatter:on
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-  @Autowired
-  private List<AbstractWorkflowDelegate> workflowDelegates;
+  private final List<AbstractWorkflowDelegate> workflowDelegates;
+
+  /**
+   * Constructor.
+   *
+   * @param objectMapper The mapper.
+   * @param workflowDelegates The delegates.
+   */
+  public BpmnModelFactory(ObjectMapper objectMapper, List<AbstractWorkflowDelegate> workflowDelegates) {
+
+    this.objectMapper = objectMapper;
+    this.workflowDelegates = workflowDelegates;
+  }
 
   public BpmnModelInstance fromWorkflow(Workflow workflow) throws ScriptTaskDeserializeCodeFailure {
 
@@ -335,7 +341,7 @@ public class BpmnModelFactory {
           String code;
           try {
             code = objectMapper.readValue(((ScriptTask) node).getCode(), String.class);
-          } catch (JsonProcessingException e) {
+          } catch (JacksonException e) {
             throw new ScriptTaskDeserializeCodeFailure(node.getId(), e);
           }
 
@@ -376,7 +382,7 @@ public class BpmnModelFactory {
     icField.setCamundaName("initialContext");
     try {
       icField.setCamundaStringValue(objectMapper.writeValueAsString(initialContext));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.warn("Failed to serialize initial context");
     }
     extensions.addChildElement(icField);
@@ -386,7 +392,7 @@ public class BpmnModelFactory {
     psField.setCamundaName("processors");
     try {
       psField.setCamundaStringValue(objectMapper.writeValueAsString(processors));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.warn("Failed to serialize processor scripts");
     }
     extensions.addChildElement(psField);
@@ -418,8 +424,8 @@ public class BpmnModelFactory {
                   field.setCamundaStringValue(serialize(value));
                   extensions.addChildElement(field);
                 }
-              } catch (JsonProcessingException | IllegalArgumentException | IllegalAccessException e) {
-                // TODO: create custom exception and controller advice to handle better
+              } catch (Exception e) {
+                // Bubble all exceptions up, which has to be a runtime exception.
                 throw new RuntimeException(e);
               }
             });
@@ -458,7 +464,7 @@ public class BpmnModelFactory {
     return scripts;
   }
 
-  private String serialize(Object value) throws JsonProcessingException {
+  private String serialize(Object value) throws JacksonException {
     if (isSerializableType(value.getClass())) {
       return value.toString();
     } else {

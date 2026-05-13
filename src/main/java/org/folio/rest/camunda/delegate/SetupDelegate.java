@@ -2,7 +2,6 @@ package org.folio.rest.camunda.delegate;
 
 import static org.camunda.spin.Spin.JSON;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.Map;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -13,6 +12,7 @@ import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 @Service
 @Scope("prototype")

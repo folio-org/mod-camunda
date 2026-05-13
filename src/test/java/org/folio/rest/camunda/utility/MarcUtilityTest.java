@@ -12,9 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,12 +20,14 @@ import org.marc4j.MarcException;
 import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Subfield;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 @ExtendWith(MockitoExtension.class)
 class MarcUtilityTest {
 
   @Test
-  void testDeserializingSubfield() throws JsonProcessingException {
+  void testDeserializingSubfield() throws JacksonException {
     MarcFactory factory = MarcFactory.newInstance();
     Subfield subfield = factory.newSubfield();
     subfield.setCode("245".charAt(0));

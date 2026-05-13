@@ -11,7 +11,7 @@ public class CamundaConfig {
 
   @Bean
   @Order(Ordering.DEFAULT_ORDER + 1)
-  public static ProcessEnginePlugin processEnginePlugin() {
+  static ProcessEnginePlugin processEnginePlugin() {
     return new CamundaEngineConfig();
   }
 

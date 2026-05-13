@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.utility;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
+import org.folio.rest.camunda.service.SubfieldDeserializer;
 import org.marc4j.MarcException;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcJsonWriter;
@@ -22,20 +23,14 @@ import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
-import org.marc4j.marc.impl.SubfieldImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.ArrayNode;
 
 public class MarcUtility {
 
@@ -43,29 +38,40 @@ public class MarcUtility {
 
   private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-  protected static final ObjectMapper mapper = new ObjectMapper();
-
-  private MarcUtility() {
-
-  }
+  protected static final ObjectMapper mapper;
 
   static {
-    mapper.setSerializationInclusion(Include.NON_NULL);
-    SimpleModule module = new SimpleModule();
-    module.addDeserializer(Subfield.class, new JsonDeserializer<Subfield>() {
-      @Override
-      public Subfield deserialize(JsonParser jp, DeserializationContext ctxt)
-          throws IOException, JsonProcessingException {
-        ObjectCodec oc = jp.getCodec();
-        JsonNode node = oc.readTree(jp);
-        return mapper.treeToValue(node, SubfieldImpl.class);
-      }
-    });
-    mapper.registerModule(module);
+    final SimpleModule module = new SimpleModule();
+
+    mapper = JsonMapper
+      .builder()
+      .changeDefaultPropertyInclusion(incl ->
+        incl
+          .withValueInclusion(JsonInclude.Include.NON_EMPTY)
+          .withContentInclusion(JsonInclude.Include.NON_EMPTY)
+      )
+      .addModule(module)
+      .build();
+
+    module.addDeserializer(Subfield.class, new SubfieldDeserializer(mapper));
   }
 
-  public static List<String> splitRawMarcToMarcJsonRecords(String rawMarc)
-      throws MarcException, IOException {
+  /**
+   * Initializer.
+   */
+  private MarcUtility() {
+  }
+
+  /**
+   * Split raw MARC to MARC JSON.
+   * 
+   * @param rawMarc The raw MARC.
+   *
+   * @return The MARC JSON.
+   *
+   * @throws IOException On error.
+   */
+  public static List<String> splitRawMarcToMarcJsonRecords(String rawMarc) throws IOException {
     List<String> records = new ArrayList<>();
     try (InputStream in = new ByteArrayInputStream(rawMarc.getBytes(DEFAULT_CHARSET))) {
       final MarcStreamReader reader = new MarcStreamReader(in, DEFAULT_CHARSET.name());
@@ -83,26 +89,26 @@ public class MarcUtility {
     MarcFactory factory = MarcFactory.newInstance();
     Record record = marcJsonToRecord(marcJson);
 
-    String tag = fieldNode.get("tag").asText();
+    String tag = fieldNode.get("tag").asString();
 
     DataField field = factory.newDataField();
     field.setTag(tag);
 
     if (fieldNode.has("indicator1")) {
-      char indicator1 = fieldNode.get("indicator1").asText().charAt(0);
+      char indicator1 = fieldNode.get("indicator1").asString().charAt(0);
       field.setIndicator1(indicator1);
     }
 
     if (fieldNode.has("indicator2")) {
-      char indicator2 = fieldNode.get("indicator2").asText().charAt(0);
+      char indicator2 = fieldNode.get("indicator2").asString().charAt(0);
       field.setIndicator2(indicator2);
     }
 
     ArrayNode subfields = (ArrayNode) fieldNode.get("subfields");
 
     subfields.forEach(subfieldNode -> {
-      char code = subfieldNode.get("code").asText().charAt(0);
-      String data = subfieldNode.get("data").asText();
+      char code = subfieldNode.get("code").asString().charAt(0);
+      String data = subfieldNode.get("data").asString();
       Subfield subfield = factory.newSubfield();
       subfield.setCode(code);
       subfield.setData(data);
@@ -143,12 +149,12 @@ public class MarcUtility {
   }
 
   public static String getFieldsFromRawMarc(String rawMarc, String[] tags)
-      throws JsonProcessingException, MarcException, IOException {
+      throws JacksonException, MarcException, IOException {
     return getRecordFields(rawMarcToRecord(rawMarc), tags);
   }
 
   public static String getFieldsFromMarcJson(String marcJson, String[] tags)
-      throws JsonProcessingException, MarcException, IOException {
+      throws JacksonException, MarcException, IOException {
     return getRecordFields(marcJsonToRecord(marcJson), tags);
   }
 
@@ -196,7 +202,7 @@ public class MarcUtility {
     }
   }
 
-  private static String getRecordFields(Record record, String[] tags) throws JsonProcessingException {
+  private static String getRecordFields(Record record, String[] tags) throws JacksonException {
     List<VariableField> fields = record.getVariableFields(tags);
     return mapper.writerWithDefaultPrettyPrinter()
       .writeValueAsString(fields);

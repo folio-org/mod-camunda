@@ -1,10 +1,5 @@
 package org.folio.rest.camunda.utility;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.Instance;
 import org.folio.processing.mapping.defaultmapper.MarcToInstanceMapper;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
  * Utility class for mapping between different data formats and transforming
@@ -43,7 +44,7 @@ public class MappingUtility {
   private static final MarcToInstanceMapper marcToInstanceMapper = new MarcToInstanceMapper();
 
   /** Jackson ObjectMapper for JSON serialization and deserialization. */
-  private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = JsonMapper.builder().build();
 
   /** Rest template for making Okapi-based REST calls. */
   static OkapiRestTemplate restTemplate = new OkapiRestTemplate();
@@ -95,17 +96,19 @@ public class MappingUtility {
    * <li>Applying the MARC to Instance mapping</li>
    * </ol>
    *
-   * @param marcJson The MARC record in JSON format
-   * @param okapiUrl The base URL for Okapi services
-   * @param tenant   The FOLIO tenant identifier
-   * @param token    Authentication token for Okapi services
-   * @return A JSON string representation of the mapped FOLIO Instance
-   * @throws JsonProcessingException  If there's an error processing the JSON
-   * @throws IllegalArgumentException If any of the input parameters are null or
-   *                                  empty
+   * @param marcJson The MARC record in JSON format.
+   * @param okapiUrl The base URL for Okapi services.
+   * @param tenant   The FOLIO tenant identifier.
+   * @param token    Authentication token for Okapi services.
+   *
+   * @return A JSON string representation of the mapped FOLIO Instance.
+   *
+   * @throws JacksonException         If there's an error processing the JSON.
+   * @throws IllegalArgumentException If any of the input parameters are null or empty.
    */
   public static String mapRecordToInsance(String marcJson, String okapiUrl, String tenant, String token)
-      throws JsonProcessingException {
+      throws JacksonException {
+
     if (StringUtils.isEmpty(marcJson)) {
       throw new IllegalArgumentException(ILLEGAL_MARC_JSON_ARGUMENT_MESSAGE);
     }
@@ -129,10 +132,11 @@ public class MappingUtility {
    * @param restTemplate The configured OkapiRestTemplate
    * @param marcJson     The MARC record in JSON format (must not be null)
    * @return A JSON string representation of the mapped FOLIO Instance
-   * @throws JsonProcessingException If there's an error processing the JSON
+   * @throws JacksonException If there's an error processing the JSON
    */
   private static String mapRecordToInsance(OkapiRestTemplate restTemplate, @NonNull String marcJson)
-      throws JsonProcessingException {
+      throws JacksonException {
+
     JsonObject parsedRecord = new JsonObject(marcJson);
     JsonObject mappingRules = MappingParametersUtility.fetchRules(restTemplate);
     MappingParameters mappingParameters = MappingParametersUtility.getMappingParamaters(restTemplate);

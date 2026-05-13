@@ -1,7 +1,8 @@
 package org.folio.rest.camunda.config;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ReactorResourceFactory;
@@ -14,19 +15,19 @@ import reactor.netty.resources.LoopResources;
 public class WebClientConfig {
 
   @Bean
-  public NioEventLoopGroup nioEventLoopGroup() {
-    return new NioEventLoopGroup(128);
+  MultiThreadIoEventLoopGroup nioEventLoopGroup() {
+    return new MultiThreadIoEventLoopGroup(128, NioIoHandler.newFactory());
   }
 
   @Bean
-  public ConnectionProvider connectionProvider() {
+  ConnectionProvider connectionProvider() {
     return ConnectionProvider.builder("camunda-web-client-thread-pool")
       .maxConnections(100)
       .build();
   }
 
   @Bean
-  public ReactorResourceFactory reactorResourceFactory(NioEventLoopGroup group, ConnectionProvider provider) {
+  ReactorResourceFactory reactorResourceFactory(MultiThreadIoEventLoopGroup group, ConnectionProvider provider) {
     ReactorResourceFactory factory = new ReactorResourceFactory();
     factory.setLoopResources(new LoopResources() {
       @Override
@@ -40,12 +41,12 @@ public class WebClientConfig {
   }
 
   @Bean
-  public ReactorClientHttpConnector reactorClientHttpConnector(ReactorResourceFactory factory) {
+  ReactorClientHttpConnector reactorClientHttpConnector(ReactorResourceFactory factory) {
     return new ReactorClientHttpConnector(factory, connection -> connection);
   }
 
   @Bean
-  public WebClient webClient(WebClient.Builder builder, ReactorClientHttpConnector connector) {
+  WebClient webClient(WebClient.Builder builder, ReactorClientHttpConnector connector) {
     return builder.clientConnector(connector).build();
   }
 
