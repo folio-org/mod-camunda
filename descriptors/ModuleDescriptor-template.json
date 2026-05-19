@@ -395,6 +395,7 @@
       { "name": "DB_USERNAME", "value": "folio_admin", "description": "Postgres user name." },
       { "name": "DB_PASSWORD", "value": "folio_admin", "description": "Postgres user name password." },
       { "name": "DB_DATABASE", "value": "okapi_modules", "description": "Postgres database name." },
+      { "name": "DB_SCHEMA", "value": "diku_mod_camunda", "description": "Postgres database schema name." },
       { "name": "DB_QUERYTIMEOUT", "value": "60000", "description": "Database query timeout." },
       { "name": "DB_CHARSET", "value": "UTF-8", "description": "Database charset." },
       { "name": "DB_MAXPOOLSIZE", "value": "16", "description": "Database max pool size." },
