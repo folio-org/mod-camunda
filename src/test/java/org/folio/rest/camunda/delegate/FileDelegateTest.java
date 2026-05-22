@@ -20,10 +20,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.EmbeddedVariable;
@@ -36,6 +32,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
@@ -81,7 +81,6 @@ class FileDelegateTest {
   @InjectMocks
   FileDelegate delegate;
 
-  @SuppressWarnings("serial")
   private final Map<String, Object> mockData = new HashMap<>() {{
     put("data", new ArrayList<>() {{
       add("Hello, World!");

@@ -7,9 +7,9 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.runtime.MessageCorrelationBuilder;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.runtime.MessageCorrelationBuilder;
+import org.operaton.bpm.engine.runtime.ProcessInstance;
 import org.folio.spring.messaging.model.Event;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.junit.jupiter.api.BeforeEach;

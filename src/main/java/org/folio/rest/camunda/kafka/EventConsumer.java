@@ -1,7 +1,7 @@
 package org.folio.rest.camunda.kafka;
 
 import java.util.Map;
-import org.camunda.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.RuntimeService;
 import org.folio.spring.messaging.model.Event;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.slf4j.Logger;

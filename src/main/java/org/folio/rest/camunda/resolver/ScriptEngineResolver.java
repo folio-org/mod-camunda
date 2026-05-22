@@ -3,7 +3,7 @@ package org.folio.rest.camunda.resolver;
 import com.oracle.truffle.js.scriptengine.GraalJSScriptEngine;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import org.camunda.bpm.engine.impl.scripting.engine.DefaultScriptEngineResolver;
+import org.operaton.bpm.engine.impl.scripting.engine.DefaultScriptEngineResolver;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;

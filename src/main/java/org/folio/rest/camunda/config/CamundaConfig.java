@@ -1,7 +1,7 @@
 package org.folio.rest.camunda.config;
 
-import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
-import org.camunda.bpm.spring.boot.starter.configuration.Ordering;
+import org.operaton.bpm.engine.impl.cfg.ProcessEnginePlugin;
+import org.operaton.bpm.spring.boot.starter.configuration.Ordering;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

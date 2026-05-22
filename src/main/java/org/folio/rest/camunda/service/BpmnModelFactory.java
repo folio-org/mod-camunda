@@ -6,19 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.GatewayDirection;
-import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
-import org.camunda.bpm.model.bpmn.builder.MultiInstanceLoopCharacteristicsBuilder;
-import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
-import org.camunda.bpm.model.bpmn.builder.ScriptTaskBuilder;
-import org.camunda.bpm.model.bpmn.builder.StartEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.SubProcessBuilder;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.workflow.enums.StartEventType;
@@ -49,6 +36,19 @@ import org.folio.rest.workflow.model.components.Gateway;
 import org.folio.rest.workflow.model.components.Navigation;
 import org.folio.rest.workflow.model.components.Task;
 import org.folio.rest.workflow.model.components.Wait;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.GatewayDirection;
+import org.operaton.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
+import org.operaton.bpm.model.bpmn.builder.MultiInstanceLoopCharacteristicsBuilder;
+import org.operaton.bpm.model.bpmn.builder.ProcessBuilder;
+import org.operaton.bpm.model.bpmn.builder.ScriptTaskBuilder;
+import org.operaton.bpm.model.bpmn.builder.StartEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.SubProcessBuilder;
+import org.operaton.bpm.model.bpmn.instance.ExtensionElements;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
+import org.operaton.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -88,15 +88,12 @@ public class BpmnModelFactory {
 
   public BpmnModelInstance fromWorkflow(Workflow workflow) throws ScriptTaskDeserializeCodeFailure {
 
-    // @formatter:off
     ProcessBuilder processBuilder = Bpmn.createExecutableProcess().name(workflow.getName())
-        .camundaHistoryTimeToLive(workflow.getHistoryTimeToLive())
-        .camundaVersionTag(workflow.getVersionTag());
-    // @formatter:on
+        .operatonHistoryTimeToLive(workflow.getHistoryTimeToLive())
+        .operatonVersionTag(workflow.getVersionTag());
 
     BpmnModelInstance model = build(processBuilder, workflow);
 
-    // @formatter:off
     workflow.getNodes().stream()
       .filter(node -> node instanceof EventSubprocess)
       .forEach(subprocess -> {
@@ -106,7 +103,6 @@ public class BpmnModelFactory {
             throw new RuntimeException(e);
         }
     });
-    // @formatter:on
 
     setup(model, workflow);
     expressions(model, workflow.getNodes());
@@ -148,7 +144,7 @@ public class BpmnModelFactory {
 
         if (node instanceof StartEvent) {
           if (Boolean.TRUE.equals(((StartEvent) node).getAsyncBefore())) {
-            builder = builder.camundaAsyncBefore();
+            builder = builder.operatonAsyncBefore();
           }
 
           boolean interrupting = Boolean.TRUE.equals(((StartEvent) node).getInterrupting());
@@ -182,17 +178,17 @@ public class BpmnModelFactory {
           }
 
           if (!setup.equals(Setup.NONE)) {
-            builder = builder.serviceTask(SETUP_TASK_ID).name("Setup").camundaDelegateExpression("${setupDelegate}");
+            builder = builder.serviceTask(SETUP_TASK_ID).name("Setup").operatonDelegateExpression("${setupDelegate}");
 
             switch (setup) {
             case ASYNC_AFTER:
-              builder = builder.camundaAsyncAfter();
+              builder = builder.operatonAsyncAfter();
               break;
             case ASYNC_BEFORE:
-              builder = builder.camundaAsyncBefore();
+              builder = builder.operatonAsyncBefore();
               break;
             case ASYNC_BEFORE_AFTER:
-              builder = builder.camundaAsyncBefore().camundaAsyncAfter();
+              builder = builder.operatonAsyncBefore().operatonAsyncAfter();
               break;
             case NONE:
             case SIMPLE:
@@ -216,18 +212,18 @@ public class BpmnModelFactory {
 
         if (delegate.isPresent()) {
           builder = builder.serviceTask(node.getIdentifier()).name(node.getName())
-              .camundaDelegateExpression(delegate.get().getExpression());
+              .operatonDelegateExpression(delegate.get().getExpression());
         } else {
           // TODO: create custom exception and controller advice to handle better
           throw new RuntimeException("Task must have delegate representation!");
         }
 
         if (Boolean.TRUE.equals(((DelegateTask) node).getAsyncBefore())) {
-          builder = builder.camundaAsyncBefore();
+          builder = builder.operatonAsyncBefore();
         }
 
         if (Boolean.TRUE.equals(((DelegateTask) node).getAsyncAfter())) {
-          builder = builder.camundaAsyncAfter();
+          builder = builder.operatonAsyncAfter();
         }
 
       } else if (node instanceof Branch) {
@@ -265,11 +261,11 @@ public class BpmnModelFactory {
           SubProcessBuilder subProcessBuilder = builder.subProcess(node.getIdentifier()).name(node.getName());
 
           if (Boolean.TRUE.equals(((Subprocess) node).getAsyncBefore())) {
-            subProcessBuilder = subProcessBuilder.camundaAsyncBefore();
+            subProcessBuilder = subProcessBuilder.operatonAsyncBefore();
           }
 
           if (Boolean.TRUE.equals(((Subprocess) node).getAsyncAfter())) {
-            subProcessBuilder = subProcessBuilder.camundaAsyncAfter();
+            subProcessBuilder = subProcessBuilder.operatonAsyncAfter();
           }
 
           if (((Subprocess) node).isMultiInstance()) {
@@ -280,8 +276,8 @@ public class BpmnModelFactory {
             if (loopRef.hasCardinalityExpression()) {
               multiInstanceBuilder = multiInstanceBuilder.cardinality(loopRef.getCardinalityExpression());
             } else if (loopRef.hasDataInput()) {
-              multiInstanceBuilder = multiInstanceBuilder.camundaCollection(loopRef.getDataInputRefExpression())
-                  .camundaElementVariable(loopRef.getInputDataName());
+              multiInstanceBuilder = multiInstanceBuilder.operatonCollection(loopRef.getDataInputRefExpression())
+                .operatonElementVariable(loopRef.getInputDataName());
             }
 
             if (Boolean.TRUE.equals(loopRef.getParallel())) {
@@ -349,7 +345,7 @@ public class BpmnModelFactory {
             .scriptFormat(((ScriptTask) node).getScriptFormat()).scriptText(code);
 
           if (((ScriptTask) node).hasResultVariable()) {
-            builder = ((ScriptTaskBuilder) builder).camundaResultVariable(((ScriptTask) node).getResultVariable());
+            builder = ((ScriptTaskBuilder) builder).operatonResultVariable(((ScriptTask) node).getResultVariable());
           }
         } else if (node instanceof InputTask) {
           builder = builder
@@ -360,11 +356,11 @@ public class BpmnModelFactory {
         }
 
         if (Boolean.TRUE.equals(((Task) node).getAsyncBefore())) {
-          builder = builder.camundaAsyncBefore();
+          builder = builder.operatonAsyncBefore();
         }
 
         if (Boolean.TRUE.equals(((Task) node).getAsyncAfter())) {
-          builder = builder.camundaAsyncAfter();
+          builder = builder.operatonAsyncAfter();
         }
       }
     }
@@ -378,20 +374,20 @@ public class BpmnModelFactory {
     ExtensionElements extensions = model.newInstance(ExtensionElements.class);
 
     Map<String, JsonNode> initialContext = workflow.getInitialContext();
-    CamundaField icField = model.newInstance(CamundaField.class);
-    icField.setCamundaName("initialContext");
+    OperatonField icField = model.newInstance(OperatonField.class);
+    icField.setOperatonName("initialContext");
     try {
-      icField.setCamundaStringValue(objectMapper.writeValueAsString(initialContext));
+      icField.setOperatonStringValue(objectMapper.writeValueAsString(initialContext));
     } catch (JacksonException e) {
       logger.warn("Failed to serialize initial context");
     }
     extensions.addChildElement(icField);
 
     List<EmbeddedProcessor> processors = getProcessorScripts(workflow.getNodes());
-    CamundaField psField = model.newInstance(CamundaField.class);
-    psField.setCamundaName("processors");
+    OperatonField psField = model.newInstance(OperatonField.class);
+    psField.setOperatonName("processors");
     try {
-      psField.setCamundaStringValue(objectMapper.writeValueAsString(processors));
+      psField.setOperatonStringValue(objectMapper.writeValueAsString(processors));
     } catch (JacksonException e) {
       logger.warn("Failed to serialize processor scripts");
     }
@@ -419,9 +415,9 @@ public class BpmnModelFactory {
               try {
                 Object value = f.get(node);
                 if (Objects.nonNull(value)) {
-                  CamundaField field = model.newInstance(CamundaField.class);
-                  field.setCamundaName(f.getName());
-                  field.setCamundaStringValue(serialize(value));
+                  OperatonField field = model.newInstance(OperatonField.class);
+                  field.setOperatonName(f.getName());
+                  field.setOperatonStringValue(serialize(value));
                   extensions.addChildElement(field);
                 }
               } catch (Exception e) {

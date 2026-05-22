@@ -14,17 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.builder.EndEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
-import org.camunda.bpm.model.bpmn.builder.ServiceTaskBuilder;
-import org.camunda.bpm.model.bpmn.builder.StartEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.UserTaskBuilder;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
 import org.folio.rest.camunda.delegate.InputDelegate;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
@@ -43,6 +32,17 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.builder.EndEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.ProcessBuilder;
+import org.operaton.bpm.model.bpmn.builder.ServiceTaskBuilder;
+import org.operaton.bpm.model.bpmn.builder.StartEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.UserTaskBuilder;
+import org.operaton.bpm.model.bpmn.instance.ExtensionElements;
+import org.operaton.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
+import org.operaton.bpm.model.xml.instance.ModelElementInstance;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -60,7 +60,7 @@ class BpmnModelFactoryTest {
   private BpmnModelInstance bpmnModelInstance;
 
   @Mock
-  private CamundaField camundaField;
+  private OperatonField camundaField;
 
   @Mock
   private ExtensionElements extensionElements;
@@ -240,7 +240,7 @@ class BpmnModelFactoryTest {
     lenient().when(startEventBuilder.done()).thenReturn(bpmnModelInstance);
 
     lenient().when(serviceTaskBuilder.name(anyString())).thenReturn(serviceTaskBuilder);
-    lenient().when(serviceTaskBuilder.camundaDelegateExpression(anyString())).thenReturn(serviceTaskBuilder);
+    lenient().when(serviceTaskBuilder.operatonDelegateExpression(anyString())).thenReturn(serviceTaskBuilder);
     lenient().when(serviceTaskBuilder.userTask(anyString())).thenReturn(userTaskBuilder);
     lenient().when(serviceTaskBuilder.done()).thenReturn(bpmnModelInstance);
 
@@ -255,8 +255,8 @@ class BpmnModelFactoryTest {
 
     lenient().when(processBuilderMocked.getElement()).thenReturn(process);
     lenient().when(processBuilderMocked.name(any())).thenReturn(processBuilderMocked);
-    lenient().when(processBuilderMocked.camundaHistoryTimeToLive(anyInt())).thenReturn(processBuilderMocked);
-    lenient().when(processBuilderMocked.camundaVersionTag(any())).thenReturn(processBuilderMocked);
+    lenient().when(processBuilderMocked.operatonHistoryTimeToLive(anyInt())).thenReturn(processBuilderMocked);
+    lenient().when(processBuilderMocked.operatonVersionTag(any())).thenReturn(processBuilderMocked);
   }
 
   /**
@@ -264,7 +264,7 @@ class BpmnModelFactoryTest {
    */
   private void commonMockingsBasic() {
     when(bpmnModelInstance.newInstance(ExtensionElements.class)).thenReturn(extensionElements);
-    when(bpmnModelInstance.newInstance(CamundaField.class)).thenReturn(camundaField);
+    when(bpmnModelInstance.newInstance(OperatonField.class)).thenReturn(camundaField);
     doNothing().when(extensionElements).addChildElement(any());
     when(bpmnModelInstance.getModelElementById(anyString())).thenReturn(modelElementInstance);
   }

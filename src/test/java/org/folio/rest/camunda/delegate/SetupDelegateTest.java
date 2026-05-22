@@ -10,10 +10,10 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;

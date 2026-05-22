@@ -1,8 +1,8 @@
 package org.folio.rest.camunda.delegate;
 
 import java.util.Map;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.ProcessorTask;

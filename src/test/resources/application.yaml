@@ -132,7 +132,6 @@ camunda:
     # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
     generic-properties:
       properties:
-        telemetry-reporter-activate: false
         enable-script-compilation: true
         enable-script-engine-nashorn-compatibility: true
         enable-fetch-script-engine-from-process-application: false
@@ -183,7 +182,8 @@ error:
 # https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
 management:
   endpoints:
-    enabled-by-default: false
+    access:
+      default: none
     web:
       base-path: /admin
       exposure:

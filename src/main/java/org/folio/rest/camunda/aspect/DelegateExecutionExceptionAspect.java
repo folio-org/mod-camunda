@@ -2,8 +2,8 @@ package org.folio.rest.camunda.aspect;
 
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +33,7 @@ public class DelegateExecutionExceptionAspect {
     this.emailSender = emailSender;
   }
 
-  @AfterThrowing(pointcut = "execution(* org.camunda.bpm.engine.delegate.JavaDelegate.execute (org.camunda.bpm.engine.delegate.DelegateExecution)) && args(execution))", throwing = "exception")
+  @AfterThrowing(pointcut = "execution(* org.operaton.bpm.engine.delegate.JavaDelegate.execute (org.operaton.bpm.engine.delegate.DelegateExecution)) && args(execution))", throwing = "exception")
   public void afterDelegateExecutionThrowsException(DelegateExecution execution, Throwable exception) {
 
     RepositoryService repositoryService = execution.getProcessEngineServices().getRepositoryService();

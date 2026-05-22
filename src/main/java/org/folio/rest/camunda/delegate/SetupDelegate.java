@@ -1,12 +1,12 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.camunda.spin.Spin.JSON;
+import static org.operaton.spin.Spin.JSON;
 
 import java.util.List;
 import java.util.Map;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.spin.json.SpinJsonNode;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.spin.json.SpinJsonNode;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.springframework.beans.factory.annotation.Autowired;

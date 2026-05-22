@@ -1,6 +1,6 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.camunda.spin.Spin.JSON;
+import static org.operaton.spin.Spin.JSON;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;

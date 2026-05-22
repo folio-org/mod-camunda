@@ -1,10 +1,10 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.camunda.spin.Spin.JSON;
+import static org.operaton.spin.Spin.JSON;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.engine.variable.Variables;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.engine.variable.Variables;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.slf4j.Logger;

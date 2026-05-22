@@ -5,11 +5,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.camunda.bpm.engine.ProcessEngineServices;
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.repository.ProcessDefinition;
-import org.camunda.bpm.engine.repository.ProcessDefinitionQuery;
+import org.operaton.bpm.engine.ProcessEngineServices;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.repository.ProcessDefinitionQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

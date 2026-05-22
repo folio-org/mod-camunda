@@ -13,8 +13,8 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,9 @@ class AbstractWorkflowInputDelegateTest {
     embeddedVariable.setType(VariableType.LOCAL);
     Set<EmbeddedVariable> variables = new HashSet<>(List.of(embeddedVariable));
 
-    when(inputVariables.getValue(any())).thenReturn(objectMapper.writeValueAsString(variables));
+    final String varJson = objectMapper.writeValueAsString(variables);
+
+    when(inputVariables.getValue(any())).thenReturn(varJson);
     setField(abstractDatabaseInputDelegate, "inputVariables", inputVariables);
     setField(abstractDatabaseInputDelegate, "objectMapper", objectMapper);
 

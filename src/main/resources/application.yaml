@@ -58,7 +58,7 @@ spring:
     #url: jdbc:h2:./target/mod-camunda;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     #driverClassName: org.h2.Driver
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:mod_camunda}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:mod_camunda}?currentSchema=${DB_SCHEMA:diku_mod_camunda},public
 
     username: ${DB_USERNAME:folio_admin}
     password: ${DB_PASSWORD:folio_admin}
@@ -78,7 +78,10 @@ spring:
     #database-platform: org.hibernate.dialect.H2Dialect
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-    properties.hibernate.jdbc.lob.non_contextual_creation: true
+    properties.hibernate:
+      jdbc.lob.non_contextual_creation: true
+      default_schema: ${DB_SCHEMA:diku_mod_camunda}
+
     generate-ddl: false
     hibernate.ddl-auto: update
     #hibernate.hbm2ddl.auto: none
@@ -109,14 +112,16 @@ spring:
   # This is relative to the context path.
   jersey.application-path: camunda
 
-camunda:
+operaton:
   # see: https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/
   bpm:
     webapp:
       application-path: ui
     auto-deployment-enabled: false
     database:
+      schema-name: ${DB_SCHEMA:diku_mod_camunda}
       schema-update: true
+      table-prefix: ${DB_SCHEMA:diku_mod_camunda}.
     filter:
       create: All Tasks
     admin-user:
@@ -145,7 +150,6 @@ camunda:
     # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
     generic-properties:
       properties:
-        telemetry-reporter-activate: false
         enable-script-compilation: true
         enable-script-engine-nashorn-compatibility: true
         enable-fetch-script-engine-from-process-application: false
@@ -183,30 +187,31 @@ tenant:
   # https://github.com/camunda/camunda-bpm-platform/tree/master/engine/src/main/resources/org/camunda/bpm/engine/db/create
   # be sure to match datasource platform
   schema-scripts:
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.engine.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.history.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.identity.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.case.engine.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.case.history.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.decision.engine.sql
-    - classpath:/org/camunda/bpm/engine/db/create/activiti.postgres.create.decision.history.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.engine.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.history.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.identity.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.case.engine.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.case.history.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.decision.engine.sql
+    - classpath:/org/operaton/bpm/engine/db/create/activiti.postgres.create.decision.history.sql
 
   # H2 schema scripts.
   #schema-scripts:
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.engine.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.history.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.identity.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.case.engine.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.case.history.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.decision.engine.sql
-  #  - classpath:/org/camunda/bpm/engine/db/create/activiti.h2.create.decision.history.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.engine.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.history.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.identity.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.case.engine.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.case.history.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.decision.engine.sql
+  #  - classpath:/org/operaton/bpm/engine/db/create/activiti.h2.create.decision.history.sql
 
 okapi.url: ${OKAPI_URL:http://localhost:9130}
 
 # https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
 management:
   endpoints:
-    enabled-by-default: false
+    access:
+      default: none
     web:
       base-path: /admin
       exposure:
