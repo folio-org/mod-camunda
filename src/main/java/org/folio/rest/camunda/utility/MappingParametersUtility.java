@@ -75,7 +75,7 @@ import tools.jackson.databind.JsonNode;
  * </ul>
  *
  * The class utilizes an {@link OkapiRestTemplate} to dynamically fetch
- * parameters from predefined REST endpoints, supporting a flexible and
+ * parameters from predefined REST end points, supporting a flexible and
  * extensible approach to parameter management.
  *
  * Key features:
@@ -100,7 +100,7 @@ public class MappingParametersUtility {
 
   /**
    * Base path for mapping rules related to MARC bibliographic records.
-   * Used as a constant endpoint for retrieving mapping configuration specific to
+   * Used as a constant end point for retrieving mapping configuration specific to
    * MARC bibliographic records.
    */
   @SuppressWarnings("java:S1075") // SonarQube path false positive.
@@ -145,11 +145,11 @@ public class MappingParametersUtility {
    * </ul>
    *
    * The method uses the provided REST template to fetch parameters from different
-   * endpoints and constructs a fully initialized {@link MappingParameters}
+   * end points and constructs a fully initialized {@link MappingParameters}
    * object.
    *
    * @param restTemplate The REST template used to fetch parameters from different
-   *                     endpoints
+   *                     end points.
    * @return A fully initialized {@link MappingParameters} object containing all
    *         retrieved parameters
    * @throws ParametersTypeLookupException if no descriptor is found for the given
@@ -193,12 +193,12 @@ public class MappingParametersUtility {
    *
    * This method dynamically fetches parameters based on the provided parameter
    * type, using a pre-configured mapping of parameter types to their respective
-   * endpoints and collection types.
+   * end points and collection types.
    *
    * Key features:
    * <ul>
    * <li>Supports retrieval of various library entity type parameters</li>
-   * <li>Dynamically determines the appropriate endpoint and collection type</li>
+   * <li>Dynamically determines the appropriate end point and collection type</li>
    * <li>Handles potential retrieval failures</li>
    * </ul>
    *
@@ -240,7 +240,7 @@ public class MappingParametersUtility {
     /**
      * Template for generating detailed error messages about parameter retrieval
      * failures.
-     * Includes placeholders for the parameter type and the endpoint path.
+     * Includes place holders for the parameter type and the end point path.
      */
     private static final String MESSAGE_TEMPLATE = "Failed to retrieve %s parameters from path %s";
 

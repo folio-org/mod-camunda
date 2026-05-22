@@ -1,14 +1,12 @@
 package org.folio.rest.camunda.utility;
 
 import io.vertx.core.json.JsonObject;
-import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.Instance;
 import org.folio.processing.mapping.defaultmapper.MarcToInstanceMapper;
 import org.folio.processing.mapping.defaultmapper.processor.parameters.MappingParameters;
 import org.jspecify.annotations.NonNull;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -65,12 +63,12 @@ public class MappingUtility {
    * </p>
    *
    * @param csv The input CSV string to be converted
+   *
    * @return A JSON string representing the CSV data as an array of objects
-   * @throws IOException              If there's an error reading or parsing the
-   *                                  CSV
+   *
    * @throws IllegalArgumentException If the CSV input is null or empty
    */
-  public static String mapCsvToJson(String csv) throws IOException {
+  public static String mapCsvToJson(String csv) {
     if (StringUtils.isEmpty(csv)) {
       throw new IllegalArgumentException(ILLEGAL_CSV_ARGUMENT_MESSAGE);
     }
@@ -102,12 +100,10 @@ public class MappingUtility {
    * @param token    Authentication token for Okapi services.
    *
    * @return A JSON string representation of the mapped FOLIO Instance.
-   *
-   * @throws JacksonException         If there's an error processing the JSON.
+   *\
    * @throws IllegalArgumentException If any of the input parameters are null or empty.
    */
-  public static String mapRecordToInsance(String marcJson, String okapiUrl, String tenant, String token)
-      throws JacksonException {
+  public static String mapRecordToInsance(String marcJson, String okapiUrl, String tenant, String token) {
 
     if (StringUtils.isEmpty(marcJson)) {
       throw new IllegalArgumentException(ILLEGAL_MARC_JSON_ARGUMENT_MESSAGE);
@@ -126,16 +122,14 @@ public class MappingUtility {
   }
 
   /**
-   * Internal method to map a MARC record to a FOLIO Instance using a
-   * pre-configured rest template.
+   * Internal method to map a MARC record to a FOLIO Instance using a pre-configured rest template.
    *
-   * @param restTemplate The configured OkapiRestTemplate
-   * @param marcJson     The MARC record in JSON format (must not be null)
+   * @param restTemplate The configured OkapiRestTemplate.
+   * @param marcJson     The MARC record in JSON format (must not be null).
+   *
    * @return A JSON string representation of the mapped FOLIO Instance
-   * @throws JacksonException If there's an error processing the JSON
    */
-  private static String mapRecordToInsance(OkapiRestTemplate restTemplate, @NonNull String marcJson)
-      throws JacksonException {
+  private static String mapRecordToInsance(OkapiRestTemplate restTemplate, @NonNull String marcJson) {
 
     JsonObject parsedRecord = new JsonObject(marcJson);
     JsonObject mappingRules = MappingParametersUtility.fetchRules(restTemplate);
