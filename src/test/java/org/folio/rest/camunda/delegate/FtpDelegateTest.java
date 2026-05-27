@@ -17,10 +17,6 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.VFS;
-import org.operaton.bpm.engine.RuntimeService;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
-import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,16 +29,20 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FtpDelegateTest {
 
   @Spy
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   @Spy
   protected RuntimeService runtimeService;

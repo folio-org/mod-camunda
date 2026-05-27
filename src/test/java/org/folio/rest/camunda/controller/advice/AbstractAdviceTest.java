@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,13 +22,13 @@ class AbstractAdviceTest {
 
   private static final RuntimeException runtimeException = new RuntimeException("A runtime failure.");
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   private MockAdvice abstractAdvice;
 
   @BeforeEach
   void beforeEach() {
-    objectMapper = Mockito.spy(JsonMapper.builder().build());
+    mapper = Mockito.spy(MapperHelper.build());
     abstractAdvice = new MockAdvice();
   }
 
@@ -42,7 +42,7 @@ class AbstractAdviceTest {
 
   @Test
   void handleBuildErrorThrowsJacksonExceptionTest() throws JacksonException {
-    when(objectMapper.writeValueAsString(any())).thenThrow(new MockJacksonException());
+    when(mapper.writeValueAsString(any())).thenThrow(new MockJacksonException());
 
     ResponseEntity<String> response = abstractAdvice.handleException(runtimeException);
 
@@ -58,8 +58,8 @@ class AbstractAdviceTest {
   private class MockAdvice extends AbstractAdvice {
 
     @Override
-    protected ObjectMapper getObjectMapper() {
-      return objectMapper;
+    protected JsonMapper getMapper() {
+      return mapper;
     }
 
     @ExceptionHandler({ RuntimeException.class })

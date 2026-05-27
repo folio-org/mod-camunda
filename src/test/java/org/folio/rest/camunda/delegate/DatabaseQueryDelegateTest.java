@@ -23,20 +23,20 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
-import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.DatabaseQueryTask;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +77,7 @@ class DatabaseQueryDelegateTest {
 
   private ResultSetMetaData resultSetMetaData;
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @InjectMocks
   private DatabaseQueryDelegate databaseQueryDelegate;
@@ -94,7 +94,7 @@ class DatabaseQueryDelegateTest {
     resultSet = mock(ResultSet.class);
     resultSetMetaData = mock(ResultSetMetaData.class);
 
-    objectMapper = JsonMapper.builder().build();
+    mapper = MapperHelper.build();
   }
 
   @Test
@@ -236,7 +236,7 @@ class DatabaseQueryDelegateTest {
     when(designationExpression.getValue(any())).thenReturn(VALUE);
     when(queryExpression.getValue(any())).thenReturn(QUERY);
     when(includeHeaderExpression.getValue(any())).thenReturn(JSON_OBJECT);
-    when(inputVariablesExpression.getValue(any())).thenReturn(objectMapper.writeValueAsString(inputs));
+    when(inputVariablesExpression.getValue(any())).thenReturn(mapper.writeValueAsString(inputs));
 
     setField(databaseQueryDelegate, "designation", designationExpression);
     setField(databaseQueryDelegate, "connectionService", connectionService);
@@ -245,6 +245,6 @@ class DatabaseQueryDelegateTest {
     setField(databaseQueryDelegate, "query", queryExpression);
     setField(databaseQueryDelegate, "resultType", resultTypeExpression);
     setField(databaseQueryDelegate, "inputVariables", inputVariablesExpression);
-    setField(databaseQueryDelegate, "objectMapper", objectMapper);
+    setField(databaseQueryDelegate, "mapper", mapper);
   }
 }

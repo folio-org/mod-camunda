@@ -6,56 +6,56 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.folio.AlternativeTitleType;
-import org.folio.Alternativetitletypes;
-import org.folio.CallNumberType;
-import org.folio.Callnumbertypes;
-import org.folio.ClassificationType;
-import org.folio.Classificationtypes;
-import org.folio.ContributorNameType;
-import org.folio.ContributorType;
-import org.folio.Contributornametypes;
-import org.folio.Contributortypes;
-import org.folio.ElectronicAccessRelationship;
-import org.folio.Electronicaccessrelationships;
-import org.folio.HoldingsNoteType;
-import org.folio.HoldingsType;
-import org.folio.Holdingsnotetypes;
-import org.folio.Holdingstypes;
-import org.folio.IdentifierType;
-import org.folio.Identifiertypes;
-import org.folio.IllPolicy;
-import org.folio.Illpolicies;
-import org.folio.InstanceFormat;
-import org.folio.InstanceNoteType;
-import org.folio.InstanceRelationshipType;
-import org.folio.InstanceStatus;
-import org.folio.InstanceType;
-import org.folio.Instanceformats;
-import org.folio.Instancenotetypes;
-import org.folio.Instancerelationshiptypes;
-import org.folio.Instancestatuses;
-import org.folio.Instancetypes;
-import org.folio.IssuanceMode;
-import org.folio.Issuancemodes;
-import org.folio.ItemDamageStatus;
-import org.folio.ItemNoteType;
-import org.folio.Itemdamagedstatuses;
-import org.folio.Itemnotetypes;
-import org.folio.Loantype;
-import org.folio.Loantypes;
-import org.folio.Location;
-import org.folio.Locations;
 import org.folio.MarcFieldProtectionSettingsCollection;
-import org.folio.Materialtypes;
-import org.folio.Mtype;
-import org.folio.NatureOfContentTerm;
-import org.folio.Natureofcontentterms;
-import org.folio.StatisticalCode;
-import org.folio.StatisticalCodeType;
-import org.folio.Statisticalcodes;
-import org.folio.Statisticalcodetypes;
+import org.folio.rest.jaxrs.model.AlternativeTitleType;
+import org.folio.rest.jaxrs.model.AlternativeTitleTypes;
+import org.folio.rest.jaxrs.model.CallNumberType;
+import org.folio.rest.jaxrs.model.CallNumberTypes;
+import org.folio.rest.jaxrs.model.ClassificationType;
+import org.folio.rest.jaxrs.model.ClassificationTypes;
+import org.folio.rest.jaxrs.model.ContributorNameType;
+import org.folio.rest.jaxrs.model.ContributorNameTypes;
+import org.folio.rest.jaxrs.model.ContributorType;
+import org.folio.rest.jaxrs.model.ContributorTypes;
+import org.folio.rest.jaxrs.model.ElectronicAccessRelationship;
+import org.folio.rest.jaxrs.model.ElectronicAccessRelationships;
+import org.folio.rest.jaxrs.model.HoldingsNoteType;
+import org.folio.rest.jaxrs.model.HoldingsNoteTypes;
+import org.folio.rest.jaxrs.model.HoldingsType;
+import org.folio.rest.jaxrs.model.HoldingsTypes;
+import org.folio.rest.jaxrs.model.IdentifierType;
+import org.folio.rest.jaxrs.model.IdentifierTypes;
+import org.folio.rest.jaxrs.model.IllPolicies;
+import org.folio.rest.jaxrs.model.IllPolicy;
+import org.folio.rest.jaxrs.model.InstanceFormat;
+import org.folio.rest.jaxrs.model.InstanceFormats;
+import org.folio.rest.jaxrs.model.InstanceNoteType;
+import org.folio.rest.jaxrs.model.InstanceNoteTypes;
+import org.folio.rest.jaxrs.model.InstanceRelationshipType;
+import org.folio.rest.jaxrs.model.InstanceRelationshipTypes;
+import org.folio.rest.jaxrs.model.InstanceStatus;
+import org.folio.rest.jaxrs.model.InstanceStatuses;
+import org.folio.rest.jaxrs.model.InstanceType;
+import org.folio.rest.jaxrs.model.InstanceTypes;
+import org.folio.rest.jaxrs.model.IssuanceMode;
+import org.folio.rest.jaxrs.model.IssuanceModes;
+import org.folio.rest.jaxrs.model.ItemDamageStatus;
+import org.folio.rest.jaxrs.model.ItemDamageStatuses;
+import org.folio.rest.jaxrs.model.ItemNoteType;
+import org.folio.rest.jaxrs.model.ItemNoteTypes;
+import org.folio.rest.jaxrs.model.LoanType;
+import org.folio.rest.jaxrs.model.LoanTypes;
+import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.Locations;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
+import org.folio.rest.jaxrs.model.MaterialType;
+import org.folio.rest.jaxrs.model.MaterialTypes;
+import org.folio.rest.jaxrs.model.NatureOfContentTerm;
+import org.folio.rest.jaxrs.model.NatureOfContentTerms;
+import org.folio.rest.jaxrs.model.StatisticalCode;
+import org.folio.rest.jaxrs.model.StatisticalCodeType;
+import org.folio.rest.jaxrs.model.StatisticalCodeTypes;
+import org.folio.rest.jaxrs.model.StatisticalCodes;
 
 /**
  * Represents different types of mapping parameters used in the FOLIO library
@@ -67,7 +67,7 @@ import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
  * <ul>
  *   <li>A specific parameter type class</li>
  *   <li>A corresponding collection type class</li>
- *   <li>A RESTful API endpoint path</li>
+ *   <li>A RESTful API end point path</li>
  * </ul>
  *
  * The enum provides methods to retrieve the parameter type, collection type,
@@ -76,61 +76,61 @@ import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
 public enum MappingParametersType {
 
   /** Mapping type for alternative title types. */
-  ALTERNATIVE_TITLE_TYPES(AlternativeTitleType.class, Alternativetitletypes.class, "/alternative-title-types"),
+  ALTERNATIVE_TITLE_TYPES(AlternativeTitleType.class, AlternativeTitleTypes.class, "/alternative-title-types"),
 
   /** Mapping type for call number types. */
-  CALL_NUMBER_TYPES(CallNumberType.class, Callnumbertypes.class, "/call-number-types"),
+  CALL_NUMBER_TYPES(CallNumberType.class, CallNumberTypes.class, "/call-number-types"),
 
   /** Mapping type for classification types. */
-  CLASSIFICATION_TYPES(ClassificationType.class, Classificationtypes.class, "/classification-types"),
+  CLASSIFICATION_TYPES(ClassificationType.class, ClassificationTypes.class, "/classification-types"),
 
   /** Mapping type for contributor name types. */
-  CONTRIBUTOR_NAME_TYPES(ContributorNameType.class, Contributornametypes.class, "/contributor-name-types"),
+  CONTRIBUTOR_NAME_TYPES(ContributorNameType.class, ContributorNameTypes.class, "/contributor-name-types"),
 
   /** Mapping type for contributor types. */
-  CONTRIBUTOR_TYPES(ContributorType.class, Contributortypes.class, "/contributor-types"),
+  CONTRIBUTOR_TYPES(ContributorType.class, ContributorTypes.class, "/contributor-types"),
 
   /** Mapping type for electronic access relationships. */
-  ELECTRONIC_ACCESS_RELATIONSHIPS(ElectronicAccessRelationship.class, Electronicaccessrelationships.class, "/electronic-access-relationships"),
+  ELECTRONIC_ACCESS_RELATIONSHIPS(ElectronicAccessRelationship.class, ElectronicAccessRelationships.class, "/electronic-access-relationships"),
 
   /** Mapping type for holdings note types. */
-  HOLDINGS_NOTE_TYPES(HoldingsNoteType.class, Holdingsnotetypes.class, "/holdings-note-types"),
+  HOLDINGS_NOTE_TYPES(HoldingsNoteType.class, HoldingsNoteTypes.class, "/holdings-note-types"),
 
   /** Mapping type for holdings types. */
-  HOLDINGS_TYPES(HoldingsType.class, Holdingstypes.class, "/holdings-types"),
+  HOLDINGS_TYPES(HoldingsType.class, HoldingsTypes.class, "/holdings-types"),
 
   /** Mapping type for identifier types. */
-  IDENTIFIER_TYPES(IdentifierType.class, Identifiertypes.class, "/identifier-types"),
+  IDENTIFIER_TYPES(IdentifierType.class, IdentifierTypes.class, "/identifier-types"),
 
-  /** Mapping type for Interlibrary Loan (ILL) policies. */
-  ILL_POLICIES(IllPolicy.class, Illpolicies.class, "/ill-policies"),
+  /** Mapping type for Inter-library Loan (ILL) policies. */
+  ILL_POLICIES(IllPolicy.class, IllPolicies.class, "/ill-policies"),
 
   /** Mapping type for instance formats. */
-  INSTANCE_FORMATS(InstanceFormat.class, Instanceformats.class, "/instance-formats"),
+  INSTANCE_FORMATS(InstanceFormat.class, InstanceFormats.class, "/instance-formats"),
 
   /** Mapping type for instance note types. */
-  INSTANCE_NOTE_TYPES(InstanceNoteType.class, Instancenotetypes.class, "/instance-note-types"),
+  INSTANCE_NOTE_TYPES(InstanceNoteType.class, InstanceNoteTypes.class, "/instance-note-types"),
 
   /** Mapping type for instance relationship types. */
-  INSTANCE_RELATIONSHIP_TYPES(InstanceRelationshipType.class, Instancerelationshiptypes.class, "/instance-relationship-types"),
+  INSTANCE_RELATIONSHIP_TYPES(InstanceRelationshipType.class, InstanceRelationshipTypes.class, "/instance-relationship-types"),
 
   /** Mapping type for instance statuses. */
-  INSTANCE_STATUSES(InstanceStatus.class, Instancestatuses.class, "/instance-statuses"),
+  INSTANCE_STATUSES(InstanceStatus.class, InstanceStatuses.class, "/instance-statuses"),
 
   /** Mapping type for instance types. */
-  INSTANCE_TYPES(InstanceType.class, Instancetypes.class, "/instance-types"),
+  INSTANCE_TYPES(InstanceType.class, InstanceTypes.class, "/instance-types"),
 
   /** Mapping type for issuance modes. */
-  ISSUANCE_MODES(IssuanceMode.class, Issuancemodes.class, "/modes-of-issuance"),
+  ISSUANCE_MODES(IssuanceMode.class, IssuanceModes.class, "/modes-of-issuance"),
 
   /** Mapping type for item damaged statuses. */
-  ITEM_DAMAGED_STATUSES(ItemDamageStatus.class, Itemdamagedstatuses.class, "/item-damaged-statuses"),
+  ITEM_DAMAGED_STATUSES(ItemDamageStatus.class, ItemDamageStatuses.class, "/item-damaged-statuses"),
 
   /** Mapping type for item note types. */
-  ITEM_NOTE_TYPES(ItemNoteType.class, Itemnotetypes.class, "/item-note-types"),
+  ITEM_NOTE_TYPES(ItemNoteType.class, ItemNoteTypes.class, "/item-note-types"),
 
   /** Mapping type for loan types. */
-  LOAN_TYPES(Loantype.class, Loantypes.class, "/loan-types"),
+  LOAN_TYPES(LoanType.class, LoanTypes.class, "/loan-types"),
 
   /** Mapping type for locations. */
   LOCATIONS(Location.class, Locations.class, "/locations"),
@@ -139,16 +139,16 @@ public enum MappingParametersType {
   MARC_FIELD_PROTECTION_SETTINGS(MarcFieldProtectionSetting.class, MarcFieldProtectionSettingsCollection.class, "/field-protection-settings/marc"),
 
   /** Mapping type for material types. */
-  MATERIAL_TYPES(Mtype.class, Materialtypes.class, "/material-types"),
+  MATERIAL_TYPES(MaterialType.class, MaterialTypes.class, "/material-types"),
 
   /** Mapping type for nature of content terms. */
-  NATURE_OF_CONTENT_TERMS(NatureOfContentTerm.class, Natureofcontentterms.class, "/nature-of-content-terms"),
+  NATURE_OF_CONTENT_TERMS(NatureOfContentTerm.class, NatureOfContentTerms.class, "/nature-of-content-terms"),
 
   /** Mapping type for statistical code types. */
-  STATISTICAL_CODE_TYPES(StatisticalCodeType.class, Statisticalcodetypes.class, "/statistical-code-types"),
+  STATISTICAL_CODE_TYPES(StatisticalCodeType.class, StatisticalCodeTypes.class, "/statistical-code-types"),
 
   /** Mapping type for statistical codes. */
-  STATISTICAL_CODES(StatisticalCode.class, Statisticalcodes.class, "/statistical-codes");
+  STATISTICAL_CODES(StatisticalCode.class, StatisticalCodes.class, "/statistical-codes");
 
   /** The specific parameter type class for this mapping type. */
   private final Class<?> parametersType;
@@ -156,7 +156,7 @@ public enum MappingParametersType {
   /** The collection type class corresponding to this mapping type. */
   private final Class<?> collectionType;
 
-  /** The API endpoint path for retrieving this mapping type's data. */
+  /** The API end point path for retrieving this mapping type's data. */
   private final String path;
 
   private static final Map<Class<?>, MappingParametersType> BY_PARAMETERS_TYPE = Arrays.stream(values())
@@ -169,7 +169,7 @@ public enum MappingParametersType {
    * @param parametersType The class representing the specific parameter type
    * @param collectionType The class representing the collection of this parameter
    *                       type
-   * @param path           The API endpoint path for retrieving this mapping
+   * @param path           The API end point path for retrieving this mapping
    *                       type's data
    */
   MappingParametersType(Class<?> parametersType, Class<?> collectionType, String path) {
@@ -198,19 +198,19 @@ public enum MappingParametersType {
   }
 
   /**
-   * Retrieves the base API endpoint path for this mapping type.
+   * Retrieves the base API end point path for this mapping type.
    *
-   * @return The API endpoint path
+   * @return The API end point path
    */
   public String getPath() {
     return path;
   }
 
   /**
-   * Retrieves the API endpoint path with a specified limit parameter.
+   * Retrieves the API end point path with a specified limit parameter.
    *
    * @param limit The maximum number of records to retrieve
-   * @return The API endpoint path with limit query parameter
+   * @return The API end point path with limit query parameter
    */
   public String getPath(int limit) {
     return path + "?limit=" + limit;
@@ -245,7 +245,7 @@ public enum MappingParametersType {
     /**
      * Template for generating detailed error messages about parameters type lookup
      * failures.
-     * Includes placeholders for the parameter type and the endpoint path.
+     * Includes place holders for the parameter type and the end point path.
      */
     private static final String MESSAGE_TEMPLATE = "Invalid parameters type:  %s";
 

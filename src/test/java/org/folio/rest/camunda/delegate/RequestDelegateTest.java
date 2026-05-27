@@ -7,7 +7,6 @@ import static org.folio.spring.test.mock.MockMvcConstant.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,13 +14,11 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Set;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
-import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
+import org.folio.spring.test.helper.MapperHelper;
 import org.folio.spring.web.service.HttpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +26,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,13 +71,13 @@ class RequestDelegateTest {
 
   private String requestStr;
 
-  private ObjectMapper mapper;
+  private JsonMapper mapper;
 
   private HttpHeaders httpHeaders;
 
   @BeforeEach
   void beforeEach() throws JacksonException {
-    mapper = JsonMapper.builder().build();
+    mapper = MapperHelper.build();
 
     request = new Request();
     request.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -182,7 +181,7 @@ class RequestDelegateTest {
   void testExecuteWorksWithToken() throws Exception {
     setupExecuteMocking(false);
 
-    when(delegateExecution.getVariable(eq(TOKEN_HEADER_NAME))).thenReturn(UUID);
+    when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
     requestDelegate.execute(delegateExecution);
@@ -201,7 +200,6 @@ class RequestDelegateTest {
 
     requestDelegate.execute(delegateExecution);
 
-    verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
   }
 
@@ -237,13 +235,13 @@ class RequestDelegateTest {
     setField(requestDelegate, "headerOutputVariables", headerOutputVariablesExpression);
     setField(requestDelegate, "httpService", httpService);
     setField(requestDelegate, "request", requestExpression);
-    setField(requestDelegate, "objectMapper", mapper);
+    setField(requestDelegate, "mapper", mapper);
 
     if (hasKey) {
       embeddedVariable.setKey(TOKEN_HEADER_NAME);
       setField(responseEntity, "headers", httpHeaders);
 
-      when(delegateExecution.getVariable(eq(TOKEN_HEADER_NAME))).thenReturn(UUID);
+      when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
       when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
     }
 

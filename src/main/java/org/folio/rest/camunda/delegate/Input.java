@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.folio.rest.workflow.enums.VariableType;
+import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.spin.impl.json.jackson.JacksonJsonNode;
-import org.folio.rest.workflow.enums.VariableType;
-import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.slf4j.Logger;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Input type.
@@ -21,7 +21,7 @@ public interface Input {
 
   public abstract Logger getLogger();
 
-  public abstract ObjectMapper getObjectMapper();
+  public abstract JsonMapper getMapper();
 
   public abstract Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JacksonException;
 
@@ -77,15 +77,15 @@ public interface Input {
     if (node == null) {
       getLogger().warn("Could not find node for value for {} from {}", key, type);
     } else if (Boolean.TRUE.equals(variable.getAsJson())) {
-      inputs.put(key, getObjectMapper().writeValueAsString(node.unwrap()));
+      inputs.put(key, getMapper().writeValueAsString(node.unwrap()));
     } else if (node.isObject()) {
-      inputs.put(key, getObjectMapper().convertValue(node.unwrap(), new TypeReference<Map<String, Object>>() {}));
+      inputs.put(key, getMapper().convertValue(node.unwrap(), new TypeReference<Map<String, Object>>() {}));
     } else if (Boolean.TRUE.equals(node.isArray())) {
-      inputs.put(key, getObjectMapper().convertValue(node.unwrap(), new TypeReference<List<Object>>() {}));
+      inputs.put(key, getMapper().convertValue(node.unwrap(), new TypeReference<List<Object>>() {}));
     } else if (Boolean.TRUE.equals(node.isValue())) {
       try {
         // Try read tree if value is JSON string.
-        inputs.put(key, getObjectMapper().readTree((String) node.value()));
+        inputs.put(key, getMapper().readTree((String) node.value()));
       } catch (Exception e) {
         inputs.put(key, node.value());
       }

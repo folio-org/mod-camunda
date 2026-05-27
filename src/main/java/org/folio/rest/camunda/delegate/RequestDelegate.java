@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
 import org.folio.spring.web.service.HttpService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -49,7 +49,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
   public void execute(DelegateExecution execution) throws Exception {
     final long startTime = determineStartTime(execution);
 
-    Request requestValue = objectMapper.readValue(this.request.getValue(execution).toString(), Request.class);
+    Request requestValue = mapper.readValue(this.request.getValue(execution).toString(), Request.class);
 
     Map<String, Object> inputs = getInputs(execution);
 
@@ -153,7 +153,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
 
   public Set<EmbeddedVariable> getHeaderOutputVariables(DelegateExecution execution) throws JacksonException {
     // @formatter:off
-    return objectMapper.readValue(headerOutputVariables.getValue(execution).toString(),
+    return mapper.readValue(headerOutputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
     // @formatter:on
   }
@@ -170,7 +170,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
    */
   private Object spinValue(EmbeddedVariable variable, Object value) throws DelegateSpinFailure {
     try {
-      return variable.getSpin() ? JSON(objectMapper.writeValueAsString(value)) : value;
+      return variable.getSpin() ? JSON(mapper.writeValueAsString(value)) : value;
     } catch (JacksonException e) {
       throw new DelegateSpinFailure(variable.getKey(), RequestDelegate.class.getName(), e);
     }

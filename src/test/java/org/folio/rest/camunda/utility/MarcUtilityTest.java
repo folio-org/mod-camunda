@@ -2,8 +2,8 @@ package org.folio.rest.camunda.utility;
 
 import static org.folio.rest.camunda.utility.TestUtility.i;
 import static org.folio.rest.camunda.utility.TestUtility.il;
-import static org.folio.rest.camunda.utility.TestUtility.om;
-import static org.folio.rest.camunda.utility.TestUtility.oml;
+import static org.folio.rest.camunda.utility.TestUtility.treeList;
+import static org.folio.rest.camunda.utility.TestUtility.treeNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,11 +34,11 @@ class MarcUtilityTest {
       ea[0] = new ArrayList<JsonNode>();
       ea[1] = new ArrayList<JsonNode>();
 
-      for (JsonNode n : oml(data.expected)) {
+      for (JsonNode n : treeList(data.expected)) {
         ea[0].add(n);
       }
 
-      for (JsonNode n : oml(MarcUtility.splitRawMarcToMarcJsonRecords(data.input))) {
+      for (JsonNode n : treeList(MarcUtility.splitRawMarcToMarcJsonRecords(data.input))) {
         ea[1].add(n);
       }
 
@@ -57,7 +57,7 @@ class MarcUtilityTest {
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(), () -> MarcUtility.addFieldToMarcJson(marcJson, fieldJson));
     } else {
-      assertEquals(om(data.expected), om(MarcUtility.addFieldToMarcJson(marcJson, fieldJson)));
+      assertEquals(treeNode(data.expected), treeNode(MarcUtility.addFieldToMarcJson(marcJson, fieldJson)));
     }
   }
 
@@ -70,7 +70,7 @@ class MarcUtilityTest {
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(), () -> MarcUtility.updateControlNumberField(marcJson, controlNumber));
     } else {
-      assertEquals(om(data.expected), om(MarcUtility.updateControlNumberField(marcJson, controlNumber)));
+      assertEquals(treeNode(data.expected), treeNode(MarcUtility.updateControlNumberField(marcJson, controlNumber)));
     }
   }
 
@@ -94,7 +94,7 @@ class MarcUtilityTest {
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(), () -> MarcUtility.rawMarcToMarcJson(rawMarc));
     } else {
-      assertEquals(om(data.expected), om(MarcUtility.rawMarcToMarcJson(rawMarc)));
+      assertEquals(treeNode(data.expected), treeNode(MarcUtility.rawMarcToMarcJson(rawMarc)));
     }
   }
 
@@ -113,18 +113,13 @@ class MarcUtilityTest {
       rawMarc = ((String[]) data.input)[0];
       tagsJson = ((String[]) data.input)[1];
 
-      List<String> list = new ArrayList<>();
-      for (JsonNode n : MarcUtility.mapper.readTree(tagsJson)) {
-        list.add(n.toString());
-      }
-
       tags = MarcUtility.mapper.readValue(tagsJson, String[].class);
     }
 
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(), () -> MarcUtility.getFieldsFromRawMarc(rawMarc, tags));
     } else {
-      assertEquals(om(data.expected), om(MarcUtility.getFieldsFromRawMarc(rawMarc, tags).trim()));
+      assertEquals(treeNode(data.expected), treeNode(MarcUtility.getFieldsFromRawMarc(rawMarc, tags)));
     }
   }
 
@@ -143,18 +138,13 @@ class MarcUtilityTest {
       marcJson = ((String[]) data.input)[0];
       tagsJson = ((String[]) data.input)[1];
 
-      List<String> list = new ArrayList<>();
-      for (JsonNode n : MarcUtility.mapper.readTree(tagsJson)) {
-        list.add(n.toString());
-      }
-
       tags = MarcUtility.mapper.readValue(tagsJson, String[].class);
     }
 
     if (Objects.nonNull(data.exception)) {
       assertThrows(data.exception.getClass(), () -> MarcUtility.getFieldsFromMarcJson(marcJson, tags));
     } else {
-      assertEquals(om(data.expected), om(MarcUtility.getFieldsFromMarcJson(marcJson, tags).trim()));
+      assertEquals(treeNode(data.expected), treeNode(MarcUtility.getFieldsFromMarcJson(marcJson, tags)));
     }
   }
 

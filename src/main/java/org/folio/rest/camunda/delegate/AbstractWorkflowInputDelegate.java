@@ -20,7 +20,7 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
   }
 
   public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JacksonException {
-    return getObjectMapper().readValue(inputVariables.getValue(execution).toString(),
+    return getMapper().readValue(inputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
   }
 

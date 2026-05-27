@@ -115,8 +115,9 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
             int lineCount = 0;
             String currerntLine = "";
-            while ((currerntLine = reader.readLine()) != null && (++lineCount) < lineValue) {}
-            reader.close();
+
+            while ((currerntLine = reader.readLine()) != null && (++lineCount) < lineValue);
+
             setOutput(execution, currerntLine);
             getLogger().info("{} read", filePath);
           }
@@ -151,7 +152,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
               if (value instanceof String) {
                 content.append(value);
               } else {
-                content.append(objectMapper.writeValueAsString(value));
+                content.append(mapper.writeValueAsString(value));
               }
               content.append("\n");
             }

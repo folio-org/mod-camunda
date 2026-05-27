@@ -5,7 +5,7 @@ import org.operaton.bpm.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Abstract delegate.
@@ -15,7 +15,7 @@ public abstract class AbstractDelegate implements JavaDelegate {
   private final Logger log;
 
   @Autowired
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   AbstractDelegate() {
     // The logger is non-static to ensure that the implementing class name is used for the logger.
@@ -63,12 +63,12 @@ public abstract class AbstractDelegate implements JavaDelegate {
   }
 
   /**
-   * Get the Object Mapper.
+   * Get the JSON Mapper.
    *
-   * @return The Object Mapper for this class.
+   * @return The JSON Mapper for this class.
    */
-  public ObjectMapper getObjectMapper() {
-    return objectMapper;
+  public JsonMapper getMapper() {
+    return mapper;
   }
 
   /**

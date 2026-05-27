@@ -39,14 +39,14 @@ import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FileDelegateTest {
 
   @Spy
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   @Spy
   protected RuntimeService runtimeService;
@@ -118,7 +118,7 @@ class FileDelegateTest {
 
     when(inputVariables.getValue(any(DelegateExecution.class))).thenReturn(inputVariablesValue);
 
-    Set<EmbeddedVariable> inputs = objectMapper.readValue(inputVariablesValue, new TypeReference<Set<EmbeddedVariable>>() {});
+    Set<EmbeddedVariable> inputs = mapper.readValue(inputVariablesValue, new TypeReference<Set<EmbeddedVariable>>() {});
 
     for (EmbeddedVariable variable : inputs) {
       Object value = mockData.get(variable.getKey());
@@ -152,7 +152,7 @@ class FileDelegateTest {
 
       switch (fileOp) {
         case LIST, READ, READ_LINE, LINE_COUNT:
-          EmbeddedVariable output = objectMapper.readValue(outputVariableValue, EmbeddedVariable.class);
+          EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
           switch (output.getType()) {
             case LOCAL:
               verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());

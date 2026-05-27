@@ -7,11 +7,9 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
-import org.operaton.bpm.engine.RuntimeService;
-import org.operaton.bpm.engine.runtime.MessageCorrelationBuilder;
-import org.operaton.bpm.engine.runtime.ProcessInstance;
 import org.folio.spring.messaging.model.Event;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,18 +18,20 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.runtime.MessageCorrelationBuilder;
+import org.operaton.bpm.engine.runtime.ProcessInstance;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class EventConsumerTest {
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @MockitoBean
   private RuntimeService runtimeService;
@@ -45,9 +45,9 @@ class EventConsumerTest {
   private EventConsumer eventConsumer;
 
   @BeforeEach
-  public void beforeEach() {
-    objectMapper = Mockito.spy(JsonMapper.builder().build());
-    eventConsumer = Mockito.spy(new EventConsumer(runtimeService, objectMapper));
+  void beforeEach() {
+    mapper = Mockito.spy(MapperHelper.build());
+    eventConsumer = Mockito.spy(new EventConsumer(runtimeService, mapper));
   }
 
   @ParameterizedTest
@@ -60,7 +60,7 @@ class EventConsumerTest {
       doReturn(messageCorrelationBuilder).when(messageCorrelationBuilder).tenantId(anyString());
       doReturn(messageCorrelationBuilder).when(runtimeService).createMessageCorrelation(anyString());
 
-      doReturn(new HashMap<String, Object>()).when(objectMapper).convertValue(any(JsonNode.class), any(TypeReference.class));
+      doReturn(new HashMap<String, Object>()).when(mapper).convertValue(any(JsonNode.class), any(TypeReference.class));
 
       eventConsumer.receive(event);
 

@@ -23,6 +23,7 @@ import org.folio.rest.workflow.model.Node;
 import org.folio.rest.workflow.model.Setup;
 import org.folio.rest.workflow.model.StartEvent;
 import org.folio.rest.workflow.model.Workflow;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,6 @@ import org.operaton.bpm.model.bpmn.instance.Process;
 import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
 import org.operaton.bpm.model.xml.instance.ModelElementInstance;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,7 +86,7 @@ class BpmnModelFactoryTest {
   @Mock
   private EndEventBuilder endEventBuilder;
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @Spy
   private List<AbstractWorkflowDelegate> workflowDelegates;
@@ -111,9 +111,9 @@ class BpmnModelFactoryTest {
 
   @BeforeEach
   void beforeEach() {
-    objectMapper = Mockito.spy(JsonMapper.builder().build());
+    mapper = Mockito.spy(MapperHelper.build());
 
-    bpmnModelFactory = new BpmnModelFactory(objectMapper, workflowDelegates);
+    bpmnModelFactory = new BpmnModelFactory(mapper, workflowDelegates);
 
     startNode = new StartEvent();
     startNode.setId(UUID_NODE_1);
@@ -151,7 +151,7 @@ class BpmnModelFactoryTest {
       // The internal code will handle the exception and a non-NULL value should still be returned.
       // This happens in setup() where a logger.warn prints "Failed to serialize processor scripts".
       // There should be two warning log messages printed "Failed to serialize initial context" and "Failed to serialize processor scripts". 
-      when(objectMapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
+      when(mapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
 
       assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
     }
@@ -217,7 +217,7 @@ class BpmnModelFactoryTest {
    * @param utility The mocked static bmp class utility instance.
    */
   private void commonUnmockedProcessBuilder(MockedStatic<Bpmn> utility) {
-    utility.when(() -> Bpmn.createExecutableProcess()).thenReturn(processBuilder);
+    utility.when(Bpmn::createExecutableProcess).thenReturn(processBuilder);
   }
 
   /**
@@ -228,7 +228,7 @@ class BpmnModelFactoryTest {
    * @param utility The mocked static bmp class utility instance.
    */
   private void commonMockedProcessBuilder(MockedStatic<Bpmn> utility) {
-    utility.when(() -> Bpmn.createExecutableProcess()).thenReturn(processBuilderMocked);
+    utility.when(Bpmn::createExecutableProcess).thenReturn(processBuilderMocked);
 
     lenient().when(startEventBuilder.id(anyString())).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.name(anyString())).thenReturn(startEventBuilder);

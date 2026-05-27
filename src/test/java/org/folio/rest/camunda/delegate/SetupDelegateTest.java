@@ -10,10 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.operaton.bpm.engine.RuntimeService;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
-import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,17 +20,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class SetupDelegateTest {
 
   @Spy
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   @Spy
   protected RuntimeService runtimeService;
@@ -83,11 +83,11 @@ class SetupDelegateTest {
       verify(element, times(2)).getName();
       verify(initialContext, times(1)).getValue(any(DelegateExecution.class));
       verify(processors, times(1)).getValue(any(DelegateExecution.class));
-      verify(objectMapper, times(1)).readValue(eq(initialContextValue), any(TypeReference.class));
+      verify(mapper, times(1)).readValue(eq(initialContextValue), any(TypeReference.class));
 
       // initialContext are not yet used and are subject to removal
       // for each initial context variable
-      // verify objectMapper writeValueAsString and execution setVariable for each initial context
+      // verify mapper writeValueAsString and execution setVariable for each initial context
 
       verify(execution, times(1)).setVariable(eq("timestamp"), anyString());
       verify(execution, times(1)).setVariable("tenantId", "diku");
@@ -97,7 +97,7 @@ class SetupDelegateTest {
       // mock processor getScriptType getExtension chain
       // mock processor getFunctionName and getCode
       // mock scriptEngineService registerScript
-      // verify objectMapper writeValueAsString and execution setVariable for each initial context
+      // verify mapper writeValueAsString and execution setVariable for each initial context
     }
   }
 

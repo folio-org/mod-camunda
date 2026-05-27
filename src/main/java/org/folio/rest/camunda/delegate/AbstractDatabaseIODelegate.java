@@ -29,7 +29,7 @@ public abstract class AbstractDatabaseIODelegate extends AbstractWorkflowInputDe
   }
 
   public EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JacksonException {
-    return objectMapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
+    return mapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
   }
 
   public void setOutputVariable(Expression outputVariable) {

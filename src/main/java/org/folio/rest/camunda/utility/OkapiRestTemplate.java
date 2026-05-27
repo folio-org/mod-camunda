@@ -55,7 +55,7 @@ public class OkapiRestTemplate extends RestTemplate {
   /**
    * Configures the REST template with tenant and authentication details.
    *
-   * <p>This method sets up an HTTP request interceptor that automatically
+   * <p>This method sets up an HTTP request intercepter that automatically
    * adds Okapi-specific headers to each request:
    * <ul>
    *   <li>X-Okapi-Tenant header</li>
@@ -65,7 +65,7 @@ public class OkapiRestTemplate extends RestTemplate {
    * </ul>
    * </p>
    *
-   * @param tenant the Okapi tenant identifier (must not be null)
+   * @param tenant the OKAPI tenant identifier (must not be null)
    * @param token the authentication token (must not be null)
    * @return the configured {@code OkapiRestTemplate} instance
    * @throws IllegalArgumentException if tenant or token is null or empty
@@ -98,7 +98,7 @@ public class OkapiRestTemplate extends RestTemplate {
    * <p>This method sets up a {@link DefaultUriBuilderFactory} with the provided
    * Okapi URL, which will be used as the base for all subsequent REST requests.</p>
    *
-   * @param okapiUrl the base URL for the Okapi service (must not be null)
+   * @param okapiUrl the base URL for the OKAPI service (must not be null)
    * @return the configured {@code OkapiRestTemplate} instance
    * @throws IllegalArgumentException if the provided URL is invalid
    */

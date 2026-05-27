@@ -2,14 +2,14 @@ package org.folio.rest.camunda.delegate;
 
 import static org.operaton.spin.Spin.JSON;
 
+import org.folio.rest.workflow.enums.VariableType;
+import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.engine.variable.Variables;
-import org.folio.rest.workflow.enums.VariableType;
-import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.slf4j.Logger;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Output type.
@@ -18,7 +18,7 @@ public interface Output {
 
   public abstract Logger getLogger();
 
-  public abstract ObjectMapper getObjectMapper();
+  public abstract JsonMapper getMapper();
 
   public abstract EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JacksonException;
 
@@ -47,7 +47,7 @@ public interface Output {
 
     VariableType type = variable.getType();
     Object value = Boolean.TRUE.equals(variable.getSpin())
-      ? JSON(getObjectMapper().writeValueAsString(output))
+      ? JSON(getMapper().writeValueAsString(output))
       : Variables.objectValue(output, variable.getAsTransient()).create();
 
     if (type == VariableType.LOCAL) {

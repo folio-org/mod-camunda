@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
+import org.folio.spring.test.helper.MapperHelper;
 import org.graalvm.shadowed.org.json.JSONException;
 import org.graalvm.shadowed.org.json.JSONObject;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +30,7 @@ class ScriptEngineUtilityTest {
 
     String encoded = seu.encodeJson(decoded);
 
-    ObjectMapper om = JsonMapper.builder().build();
+    JsonMapper om = MapperHelper.build();
     JsonNode expected = om.readValue(input.json, JsonNode.class);
     JsonNode actual = om.readValue(encoded, JsonNode.class);
 

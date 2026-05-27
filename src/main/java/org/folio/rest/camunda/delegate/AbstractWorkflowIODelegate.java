@@ -18,7 +18,7 @@ public abstract class AbstractWorkflowIODelegate extends AbstractWorkflowInputDe
   }
 
   public EmbeddedVariable getOutputVariable(DelegateExecution execution) throws JacksonException {
-    return objectMapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
+    return mapper.readValue(outputVariable.getValue(execution).toString(), EmbeddedVariable.class);
   }
 
   public boolean hasOutputVariable(DelegateExecution execution) {

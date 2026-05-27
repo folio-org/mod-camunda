@@ -6,10 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
+import org.folio.spring.test.helper.MapperHelper;
 import org.springframework.http.ResponseEntity;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -18,10 +18,13 @@ import tools.jackson.databind.json.JsonMapper;
  */
 public class TestUtility {
 
-  private static final ObjectMapper om = JsonMapper.builder().build();
+  private static final JsonMapper mapper = MapperHelper.build();
 
+  /**
+   * Prevent utility from being directly instantiated.
+   */
   private TestUtility() {
-
+    // This should do nothing.
   }
 
   /**
@@ -30,11 +33,11 @@ public class TestUtility {
    * @param <T> generic input type
    * @param path path to mock resource JSON
    * @param valueType type of generic object to map to
+   *
    * @return ResponseEntity for a expected type to test with
-   * @throws IOException when reading file or object mapping fails
    */
-  public static <T> ResponseEntity<T> i(String path, Class<T> valueType) throws IOException {
-    return ResponseEntity.ofNullable(om.readValue(new File("src/test/resources/" + path), valueType));
+  public static <T> ResponseEntity<T> i(String path, Class<T> valueType) {
+    return ResponseEntity.ofNullable(mapper.readValue(new File("src/test/resources/" + path), valueType));
   }
 
   /**
@@ -74,7 +77,7 @@ public class TestUtility {
     String json = i(path);
     List<String> marcjson = new ArrayList<>();
 
-    for (JsonNode n : om.readTree(json)) {
+    for (JsonNode n : mapper.readTree(json)) {
       marcjson.add(n.toString());
     }
 
@@ -87,9 +90,9 @@ public class TestUtility {
    * @param json JSON String
    * @return JsonNode
    */
-  public static JsonNode om(String json) {
+  public static JsonNode treeNode(String json) {
     try {
-      return om.readTree(json);
+      return mapper.readTree(json);
     } catch (JacksonException e) {
       e.printStackTrace();
       throw new RuntimeException();
@@ -97,13 +100,13 @@ public class TestUtility {
   }
 
   /**
-   * Object map list of Srring to list orf JsonNode.
+   * Object map list of String to list of JsonNode.
    *
    * @param json list of JSON strings
    * @return list of JsonNode
    */
-  public static List<JsonNode> oml(List<String> json) {
-    return json.stream().map(n -> om(n)).toList();
+  public static List<JsonNode> treeList(List<String> json) {
+    return json.stream().map(n -> treeNode(n)).toList();
   }
 
 }

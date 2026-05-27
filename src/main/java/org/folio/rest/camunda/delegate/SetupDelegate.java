@@ -34,12 +34,12 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
 
     getLogger().info("loading initial context");
 
-    Map<String, Object> context = objectMapper.readValue(initialContext.getValue(execution).toString(),
+    Map<String, Object> context = mapper.readValue(initialContext.getValue(execution).toString(),
       new TypeReference<Map<String, Object>>() {
     });
 
     for (Map.Entry<String, Object> entry : context.entrySet()) {
-      SpinJsonNode node = JSON(objectMapper.writeValueAsString(entry.getValue()));
+      SpinJsonNode node = JSON(mapper.writeValueAsString(entry.getValue()));
       execution.setVariable(entry.getKey(), node);
       getLogger().info("{}: {}", entry.getKey(), node);
     }
@@ -51,7 +51,7 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
 
     getLogger().info("loading scripts");
 
-    List<EmbeddedProcessor> processorsValue = objectMapper.readValue(this.processors.getValue(execution).toString(),
+    List<EmbeddedProcessor> processorsValue = mapper.readValue(this.processors.getValue(execution).toString(),
       new TypeReference<List<EmbeddedProcessor>>() {
     });
 

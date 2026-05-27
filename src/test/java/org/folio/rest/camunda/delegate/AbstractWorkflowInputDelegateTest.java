@@ -13,10 +13,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +23,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,14 +37,14 @@ class AbstractWorkflowInputDelegateTest {
   @Mock
   private Expression inputVariables;
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @Spy
   private Impl abstractDatabaseInputDelegate;
 
   @BeforeEach
-  public void beforeEach() {
-    objectMapper = Mockito.spy(JsonMapper.builder().build());
+  void beforeEach() {
+    mapper = Mockito.spy(MapperHelper.build());
   }
 
   @Test
@@ -57,11 +57,11 @@ class AbstractWorkflowInputDelegateTest {
     embeddedVariable.setType(VariableType.LOCAL);
     Set<EmbeddedVariable> variables = new HashSet<>(List.of(embeddedVariable));
 
-    final String varJson = objectMapper.writeValueAsString(variables);
+    final String varJson = mapper.writeValueAsString(variables);
 
     when(inputVariables.getValue(any())).thenReturn(varJson);
     setField(abstractDatabaseInputDelegate, "inputVariables", inputVariables);
-    setField(abstractDatabaseInputDelegate, "objectMapper", objectMapper);
+    setField(abstractDatabaseInputDelegate, "mapper", mapper);
 
     final Set<EmbeddedVariable> responseVariables = abstractDatabaseInputDelegate.getInputVariables(delegateExecution);
 
@@ -109,12 +109,13 @@ class AbstractWorkflowInputDelegateTest {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
+      // This is a test and should not do anything.
     }
 
     @Override
     public Class<?> fromTask() {
       return null;
     }
-  };
+  }
 
 }

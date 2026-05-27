@@ -7,23 +7,23 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.ObjectReadContext;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Deserializer for Subfield.
+ * De-serializer for Subfield.
  *
- * This is intended to be used with Jackson when deserializing a SimpleModule.
+ * This is intended to be used with Jackson 3 when de-serializing a SimpleModule.
  */
 public class SubfieldDeserializer extends ValueDeserializer<Subfield> {
 
-  private final ObjectMapper objectMapper;
+  private final JsonMapper mapper;
 
   /**
    * Initializer.
    */
-  public SubfieldDeserializer(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
+  public SubfieldDeserializer(JsonMapper mapper) {
+    this.mapper = mapper;
   }
 
   /**
@@ -35,7 +35,7 @@ public class SubfieldDeserializer extends ValueDeserializer<Subfield> {
     final ObjectReadContext oc = jp.objectReadContext();
     final JsonNode node = oc.readTree(jp);
 
-    return objectMapper.treeToValue(node, SubfieldImpl.class);
+    return mapper.treeToValue(node, SubfieldImpl.class);
   }
 
 }
