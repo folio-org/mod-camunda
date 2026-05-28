@@ -1,15 +1,15 @@
 package org.folio.rest.camunda.service;
 
-import org.camunda.bpm.engine.AuthorizationException;
-import org.camunda.bpm.engine.ParseException;
-import org.camunda.bpm.engine.ProcessEngine;
-import org.camunda.bpm.engine.ProcessEngines;
-import org.camunda.bpm.engine.RepositoryService;
-import org.camunda.bpm.engine.exception.NotFoundException;
-import org.camunda.bpm.engine.exception.NotValidException;
-import org.camunda.bpm.engine.repository.Deployment;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.engine.AuthorizationException;
+import org.operaton.bpm.engine.ParseException;
+import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.ProcessEngines;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.exception.NotFoundException;
+import org.operaton.bpm.engine.exception.NotValidException;
+import org.operaton.bpm.engine.repository.Deployment;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.workflow.model.Workflow;

@@ -3,8 +3,8 @@ package org.folio.rest.camunda.aspect;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateTask;
 import org.folio.spring.tenant.exception.NoTenantException;
 import org.folio.spring.tenant.properties.TenantProperties;
 import org.junit.jupiter.api.Test;

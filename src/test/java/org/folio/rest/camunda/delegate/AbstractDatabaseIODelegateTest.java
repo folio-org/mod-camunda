@@ -10,21 +10,23 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.spring.test.helper.MapperHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractDatabaseOutputDelegateTest {
+class AbstractDatabaseIODelegateTest {
 
   @Mock
   private DelegateExecution delegateExecution;
@@ -32,11 +34,15 @@ class AbstractDatabaseOutputDelegateTest {
   @Mock
   private Expression outputVariable;
 
-  @InjectMocks
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @Spy
   private Impl abstractDatabaseOutputDelegate;
+
+  @BeforeEach
+  void beforeEach() {
+    mapper = Mockito.spy(MapperHelper.build());
+  }
 
   @Test
   void testSetDesignationWorks() {
@@ -67,7 +73,7 @@ class AbstractDatabaseOutputDelegateTest {
   }
 
   @Test
-  void testGetOutputVariableWorks() throws JsonProcessingException {
+  void testGetOutputVariableWorks() throws JacksonException {
     final EmbeddedVariable embeddedVariable = new EmbeddedVariable();
     embeddedVariable.setKey(KEY);
     embeddedVariable.setAsJson(true);
@@ -75,9 +81,11 @@ class AbstractDatabaseOutputDelegateTest {
     embeddedVariable.setSpin(true);
     embeddedVariable.setType(VariableType.LOCAL);
 
-    when(outputVariable.getValue(any())).thenReturn(objectMapper.writeValueAsString(embeddedVariable));
+    final String embeddedString = mapper.writeValueAsString(embeddedVariable);
+
+    when(outputVariable.getValue(any())).thenReturn(embeddedString);
     setField(abstractDatabaseOutputDelegate, "outputVariable", outputVariable);
-    setField(abstractDatabaseOutputDelegate, "objectMapper", objectMapper);
+    setField(abstractDatabaseOutputDelegate, "mapper", mapper);
 
     final EmbeddedVariable responseVariable = abstractDatabaseOutputDelegate.getOutputVariable(delegateExecution);
 
@@ -96,16 +104,17 @@ class AbstractDatabaseOutputDelegateTest {
     assertEquals(outputVariable, getField(abstractDatabaseOutputDelegate, "outputVariable"));
   }
 
-  private static class Impl extends AbstractDatabaseOutputDelegate {
+  private static class Impl extends AbstractDatabaseIODelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
+      // This is a test and should not do anything.
     }
 
     @Override
     public Class<?> fromTask() {
       return null;
     }
-  };
+  }
 
 }

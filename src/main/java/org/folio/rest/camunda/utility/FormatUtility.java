@@ -1,13 +1,13 @@
 package org.folio.rest.camunda.utility;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FormatUtility {
 
@@ -45,7 +45,7 @@ public class FormatUtility {
    *
    * Perform the most minimalistic URL escaping possible for a single URL Argument.
    *
-   * This only escapes what is necessary when passing a URL to an endpoint.
+   * This only escapes what is necessary when passing a URL to an end point.
    * So far this only appears to be the ampersand character.
    *
    * Use this instead of URLEncoder.encode(url, StandardCharsets.UTF_8); for when CQL is involved.
@@ -67,11 +67,7 @@ public class FormatUtility {
       char c = text.charAt(i);
 
       switch (c) {
-      case '\\':
-      case '*':
-      case '?':
-      case '^':
-      case '"':
+      case '\\', '*', '?', '^', '"':
         builder.append('\\')
           .append(c);
         break;
@@ -89,7 +85,7 @@ public class FormatUtility {
   public static String normalizePostalCode(String postalCode) {
     if (StringUtils.isNotEmpty(postalCode)) {
       // simple fix for trailing hyphens
-      postalCode = StringUtils.removeEnd(postalCode, "-");
+      postalCode = Strings.CS.removeEnd(postalCode, "-");
       // add hyphen if 9 digit postal code
       if (postalCode.length() == 9 && !postalCode.contains("-")) {
         postalCode = String.format("%s-%s", postalCode.substring(0, 5), postalCode.substring(5));

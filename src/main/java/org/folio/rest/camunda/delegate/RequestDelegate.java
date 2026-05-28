@@ -1,9 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.camunda.spin.Spin.JSON;
+import static org.operaton.spin.Spin.JSON;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import java.util.ArrayList;
@@ -11,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
 import org.folio.spring.web.service.HttpService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -27,6 +25,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
 @Service
 @Scope("prototype")
@@ -49,7 +49,7 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
   public void execute(DelegateExecution execution) throws Exception {
     final long startTime = determineStartTime(execution);
 
-    Request requestValue = objectMapper.readValue(this.request.getValue(execution).toString(), Request.class);
+    Request requestValue = mapper.readValue(this.request.getValue(execution).toString(), Request.class);
 
     Map<String, Object> inputs = getInputs(execution);
 
@@ -98,14 +98,14 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
         VariableType type = headerOutputVariable.getType();
         String key = headerOutputVariable.getKey();
 
-        if (response.getHeaders().containsKey(key)) {
+        if (response.getHeaders().containsHeader(key)) {
           if (type != null) {
             Object value = null;
 
             if (headerOutputVariable.getAsArray()) {
               List<String> valueList = new ArrayList<>();
 
-              if (response.getHeaders().containsKey(key)) {
+              if (response.getHeaders().containsHeader(key)) {
                 valueList.addAll(response.getHeaders().get(key));
               }
 
@@ -151,9 +151,9 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
     return RequestTask.class;
   }
 
-  public Set<EmbeddedVariable> getHeaderOutputVariables(DelegateExecution execution) throws JsonProcessingException {
+  public Set<EmbeddedVariable> getHeaderOutputVariables(DelegateExecution execution) throws JacksonException {
     // @formatter:off
-    return objectMapper.readValue(headerOutputVariables.getValue(execution).toString(),
+    return mapper.readValue(headerOutputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
     // @formatter:on
   }
@@ -170,8 +170,8 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
    */
   private Object spinValue(EmbeddedVariable variable, Object value) throws DelegateSpinFailure {
     try {
-      return variable.getSpin() ? JSON(objectMapper.writeValueAsString(value)) : value;
-    } catch (JsonProcessingException e) {
+      return variable.getSpin() ? JSON(mapper.writeValueAsString(value)) : value;
+    } catch (JacksonException e) {
       throw new DelegateSpinFailure(variable.getKey(), RequestDelegate.class.getName(), e);
     }
   }

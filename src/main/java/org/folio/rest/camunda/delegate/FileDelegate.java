@@ -1,5 +1,8 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.folio.rest.camunda.utility.FileUtility.createFile;
+import static org.folio.rest.camunda.utility.FileUtility.fileUtilsCopyFile;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.BufferedReader;
@@ -14,10 +17,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.FileTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -58,7 +61,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
     String filePath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(PATH_KEY), inputs);
     Integer lineValue = Integer.parseInt(FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(LINE_KEY), inputs));
 
-    File file = new File(filePath);
+    File file = createFile(filePath);
 
     switch (fileOp) {
       case COPY:
@@ -67,21 +70,21 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           templateLoader.putTemplate(TARGET_KEY, targetTemplate);
           String targetPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(TARGET_KEY), inputs);
 
-          File targetFile = new File(targetPath);
+          File targetFile = createFile(targetPath);
 
-          FileUtils.copyFile(file, targetFile);
-
+          fileUtilsCopyFile(file, targetFile);
         } else {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case MOVE:
         if (file.exists()) {
           String targetTemplate = this.target.getValue(execution).toString();
           templateLoader.putTemplate(TARGET_KEY, targetTemplate);
           String targetPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(TARGET_KEY), inputs);
 
-          File targetFile = new File(targetPath);
+          File targetFile = createFile(targetPath);
 
           FileUtils.moveFile(file, targetFile);
 
@@ -89,6 +92,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case DELETE:
         if (file.exists()) {
           boolean deleted = file.delete();
@@ -99,6 +103,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case LINE_COUNT:
         if (file.exists()) {
           try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
@@ -110,13 +115,15 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case READ_LINE:
         if (file.exists() && lineValue > 0) {
           try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
             int lineCount = 0;
             String currerntLine = "";
-            while ((currerntLine = reader.readLine()) != null && (++lineCount) < lineValue) {}
-            reader.close();
+
+            while ((currerntLine = reader.readLine()) != null && (++lineCount) < lineValue);
+
             setOutput(execution, currerntLine);
             getLogger().info("{} read", filePath);
           }
@@ -124,6 +131,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case READ:
         if (file.exists()) {
           String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
@@ -133,6 +141,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       case WRITE:
         // iterate over `target` input varaible
         // writing entry per line
@@ -151,7 +160,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
               if (value instanceof String) {
                 content.append(value);
               } else {
-                content.append(objectMapper.writeValueAsString(value));
+                content.append(mapper.writeValueAsString(value));
               }
               content.append("\n");
             }
@@ -166,6 +175,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
         FileUtils.writeStringToFile(file, content.toString(), StandardCharsets.UTF_8);
         getLogger().info("{} written", filePath);
         break;
+
       case LIST:
         if (file.exists()) {
           if (file.isDirectory()) {
@@ -179,6 +189,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
           getLogger().info("{} does not exist", filePath);
         }
         break;
+
       default:
         break;
     }

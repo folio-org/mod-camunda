@@ -1,21 +1,21 @@
 package org.folio.rest.camunda.controller.advice;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.folio.spring.web.utility.ErrorUtility;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 abstract class AbstractAdvice extends RequestMappingHandlerMapping {
 
   /**
    * Get the object mapper
    *
-   * @return objectMapper The object mapper.
+   * @return mapper The object mapper.
    */
-  protected abstract ObjectMapper getObjectMapper();
+  protected abstract JsonMapper getMapper();
 
   /**
    * Build the error message, with default JSON media type.
@@ -46,8 +46,8 @@ abstract class AbstractAdvice extends RequestMappingHandlerMapping {
     // The exception handler should ideally not throw its own exceptions.
     // Catch the exceptions and report it, then fall back to a plain text error message.
     try {
-      message = getObjectMapper().writeValueAsString(ErrorUtility.buildError(ex, code));
-    } catch (JsonProcessingException e) {
+      message = getMapper().writeValueAsString(ErrorUtility.buildError(ex, code));
+    } catch (JacksonException e) {
       logger.error("Mapping error to JSON Object failed.", e);
 
       type = MediaType.TEXT_PLAIN;

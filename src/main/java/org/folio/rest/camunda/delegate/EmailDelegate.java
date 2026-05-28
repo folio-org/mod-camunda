@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.folio.rest.camunda.utility.FileUtility.createFile;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import jakarta.mail.internet.AddressException;
@@ -8,10 +10,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.workflow.model.EmailTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -136,7 +138,7 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
 
         // This is a hot fix to address an issue with the workflow not attaching e-mails.
         if (attachmentPathValue.isPresent()) {
-          File attachment = new File(attachmentPathValue.get());
+          File attachment = createFile(attachmentPathValue.get());
           if (attachment.exists() && attachment.isFile()) {
             message.addAttachment(attachment.getName(), attachment);
           } else {

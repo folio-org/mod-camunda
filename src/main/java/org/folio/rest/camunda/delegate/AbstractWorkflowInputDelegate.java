@@ -2,14 +2,15 @@ package org.folio.rest.camunda.delegate;
 
 import java.util.Objects;
 import java.util.Set;
-
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-
+/**
+ * Abstract workflow input delegate.
+ */
 public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDelegate implements Input {
 
   private Expression inputVariables;
@@ -18,8 +19,8 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
     super();
   }
 
-  public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JsonProcessingException {
-    return objectMapper.readValue(inputVariables.getValue(execution).toString(),
+  public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JacksonException {
+    return getMapper().readValue(inputVariables.getValue(execution).toString(),
         new TypeReference<Set<EmbeddedVariable>>() {});
   }
 

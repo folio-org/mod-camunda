@@ -10,11 +10,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.mail.internet.MimeMessage;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.workflow.model.EmailTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
+import tools.jackson.core.JacksonException;
 
 @ExtendWith(MockitoExtension.class)
 class EmailDelegateTest {
@@ -183,9 +183,9 @@ class EmailDelegateTest {
   /**
    * Provide common mocking behavior for the execute() method.
    *
-   * @throws JsonProcessingException On JSON processing error.
+   * @throws JacksonException On JSON processing error.
    */
-  private void setupExecuteMocking() throws JsonProcessingException {
+  private void setupExecuteMocking() throws JacksonException {
     when(delegateExecution.getBpmnModelElementInstance()).thenReturn(flowElementBpmn);
     when(flowElementBpmn.getName()).thenReturn(KEY);
     when(attachmentPathExpression.getValue(any())).thenReturn(ATTACHMENT_PATH);

@@ -12,21 +12,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.builder.EndEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
-import org.camunda.bpm.model.bpmn.builder.ServiceTaskBuilder;
-import org.camunda.bpm.model.bpmn.builder.StartEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.UserTaskBuilder;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
-import org.camunda.bpm.model.bpmn.instance.Process;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
 import org.folio.rest.camunda.delegate.InputDelegate;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
@@ -36,16 +23,29 @@ import org.folio.rest.workflow.model.Node;
 import org.folio.rest.workflow.model.Setup;
 import org.folio.rest.workflow.model.StartEvent;
 import org.folio.rest.workflow.model.Workflow;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.builder.EndEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.ProcessBuilder;
+import org.operaton.bpm.model.bpmn.builder.ServiceTaskBuilder;
+import org.operaton.bpm.model.bpmn.builder.StartEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.UserTaskBuilder;
+import org.operaton.bpm.model.bpmn.instance.ExtensionElements;
+import org.operaton.bpm.model.bpmn.instance.Process;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
+import org.operaton.bpm.model.xml.instance.ModelElementInstance;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class BpmnModelFactoryTest {
@@ -60,7 +60,7 @@ class BpmnModelFactoryTest {
   private BpmnModelInstance bpmnModelInstance;
 
   @Mock
-  private CamundaField camundaField;
+  private OperatonField camundaField;
 
   @Mock
   private ExtensionElements extensionElements;
@@ -86,13 +86,11 @@ class BpmnModelFactoryTest {
   @Mock
   private EndEventBuilder endEventBuilder;
 
-  @Spy
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @Spy
   private List<AbstractWorkflowDelegate> workflowDelegates;
 
-  @InjectMocks
   private BpmnModelFactory bpmnModelFactory;
 
   private ProcessBuilder processBuilder;
@@ -113,6 +111,10 @@ class BpmnModelFactoryTest {
 
   @BeforeEach
   void beforeEach() {
+    mapper = Mockito.spy(MapperHelper.build());
+
+    bpmnModelFactory = new BpmnModelFactory(mapper, workflowDelegates);
+
     startNode = new StartEvent();
     startNode.setId(UUID_NODE_1);
     startNode.setName(VALUE);
@@ -141,7 +143,7 @@ class BpmnModelFactoryTest {
   }
 
   @Test
-  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JsonProcessingException {
+  void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JacksonException {
     try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
@@ -149,7 +151,7 @@ class BpmnModelFactoryTest {
       // The internal code will handle the exception and a non-NULL value should still be returned.
       // This happens in setup() where a logger.warn prints "Failed to serialize processor scripts".
       // There should be two warning log messages printed "Failed to serialize initial context" and "Failed to serialize processor scripts". 
-      when(objectMapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
+      when(mapper.writeValueAsString(any())).thenThrow(new MyException(VALUE));
 
       assertNotNull(bpmnModelFactory.fromWorkflow(workflow));
     }
@@ -215,7 +217,7 @@ class BpmnModelFactoryTest {
    * @param utility The mocked static bmp class utility instance.
    */
   private void commonUnmockedProcessBuilder(MockedStatic<Bpmn> utility) {
-    utility.when(() -> Bpmn.createExecutableProcess()).thenReturn(processBuilder);
+    utility.when(Bpmn::createExecutableProcess).thenReturn(processBuilder);
   }
 
   /**
@@ -226,7 +228,7 @@ class BpmnModelFactoryTest {
    * @param utility The mocked static bmp class utility instance.
    */
   private void commonMockedProcessBuilder(MockedStatic<Bpmn> utility) {
-    utility.when(() -> Bpmn.createExecutableProcess()).thenReturn(processBuilderMocked);
+    utility.when(Bpmn::createExecutableProcess).thenReturn(processBuilderMocked);
 
     lenient().when(startEventBuilder.id(anyString())).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.name(anyString())).thenReturn(startEventBuilder);
@@ -238,7 +240,7 @@ class BpmnModelFactoryTest {
     lenient().when(startEventBuilder.done()).thenReturn(bpmnModelInstance);
 
     lenient().when(serviceTaskBuilder.name(anyString())).thenReturn(serviceTaskBuilder);
-    lenient().when(serviceTaskBuilder.camundaDelegateExpression(anyString())).thenReturn(serviceTaskBuilder);
+    lenient().when(serviceTaskBuilder.operatonDelegateExpression(anyString())).thenReturn(serviceTaskBuilder);
     lenient().when(serviceTaskBuilder.userTask(anyString())).thenReturn(userTaskBuilder);
     lenient().when(serviceTaskBuilder.done()).thenReturn(bpmnModelInstance);
 
@@ -253,8 +255,8 @@ class BpmnModelFactoryTest {
 
     lenient().when(processBuilderMocked.getElement()).thenReturn(process);
     lenient().when(processBuilderMocked.name(any())).thenReturn(processBuilderMocked);
-    lenient().when(processBuilderMocked.camundaHistoryTimeToLive(anyInt())).thenReturn(processBuilderMocked);
-    lenient().when(processBuilderMocked.camundaVersionTag(any())).thenReturn(processBuilderMocked);
+    lenient().when(processBuilderMocked.operatonHistoryTimeToLive(anyInt())).thenReturn(processBuilderMocked);
+    lenient().when(processBuilderMocked.operatonVersionTag(any())).thenReturn(processBuilderMocked);
   }
 
   /**
@@ -262,7 +264,7 @@ class BpmnModelFactoryTest {
    */
   private void commonMockingsBasic() {
     when(bpmnModelInstance.newInstance(ExtensionElements.class)).thenReturn(extensionElements);
-    when(bpmnModelInstance.newInstance(CamundaField.class)).thenReturn(camundaField);
+    when(bpmnModelInstance.newInstance(OperatonField.class)).thenReturn(camundaField);
     doNothing().when(extensionElements).addChildElement(any());
     when(bpmnModelInstance.getModelElementById(anyString())).thenReturn(modelElementInstance);
   }
@@ -270,7 +272,7 @@ class BpmnModelFactoryTest {
   /**
    * Provide an exception that exposes the string initializer for easy usage.
    */
-  private class MyException extends JsonProcessingException {
+  private class MyException extends JacksonException {
 
     private static final long serialVersionUID = -6261961424503639802L;
 
