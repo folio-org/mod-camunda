@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.folio.rest.camunda.utility.FileUtility.createFile;
+
 import java.io.File;
 import java.net.URI;
 import java.util.Objects;
@@ -8,10 +10,10 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.VFS;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.SftpOp;
 import org.folio.rest.workflow.model.FtpTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +76,7 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
     switch (opValue) {
       case GET: {
 
-        File file = new File(destinationPathValue);
+        File file = createFile(destinationPathValue);
 
         URI uri = new URI(
           schemeValue,
@@ -96,7 +98,7 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
       } break;
       case PUT: {
 
-        File file = new File(originPathValue);
+        File file = createFile(originPathValue);
 
         URI uri = new URI(
           schemeValue,
