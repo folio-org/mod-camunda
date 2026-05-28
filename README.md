@@ -199,6 +199,7 @@ The following is a summary of many of them.
 | CAMUNDA_BPM_METRICS               |           false             | Enable or disable Camunda metrics by default.
 | DB_CHARSET                        |           UTF-8             | Database charset.
 | DB_DATABASE                       |       okapi_modules         | Postgres database name.
+| DB_SCHEMA                         |      diku_mod_camunda       | Postgres database schema name.
 | DB_HOST                           |         postgres            | Postgres host name.
 | DB_MAXPOOLSIZE                    |             5               | Database max pool size.
 | DB_PASSWORD                       |         folio_admin         | Postgres user password (be sure to change this).
