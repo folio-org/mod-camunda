@@ -7,9 +7,9 @@ logging:
       zaxxer:
         hikari: INFO
     org:
-      camunda: INFO
       folio: INFO
       hibernate: INFO
+      operaton: INFO
       springframework: INFO
 
     # Enable logging of BPMN if activation fails.
