@@ -29,7 +29,9 @@
     <operaton.version>2.1.1</operaton.version>
     <openapi.server.port>9000</openapi.server.port>
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <graalvm.polyglot.version>24.2.2</graalvm.polyglot.version>
+    <graalvm.polyglot.version>25.0.3</graalvm.polyglot.version>
+    <graalvm.llvm.version>25.0.1</graalvm.llvm.version>
+    <graalvm.ruby.version>25.0.0</graalvm.ruby.version>
   </properties>
 
   <packaging>jar</packaging>
@@ -205,7 +207,7 @@
     <dependency>
       <groupId>com.github.mwiede</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.2.26</version>
+      <version>2.28.2</version>
     </dependency>
 
     <dependency>
@@ -282,7 +284,7 @@
     <dependency>
       <groupId>org.graalvm.ruby</groupId>
       <artifactId>ruby</artifactId>
-      <version>${graalvm.polyglot.version}</version>
+      <version>${graalvm.ruby.version}</version>
       <type>pom</type>
     </dependency>
 
@@ -321,7 +323,7 @@
     <dependency>
       <groupId>org.graalvm.polyglot</groupId>
       <artifactId>llvm</artifactId>
-      <version>${graalvm.polyglot.version}</version>
+      <version>${graalvm.llvm.version}</version>
       <type>pom</type>
     </dependency>
 
@@ -342,7 +344,7 @@
     <dependency>
       <groupId>org.graalvm.polyglot</groupId>
       <artifactId>ruby</artifactId>
-      <version>${graalvm.polyglot.version}</version>
+      <version>${graalvm.ruby.version}</version>
       <type>pom</type>
     </dependency>
 
