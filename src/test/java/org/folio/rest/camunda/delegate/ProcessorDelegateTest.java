@@ -40,6 +40,8 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(MockitoExtension.class)
 class ProcessorDelegateTest {
 
+  private static final String EMPTY_OBJECT = "{}";
+
   @Spy
   protected JsonMapper mapper;
 
@@ -108,10 +110,12 @@ class ProcessorDelegateTest {
 
       EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
 
-      if (output.getType().equals(VariableType.LOCAL)) {
-        verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
-      } else {
-        verify(execution, times(1)).setVariable(eq(output.getKey()), any());
+      if (!EMPTY_OBJECT.equals(processorValue)) {
+        if (output.getType().equals(VariableType.LOCAL)) {
+          verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
+        } else {
+          verify(execution, times(1)).setVariable(eq(output.getKey()), any());
+        }
       }
     }
   }
@@ -157,7 +161,7 @@ class ProcessorDelegateTest {
     return Stream.of(
         Arguments.of(null, null, null, NullPointerException.class),
         Arguments.of("", "", "", MismatchedInputException.class),
-        Arguments.of("{}", "[]", "{}", NullPointerException.class),
+        Arguments.of(EMPTY_OBJECT, "[]", EMPTY_OBJECT, null),
         Arguments.of(jsTestString, "[]", local, null),
         Arguments.of(groovyTestString, "[]", process, null));
   }

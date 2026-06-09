@@ -2,6 +2,7 @@ package org.folio.rest.camunda.controller.advice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.folio.rest.camunda.exception.BpmnModelFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
@@ -18,6 +19,9 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalAdviceTest {
+
+  @Mock
+  private BpmnModelFailure bpmnModelFailure;
 
   @Mock
   private DelegateSpinFailure delegateSpinFailure;
@@ -40,6 +44,13 @@ class GlobalAdviceTest {
   @BeforeEach
   void beforeEach() {
     globalAdvice = new GlobalAdvice();
+  }
+
+  @Test
+  void handleBpmnModelFailureTest() {
+    ResponseEntity<String> response = globalAdvice.handleBpmnModelFailure(bpmnModelFailure);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
 
   @Test
@@ -75,6 +86,21 @@ class GlobalAdviceTest {
     ResponseEntity<String> response = globalAdvice.handleWorkflowAlreadyActiveException(workflowAlreadyActiveException);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+
+  @Test
+  void handleExceptionTest() {
+    ResponseEntity<String> response = globalAdvice.handleException(new ArbitraryException());
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  /**
+   * Provide arbitrary exception that can be used to trigger the generic/fallback exception handling.
+   */
+  private class ArbitraryException extends Exception {
+
+    private static final long serialVersionUID = 4246246724724220L;
   }
 
 }

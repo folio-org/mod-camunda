@@ -33,7 +33,6 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.folio.rest.workflow.enums.CompressFileContainer;
 import org.folio.rest.workflow.enums.CompressFileFormat;
 import org.folio.rest.workflow.model.CompressFileTask;
-import org.h2.util.IOUtils;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
