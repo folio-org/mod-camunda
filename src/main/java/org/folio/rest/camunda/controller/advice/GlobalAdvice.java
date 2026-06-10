@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.controller.advice;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.folio.rest.camunda.exception.BpmnModelFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
@@ -45,6 +46,12 @@ public class GlobalAdvice extends AbstractAdvice {
   }
 
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(BpmnModelFailure.class)
+  public ResponseEntity<String> handleBpmnModelFailure(BpmnModelFailure exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
+  }
+
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(DelegateSpinFailure.class)
   public ResponseEntity<String> handleDelegateSpinFailure(DelegateSpinFailure exception) {
     return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
@@ -72,6 +79,19 @@ public class GlobalAdvice extends AbstractAdvice {
   @ExceptionHandler(WorkflowAlreadyActiveException.class)
   public ResponseEntity<String> handleWorkflowAlreadyActiveException(WorkflowAlreadyActiveException exception) {
     return buildError(exception, HttpStatus.BAD_REQUEST, MediaType.APPLICATION_JSON);
+  }
+
+  /**
+   * Catch all exception handler.
+   *
+   * @param exception The exception.
+   *
+   * @return The generated response.
+   */
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<String> handleException(Exception exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
   }
 
 }
