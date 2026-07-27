@@ -41,10 +41,40 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
 
   private Expression target;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   */
   @Override
   public void execute(DelegateExecution execution) throws Exception {
+
     final FileOp fileOp = FileOp.valueOf(this.op.getValue(execution).toString());
-    final long startTime = determineStartTime(execution, fileOp);
+    final String name = getDelegateName(execution);
+    final long startTime = determineStartTime(execution, name, fileOp);
+
+    try {
+      performExecute(execution, name);
+      determineEndTime(execution, startTime, name, false);
+    } catch (Exception e) {
+      determineEndTime(execution, startTime, name, true);
+
+      throw e;
+    }
+  }
+
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
+  @Override
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+
+    final FileOp fileOp = FileOp.valueOf(this.op.getValue(execution).toString());
 
     String pathTemplate = this.path.getValue(execution).toString();
     String lineTemplate = this.line != null ? this.line.getValue(execution).toString() : "0";
@@ -193,8 +223,6 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
       default:
         break;
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setPath(Expression path) {

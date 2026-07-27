@@ -62,9 +62,16 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
 
   private Expression container;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     String sourcePathTemplate = this.source.getValue(execution).toString();
     String destinationPathTemplate = this.destination.getValue(execution).toString();
@@ -172,8 +179,6 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
         getLogger().info("{} written to {} as {}", sourcePath, destinationPath, compressFormat);
       }
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setSource(Expression source) {

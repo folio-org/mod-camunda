@@ -1,9 +1,9 @@
 package org.folio.rest.camunda.delegate;
 
 import java.util.Properties;
+import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
-import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +18,16 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
   private Expression username;
   private Expression password;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     String urlValue = this.url.getValue(execution).toString();
     String key = this.designation.getValue(execution).toString();
@@ -30,8 +37,6 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
     info.setProperty("password", this.password.getValue(execution).toString());
 
     connectionService.createPool(key, urlValue, info);
-
-    determineEndTime(execution, startTime);
   }
 
   public void setUrl(Expression url) {

@@ -109,6 +109,40 @@ class RequestDelegateTest {
   }
 
   @Test
+  void testExecuteWithEmptyBodyTrueWorks() throws Exception {
+
+    setField(request, "bodyTemplate", null);
+    setField(request, "sendEmptyBody", true);
+    requestStr = "{\"url\":\"http://localhost/\",\"method\":\"GET\",\"contentType\":\"application/json\",\"accept\":\"application/json\",\"bodyTemplate\":null,\"sendEmptyBody\":true,\"iterable\":false,\"iterableKey\":null,\"responseKey\":null}";
+
+    setupExecuteMocking(false);
+
+    when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
+
+    requestDelegate.execute(delegateExecution);
+
+    verify(delegateExecution, never()).setVariable(anyString(), any());
+    verify(delegateExecution, never()).setVariableLocal(anyString(), any());
+  }
+
+  @Test
+  void testExecuteWithEmptyBodyFalseWorks() throws Exception {
+
+    setField(request, "bodyTemplate", null);
+    setField(request, "sendEmptyBody", false);
+    requestStr = "{\"url\":\"http://localhost/\",\"method\":\"GET\",\"contentType\":\"application/json\",\"accept\":\"application/json\",\"bodyTemplate\":null,\"sendEmptyBody\":false,\"iterable\":false,\"iterableKey\":null,\"responseKey\":null}";
+
+    setupExecuteMocking(false);
+
+    when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
+
+    requestDelegate.execute(delegateExecution);
+
+    verify(delegateExecution, never()).setVariable(anyString(), any());
+    verify(delegateExecution, never()).setVariableLocal(anyString(), any());
+  }
+
+  @Test
   void testExecuteWorksAsArray() throws Exception {
     embeddedVariable.setType(VariableType.PROCESS);
     embeddedVariable.setAsArray(true);

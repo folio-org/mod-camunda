@@ -80,7 +80,7 @@ class SetupDelegateTest {
 
       delegate.execute(execution);
 
-      verify(element, times(2)).getName();
+      verify(element, times(1)).getName();
       verify(initialContext, times(1)).getValue(any(DelegateExecution.class));
       verify(processors, times(1)).getValue(any(DelegateExecution.class));
       verify(mapper, times(1)).readValue(eq(initialContextValue), any(TypeReference.class));

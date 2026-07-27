@@ -1,5 +1,9 @@
 package org.folio.rest.camunda.service;
 
+import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
+import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
+import org.folio.rest.camunda.utility.LoggerStream;
+import org.folio.rest.workflow.model.Workflow;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
 import org.operaton.bpm.engine.ProcessEngine;
@@ -10,12 +14,9 @@ import org.operaton.bpm.engine.exception.NotValidException;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
-import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
-import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
-import org.folio.rest.workflow.model.Workflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,13 +24,28 @@ public class CamundaApiService {
 
   private static final Logger logger = LoggerFactory.getLogger(CamundaApiService.class);
 
-  @Autowired
+  private static final LoggerStream debugStream = new LoggerStream(logger, Level.DEBUG);
+
   private BpmnModelFactory bpmnModelFactory;
 
-  public Workflow deployWorkflow(Workflow workflow, String tenant) throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
+  /**
+   * Initializer.
+   *
+   * @param bpmnModelFactory The model factory.
+   */
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory) {
+
+    this.bpmnModelFactory = bpmnModelFactory;
+  }
+
+  public Workflow deployWorkflow(Workflow workflow, String tenant)
+      throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
+
     if (Boolean.TRUE.equals(workflow.getActive())) {
       throw new WorkflowAlreadyActiveException(workflow.getId());
     }
+
+    logger.info("Deploying BPMN Model for Workflow '{}' with ID '{}'.", workflow.getName(), workflow.getId());
 
     BpmnModelInstance modelInstance = bpmnModelFactory.fromWorkflow(workflow);
 
@@ -49,12 +65,7 @@ public class CamundaApiService {
       workflow.setActive(true);
       workflow.setDeploymentId(deploymentId);
     } catch (NotFoundException | NotValidException | ParseException | AuthorizationException e) {
-      // TODO: find a way to write the stream to the logger rather than using System.out.
-      // Display the model while in debug mode to help identify model problems.
-      // This should never be displayed outside of debug and the exception is bubbled up.
-      if (logger.isDebugEnabled()) {
-        Bpmn.writeModelToStream(System.out, modelInstance);
-      }
+      Bpmn.writeModelToStream(debugStream, modelInstance);
 
       throw e;
     }

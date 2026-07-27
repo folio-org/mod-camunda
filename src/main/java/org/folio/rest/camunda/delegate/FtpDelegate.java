@@ -37,9 +37,16 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
 
   private Expression password;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     String originPathValue = this.originPath.getValue(execution).toString();
 
@@ -121,8 +128,6 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
       default:
         break;
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setOriginPath(Expression originPath) {

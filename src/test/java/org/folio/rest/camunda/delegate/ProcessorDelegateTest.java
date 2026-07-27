@@ -97,11 +97,10 @@ class ProcessorDelegateTest {
     if (Objects.nonNull(exception)) {
       assertThrows(exception, () -> delegate.execute(execution));
     } else {
-
       delegate.execute(execution);
 
-      verify(execution, times(2)).getBpmnModelElementInstance();
-      verify(element, times(2)).getName();
+      verify(execution, times(1)).getBpmnModelElementInstance();
+      verify(element, times(1)).getName();
       verify(processor, times(1)).getValue(any(DelegateExecution.class));
       verify(mapper, times(1)).readValue(processorValue, EmbeddedProcessor.class);
       verify(mapper, times(1)).readValue(eq(inputVariablesValue), any(TypeReference.class));

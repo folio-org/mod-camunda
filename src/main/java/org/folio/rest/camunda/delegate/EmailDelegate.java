@@ -49,9 +49,16 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
     this.emailSender = emailSender;
   }
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     String subjectTemplate = this.mailSubject.getValue(execution).toString();
     String textTemplate = this.mailText.getValue(execution).toString();
@@ -151,8 +158,6 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
     };
 
     emailSender.send(preparator);
-
-    determineEndTime(execution, startTime);
   }
 
   public void setMailTo(Expression mailTo) {

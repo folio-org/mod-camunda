@@ -20,9 +20,16 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
   private Expression processor;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     EmbeddedProcessor processorValue = mapper.readValue(this.processor.getValue(execution).toString(), EmbeddedProcessor.class);
 
@@ -37,8 +44,6 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
     String output = (String) scriptEngineService.runScript(scriptTypeExtension, scriptName, input);
 
     setOutput(execution, output);
-
-    determineEndTime(execution, startTime);
   }
 
   public void setProcessor(Expression processor) {

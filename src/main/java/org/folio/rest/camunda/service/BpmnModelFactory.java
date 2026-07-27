@@ -585,11 +585,13 @@ public class BpmnModelFactory {
       } else if (node instanceof Subprocess subprocess) {
         scripts.addAll(getProcessorScripts(workflow, subprocess.getNodes()));
       } else if (node instanceof Task) {
-        logger.warn("A Process Script named {} for Workflow '{}' ({}) is a non-processor task.", node.getName(), workflow.getName(), workflow.getId());
+        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor task ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+      } else if (node instanceof Event) {
+        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor event ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
       } else if (node == null) {
         throw new BpmnModelFailure(String.format("A Process Script Node for Workflow '%s' (%s) is NULL.", workflow.getName(), workflow.getId()));
       } else {
-        logger.warn("A Process Script named {} for Workflow '{}' ({}) is of an unknown type.", node.getName(), workflow.getName(), workflow.getId());
+        logger.warn("A Process Script named {} for Workflow '{}' ({}) is of an unknown type ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
       }
     });
 

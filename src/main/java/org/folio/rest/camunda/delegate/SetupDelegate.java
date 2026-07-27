@@ -4,11 +4,11 @@ import static org.operaton.spin.Spin.JSON;
 
 import java.util.List;
 import java.util.Map;
+import org.folio.rest.camunda.service.ScriptEngineService;
+import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.spin.json.SpinJsonNode;
-import org.folio.rest.camunda.service.ScriptEngineService;
-import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -28,11 +28,18 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
 
   private Expression processors;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
-    getLogger().info("loading initial context");
+    getLogger().info("loading initial context with definition id {}", execution.getProcessDefinitionId());
 
     Map<String, Object> context = mapper.readValue(initialContext.getValue(execution).toString(),
       new TypeReference<Map<String, Object>>() {
@@ -62,8 +69,6 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
       scriptEngineService.registerScript(extension, functionName, code);
       getLogger().info("{}: {}", processor.getFunctionName(), processor.getCode());
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setInitialContext(Expression initialContext) {

@@ -38,9 +38,16 @@ public class DatabaseQueryDelegate extends AbstractDatabaseIODelegate {
 
   private Expression includeHeader;
 
+  /**
+   * Perform the delegate execution.
+   *
+   * @param execution The delegate execution data.
+   * @param name      The delegate name.
+   *
+   * @throws Exception On any error.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name) throws Exception {
 
     String queryTemplate = this.query.getValue(execution).toString();
 
@@ -99,8 +106,6 @@ public class DatabaseQueryDelegate extends AbstractDatabaseIODelegate {
     } finally {
       conn.close();
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setQuery(Expression query) {
