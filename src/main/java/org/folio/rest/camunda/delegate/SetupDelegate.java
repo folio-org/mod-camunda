@@ -4,6 +4,7 @@ import static org.operaton.spin.Spin.JSON;
 
 import java.util.List;
 import java.util.Map;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -29,15 +30,14 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
   private Expression processors;
 
   /**
-   * Perform the delegate execution.
+   * Perform the execution.
    *
-   * @param execution The delegate execution data.
+   * @param execution The execution data.
    * @param name      The delegate name.
-   *
-   * @throws Exception On any error.
+   * @param id        The delegate ID.
    */
   @Override
-  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     getLogger().info("loading initial context with definition id {}", execution.getProcessDefinitionId());
 
@@ -66,8 +66,13 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
       String extension = processor.getScriptType().getExtension();
       String functionName = processor.getFunctionName();
       String code = processor.getCode();
-      scriptEngineService.registerScript(extension, functionName, code);
-      getLogger().info("{}: {}", processor.getFunctionName(), processor.getCode());
+
+      try {
+        scriptEngineService.registerScript(extension, functionName, code);
+        getLogger().info("{}: {}", processor.getFunctionName(), processor.getCode());
+      } catch (Exception e) {
+        throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+      }
     }
   }
 

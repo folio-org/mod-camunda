@@ -30,6 +30,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.enums.CompressFileContainer;
 import org.folio.rest.workflow.enums.CompressFileFormat;
 import org.folio.rest.workflow.model.CompressFileTask;
@@ -63,15 +64,14 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
   private Expression container;
 
   /**
-   * Perform the delegate execution.
+   * Perform the execution.
    *
-   * @param execution The delegate execution data.
+   * @param execution The execution data.
    * @param name      The delegate name.
-   *
-   * @throws Exception On any error.
+   * @param id        The delegate ID.
    */
   @Override
-  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     String sourcePathTemplate = this.source.getValue(execution).toString();
     String destinationPathTemplate = this.destination.getValue(execution).toString();
@@ -84,8 +84,15 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
     cfg.setTemplateLoader(pathLoader);
 
     Map<String, Object> inputs = getInputs(execution);
-    String sourcePath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("sourcePath"), inputs);
-    String destinationPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("destinationPath"), inputs);
+    String sourcePath;
+    String destinationPath;
+
+    try {
+      sourcePath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("sourcePath"), inputs);
+      destinationPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("destinationPath"), inputs);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
 
     CompressFileFormat compressFormat = CompressFileFormat.valueOf(this.format.getValue(execution).toString());
     CompressFileContainer useContainer = CompressFileContainer.valueOf(this.container.getValue(execution).toString());
@@ -138,6 +145,8 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
       try (ZipOutputStream zipOut = createZipOutputStream(createFileOutputStream(destinationFile))) {
         zipOut.putNextEntry(new ZipEntry(sourceFile.getName()));
         filesCopy(sourceFile.toPath(), zipOut);
+      } catch (Exception e) {
+        throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
       }
     } else {
       getLogger().info("Format type: {}", formatType);
@@ -153,26 +162,24 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
             CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
           ) {
             iOUtilsCopyAndClose(input, compress);
+          } catch (Exception e) {
+            throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
           }
         } else if (useContainer == CompressFileContainer.TAR) {
-          FileOutputStream outputFile = createFileOutputStream(destinationFile);
-          BufferedOutputStream output = createBufferedOutputStream(outputFile);
+          try (
+            final FileOutputStream outputFile = createFileOutputStream(destinationFile);
+            final BufferedOutputStream output = createBufferedOutputStream(outputFile);
+            final CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
+            final TarArchiveOutputStream tar = createTarArchiveOutputStream(compress, BLOCK_SIZE, ENCODING);
+          ) {
+            tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+            tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
 
-          CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
-
-          TarArchiveOutputStream tar = createTarArchiveOutputStream(compress, BLOCK_SIZE, ENCODING);
-
-          tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-          tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-
-          try {
             addPaths(sourcePath, "", tar);
 
             tar.finish();
-          } finally {
-            tar.close();
-            compress.close();
-            outputFile.close();
+          } catch (Exception e) {
+            throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
           }
         }
 

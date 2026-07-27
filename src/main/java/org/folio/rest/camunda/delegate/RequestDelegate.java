@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
@@ -67,15 +68,14 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
   }
 
   /**
-   * Perform the delegate execution.
+   * Perform the execution.
    *
-   * @param execution The delegate execution data.
+   * @param execution The execution data.
    * @param name      The delegate name.
-   *
-   * @throws Exception On any error.
+   * @param id        The delegate ID.
    */
   @Override
-  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     final Request requestValue = mapper.readValue(this.request.getValue(execution).toString(), Request.class);
 
@@ -95,10 +95,20 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
     if (bodyTemplate != null) {
       stringLoader.putTemplate("body", requestValue.getBodyTemplate());
 
-      body = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("body"), inputs);
+      try {
+        body = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("body"), inputs);
+      } catch (Exception e) {
+        throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+      }
     }
 
-    final String url = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("url"), inputs);
+    final String url;
+
+    try {
+      url = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("url"), inputs);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
 
     final HttpMethod method = HttpMethod.valueOf(requestValue.getMethod().toString());
     final String accept = requestValue.getAccept();

@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
 import java.util.Properties;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
@@ -19,15 +20,14 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
   private Expression password;
 
   /**
-   * Perform the delegate execution.
+   * Perform the execution.
    *
-   * @param execution The delegate execution data.
+   * @param execution The execution data.
    * @param name      The delegate name.
-   *
-   * @throws Exception On any error.
+   * @param id        The delegate ID.
    */
   @Override
-  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     String urlValue = this.url.getValue(execution).toString();
     String key = this.designation.getValue(execution).toString();
@@ -36,7 +36,11 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
     info.setProperty("user", this.username.getValue(execution).toString());
     info.setProperty("password", this.password.getValue(execution).toString());
 
-    connectionService.createPool(key, urlValue, info);
+    try {
+      connectionService.createPool(key, urlValue, info);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
   }
 
   public void setUrl(Expression url) {

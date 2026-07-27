@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,6 @@ import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
@@ -112,14 +112,14 @@ class SetupDelegateTest {
    */
   private static Stream<Arguments> executionStream() {
     return Stream.of(
-      Arguments.of(null, null, NullPointerException.class),
-      Arguments.of(null, "",   NullPointerException.class),
-      Arguments.of(null, "[]", NullPointerException.class),
-      Arguments.of("",   null, MismatchedInputException.class),
-      Arguments.of("",   "",   MismatchedInputException.class),
-      Arguments.of("",   "[]", MismatchedInputException.class),
-      Arguments.of("{}", null, NullPointerException.class),
-      Arguments.of("{}", "",   MismatchedInputException.class),
+      Arguments.of(null, null, DelegateExecutionFailure.class),
+      Arguments.of(null, "",   DelegateExecutionFailure.class),
+      Arguments.of(null, "[]", DelegateExecutionFailure.class),
+      Arguments.of("",   null, DelegateExecutionFailure.class),
+      Arguments.of("",   "",   DelegateExecutionFailure.class),
+      Arguments.of("",   "[]", DelegateExecutionFailure.class),
+      Arguments.of("{}", null, DelegateExecutionFailure.class),
+      Arguments.of("{}", "",   DelegateExecutionFailure.class),
       Arguments.of("{}", "[]", null)
     );
   }

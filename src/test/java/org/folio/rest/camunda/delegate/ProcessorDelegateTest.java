@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.enums.ScriptType;
 import org.folio.rest.workflow.enums.VariableType;
@@ -33,7 +34,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
@@ -158,8 +158,8 @@ class ProcessorDelegateTest {
     String process = om.writeValueAsString(p);
 
     return Stream.of(
-        Arguments.of(null, null, null, NullPointerException.class),
-        Arguments.of("", "", "", MismatchedInputException.class),
+        Arguments.of(null, null, null, DelegateExecutionFailure.class),
+        Arguments.of("", "", "", DelegateExecutionFailure.class),
         Arguments.of(EMPTY_OBJECT, "[]", EMPTY_OBJECT, null),
         Arguments.of(jsTestString, "[]", local, null),
         Arguments.of(groovyTestString, "[]", process, null));

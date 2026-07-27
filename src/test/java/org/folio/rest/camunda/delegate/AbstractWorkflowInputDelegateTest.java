@@ -108,7 +108,7 @@ class AbstractWorkflowInputDelegateTest {
   private static class Impl extends AbstractWorkflowInputDelegate {
 
     @Override
-    protected void performExecute(DelegateExecution execution, String name) throws Exception {
+    protected void performExecute(DelegateExecution execution, String name, String id) {
       // This is a test and should not do anything.
     }
 

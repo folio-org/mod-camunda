@@ -21,15 +21,14 @@ public class InputDelegate extends AbstractWorkflowIODelegate {
   }
 
   /**
-   * Perform the delegate execution.
+   * Perform the execution.
    *
-   * @param execution The delegate execution data.
+   * @param execution The execution data.
    * @param name      The delegate name.
-   *
-   * @throws Exception On any error.
+   * @param id        The delegate ID.
    */
   @Override
-  protected void performExecute(DelegateExecution execution, String name) throws Exception {
+  protected void performExecute(DelegateExecution execution, String name, String id) {
     // Should be empty.
   }
 

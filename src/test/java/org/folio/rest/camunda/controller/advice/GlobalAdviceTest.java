@@ -3,6 +3,7 @@ package org.folio.rest.camunda.controller.advice;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.folio.rest.camunda.exception.BpmnModelFailure;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
@@ -22,6 +23,9 @@ class GlobalAdviceTest {
 
   @Mock
   private BpmnModelFailure bpmnModelFailure;
+
+  @Mock
+  private DelegateExecutionFailure delegateExecutionFailure;
 
   @Mock
   private DelegateSpinFailure delegateSpinFailure;
@@ -49,6 +53,13 @@ class GlobalAdviceTest {
   @Test
   void handleBpmnModelFailureTest() {
     ResponseEntity<String> response = globalAdvice.handleBpmnModelFailure(bpmnModelFailure);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  @Test
+  void handleDelegateExecutionFailureTest() {
+    ResponseEntity<String> response = globalAdvice.handleDelegateExecutionFailure(delegateExecutionFailure);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
   }
