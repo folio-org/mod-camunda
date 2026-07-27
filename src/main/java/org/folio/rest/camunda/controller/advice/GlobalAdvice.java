@@ -5,6 +5,7 @@ import org.folio.rest.camunda.exception.BpmnModelFailure;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
+import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
 import org.folio.rest.camunda.exception.ScriptEngineUnsupported;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
@@ -68,6 +69,12 @@ public class GlobalAdvice extends AbstractAdvice {
   @ExceptionHandler(EmailDelegateAddressFailure.class)
   public ResponseEntity<String> handleEmailDelegateAddressFailure(EmailDelegateAddressFailure exception) {
     return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
+  }
+
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(RequestMissingWorkflowException.class)
+  public ResponseEntity<String> handleRequestMissingWorkflowException(RequestMissingWorkflowException exception) {
+    return buildError(exception, HttpStatus.BAD_REQUEST, MediaType.APPLICATION_JSON);
   }
 
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

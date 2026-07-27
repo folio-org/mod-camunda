@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.service;
 
+import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.camunda.utility.LoggerStream;
@@ -41,6 +42,10 @@ public class CamundaApiService {
   public Workflow deployWorkflow(Workflow workflow, String tenant)
       throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
 
+    if (workflow == null) {
+      throw new RequestMissingWorkflowException("deploy");
+    }
+
     if (Boolean.TRUE.equals(workflow.getActive())) {
       throw new WorkflowAlreadyActiveException(workflow.getId());
     }
@@ -74,6 +79,11 @@ public class CamundaApiService {
   }
 
   public Workflow undeployWorkflow(Workflow workflow) {
+
+    if (workflow == null) {
+      throw new RequestMissingWorkflowException("undeploy");
+    }
+
     if (Boolean.FALSE.equals(workflow.getActive())) {
       return workflow;
     }

@@ -12,14 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.operaton.bpm.engine.exception.NotValidException;
-import org.operaton.bpm.engine.ProcessEngine;
-import org.operaton.bpm.engine.ProcessEngines;
-import org.operaton.bpm.engine.RepositoryService;
-import org.operaton.bpm.engine.repository.Deployment;
-import org.operaton.bpm.engine.repository.DeploymentBuilder;
-import org.operaton.bpm.model.bpmn.Bpmn;
-import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.workflow.model.Workflow;
@@ -31,6 +24,14 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.ProcessEngines;
+import org.operaton.bpm.engine.RepositoryService;
+import org.operaton.bpm.engine.exception.NotValidException;
+import org.operaton.bpm.engine.repository.Deployment;
+import org.operaton.bpm.engine.repository.DeploymentBuilder;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 
 @ExtendWith(MockitoExtension.class)
 class CamundaApiServiceTest {
@@ -111,6 +112,16 @@ class CamundaApiServiceTest {
 
       assertThrows(NotValidException.class, () -> camundaApiService.deployWorkflow(workflow, TENANT));
     }
+  }
+
+  @Test
+  void testDeployWorkflowMissingWOrkflowException() {
+    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.deployWorkflow(null, TENANT));
+  }
+
+  @Test
+  void testUndeployWorkflowMissingWOrkflowException() {
+    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.undeployWorkflow(null));
   }
 
   @Test
