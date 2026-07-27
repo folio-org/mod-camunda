@@ -2,6 +2,7 @@ package org.folio.rest.camunda.delegate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
@@ -87,7 +88,7 @@ class CompressFileDelegateTest {
     setField(compressFileDelegate, "inputVariables", null);
     setField(compressFileDelegate, "source", expression);
 
-    try (MockedStatic<FileUtility> fileUtility = Mockito.mockStatic(FileUtility.class)) {
+    try (MockedStatic<FileUtility> fileUtility = mockStatic(FileUtility.class)) {
 
       File sourceFile = Mockito.mock(File.class);
       File destinationFile = Mockito.mock(File.class);

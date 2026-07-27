@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.ProcessEngine;
 import org.operaton.bpm.engine.ProcessEngines;
@@ -82,8 +82,8 @@ class CamundaApiServiceTest {
   @Test
   void testDeployWorkflow() throws ScriptTaskDeserializeCodeFailure, WorkflowAlreadyActiveException {
     try (
-        MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
-        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+        MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class);
+        MockedStatic<Bpmn> utilityBpmn = mockStatic(Bpmn.class);
       ) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
@@ -102,8 +102,8 @@ class CamundaApiServiceTest {
   @Test
   void testDeployWorkflowException() {
     try (
-        MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class);
-        MockedStatic<Bpmn> utilityBpmn = Mockito.mockStatic(Bpmn.class);
+        MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class);
+        MockedStatic<Bpmn> utilityBpmn = mockStatic(Bpmn.class);
     ) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
@@ -135,7 +135,7 @@ class CamundaApiServiceTest {
   void testUndeployWorkflow() throws ScriptTaskDeserializeCodeFailure, WorkflowAlreadyActiveException {
     testDeployWorkflow();
 
-    try (MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class)) {
+    try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
 
       Workflow result = camundaApiService.undeployWorkflow(workflow);
@@ -150,7 +150,7 @@ class CamundaApiServiceTest {
 
   @Test
   void testUndeployWorkflowNotActive() {
-    try (MockedStatic<ProcessEngines> utilityProcessEngines = Mockito.mockStatic(ProcessEngines.class)) {
+    try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
 
       Workflow result = camundaApiService.undeployWorkflow(workflow);

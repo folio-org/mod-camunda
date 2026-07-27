@@ -1,12 +1,12 @@
 package org.folio.rest.camunda.delegate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.spy;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -23,7 +23,7 @@ class AbstractDelegateTest {
   private Impl abstractDelegate;
 
   public void beforeEach() {
-    mapper = Mockito.spy(MapperHelper.build());
+    mapper = spy(MapperHelper.build());
   }
 
   @Test
