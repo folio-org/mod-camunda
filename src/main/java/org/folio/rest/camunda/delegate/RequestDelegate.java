@@ -228,10 +228,8 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
 
     if (TRACE.equals(method)) return false;
 
-    if (body == null || body.isEmpty()) {
-      if (DELETE.equals(method) || GET.equals(method) || HEAD.equals(method)) {
-        return Boolean.TRUE.equals(sendEmptyBody);
-      }
+    if ((body == null || body.isEmpty()) && (DELETE.equals(method) || GET.equals(method) || HEAD.equals(method))) {
+      return Boolean.TRUE.equals(sendEmptyBody);
     }
 
     return true;
