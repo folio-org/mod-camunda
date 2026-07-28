@@ -10,6 +10,7 @@ logging:
       folio: INFO
       hibernate: INFO
       operaton: INFO
+      operaton.bpm.engine.jobexecutor: ERROR
       springframework: INFO
 
     # Enable logging of BPMN if activation fails.

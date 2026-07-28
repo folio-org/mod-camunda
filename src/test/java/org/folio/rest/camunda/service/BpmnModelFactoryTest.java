@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -111,7 +113,7 @@ class BpmnModelFactoryTest {
 
   @BeforeEach
   void beforeEach() {
-    mapper = Mockito.spy(MapperHelper.build());
+    mapper = spy(MapperHelper.build());
 
     bpmnModelFactory = new BpmnModelFactory(mapper, workflowDelegates);
 
@@ -144,7 +146,7 @@ class BpmnModelFactoryTest {
 
   @Test
   void testFromWorkflowExceptionDuringSetupUsingWarnings() throws ScriptTaskDeserializeCodeFailure, JacksonException {
-    try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
+    try (MockedStatic<Bpmn> utility = mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
 
@@ -159,7 +161,7 @@ class BpmnModelFactoryTest {
 
   @Test
   void testFromWorkflowNoNodesWorks() throws ScriptTaskDeserializeCodeFailure {
-    try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
+    try (MockedStatic<Bpmn> utility = mockStatic(Bpmn.class)) {
       commonUnmockedProcessBuilder(utility);
       commonMockingsBasic();
 
@@ -172,7 +174,7 @@ class BpmnModelFactoryTest {
     nodes.add(simpleNode);
     workflow.setNodes(nodes);
 
-    try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
+    try (MockedStatic<Bpmn> utility = mockStatic(Bpmn.class)) {
       commonMockedProcessBuilder(utility);
 
       when(processBuilderMocked.startEvent()).thenReturn(startEventBuilder);
@@ -193,7 +195,7 @@ class BpmnModelFactoryTest {
     nodes.add(endNode);
     workflow.setNodes(nodes);
 
-    try (MockedStatic<Bpmn> utility = Mockito.mockStatic(Bpmn.class)) {
+    try (MockedStatic<Bpmn> utility = mockStatic(Bpmn.class)) {
       commonMockedProcessBuilder(utility);
       commonMockingsBasic();
 

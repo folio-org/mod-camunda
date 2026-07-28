@@ -14,6 +14,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
@@ -110,6 +111,19 @@ public class FileUtility {
   public static FileInputStream createFileInputStream(File file) throws FileNotFoundException {
 
     return new FileInputStream(file);
+  }
+
+  /**
+   * Wrap new TarArchiveEntry() method in such a way that unit tests can be more easily written.
+   *
+   * @param file The file.
+   * @param name The file name.
+   *
+   * @return The new TarArchiveEntry.
+   */
+  public static TarArchiveEntry createTarArchiveEntry(File file, String name) {
+
+    return new TarArchiveEntry(file, name);
   }
 
   /**

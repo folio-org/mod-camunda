@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -30,6 +29,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
+import org.folio.rest.camunda.utility.FileUtility;
 import org.folio.rest.workflow.enums.CompressFileContainer;
 import org.folio.rest.workflow.enums.CompressFileFormat;
 import org.folio.rest.workflow.model.CompressFileTask;
@@ -62,12 +63,21 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
 
   private Expression container;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
-    String sourcePathTemplate = this.source.getValue(execution).toString();
-    String destinationPathTemplate = this.destination.getValue(execution).toString();
+    final Object sourcePathTemplateValue = this.source == null ? null : this.source.getValue(execution);
+    final Object destinationPathTemplateValue = this.destination == null ? null : this.destination.getValue(execution);
+
+    final String sourcePathTemplate = sourcePathTemplateValue == null ? "" : sourcePathTemplateValue.toString();
+    final String destinationPathTemplate = destinationPathTemplateValue == null ? "" : destinationPathTemplateValue.toString();
 
     StringTemplateLoader pathLoader = new StringTemplateLoader();
     pathLoader.putTemplate("sourcePath", sourcePathTemplate);
@@ -77,8 +87,15 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
     cfg.setTemplateLoader(pathLoader);
 
     Map<String, Object> inputs = getInputs(execution);
-    String sourcePath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("sourcePath"), inputs);
-    String destinationPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("destinationPath"), inputs);
+    String sourcePath;
+    String destinationPath;
+
+    try {
+      sourcePath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("sourcePath"), inputs);
+      destinationPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("destinationPath"), inputs);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
 
     CompressFileFormat compressFormat = CompressFileFormat.valueOf(this.format.getValue(execution).toString());
     CompressFileContainer useContainer = CompressFileContainer.valueOf(this.container.getValue(execution).toString());
@@ -131,6 +148,8 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
       try (ZipOutputStream zipOut = createZipOutputStream(createFileOutputStream(destinationFile))) {
         zipOut.putNextEntry(new ZipEntry(sourceFile.getName()));
         filesCopy(sourceFile.toPath(), zipOut);
+      } catch (Exception e) {
+        throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
       }
     } else {
       getLogger().info("Format type: {}", formatType);
@@ -146,34 +165,30 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
             CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
           ) {
             iOUtilsCopyAndClose(input, compress);
+          } catch (Exception e) {
+            throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
           }
         } else if (useContainer == CompressFileContainer.TAR) {
-          FileOutputStream outputFile = createFileOutputStream(destinationFile);
-          BufferedOutputStream output = createBufferedOutputStream(outputFile);
+          try (
+            final FileOutputStream outputFile = createFileOutputStream(destinationFile);
+            final BufferedOutputStream output = createBufferedOutputStream(outputFile);
+            final CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
+            final TarArchiveOutputStream tar = createTarArchiveOutputStream(compress, BLOCK_SIZE, ENCODING);
+          ) {
+            tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+            tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
 
-          CompressorOutputStream<?> compress = createCompressorOutputStream(formatType, output);
-
-          TarArchiveOutputStream tar = createTarArchiveOutputStream(compress, BLOCK_SIZE, ENCODING);
-
-          tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
-          tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
-
-          try {
             addPaths(sourcePath, "", tar);
 
             tar.finish();
-          } finally {
-            tar.close();
-            compress.close();
-            outputFile.close();
+          } catch (Exception e) {
+            throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
           }
         }
 
         getLogger().info("{} written to {} as {}", sourcePath, destinationPath, compressFormat);
       }
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setSource(Expression source) {
@@ -218,11 +233,12 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
   }
 
   private void setupEntryHeader(String path, String parentPath, TarArchiveOutputStream tar, File file) throws IOException {
-    Path filePath = Path.of(path);
-    TarArchiveEntry entry = new TarArchiveEntry(file, parentPath + file.getName());
+
+    final Path filePath = Path.of(path);
+    final TarArchiveEntry entry = FileUtility.createTarArchiveEntry(file, parentPath + file.getName());
 
     if (file.isFile()) {
-      entry.setSize(filesSize(Paths.get(path)));
+      entry.setSize(filesSize(filePath));
     }
 
     entry.setModTime(filesGetLastModifiedTime(filePath).toMillis());

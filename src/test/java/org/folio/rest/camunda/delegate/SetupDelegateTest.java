@@ -7,9 +7,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,13 +22,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
@@ -35,12 +35,6 @@ class SetupDelegateTest {
 
   @Spy
   protected JsonMapper mapper;
-
-  @Spy
-  protected RuntimeService runtimeService;
-
-  @Spy
-  private ScriptEngineService scriptEngineService;
 
   @Mock
   Expression initialContext;
@@ -53,6 +47,9 @@ class SetupDelegateTest {
 
   @Mock
   FlowElement element;
+
+  @Mock
+  ScriptEngineService scriptEngineService;
 
   @InjectMocks
   SetupDelegate delegate;
@@ -74,13 +71,17 @@ class SetupDelegateTest {
     lenient().when(initialContext.getValue(any(DelegateExecution.class))).thenReturn(initialContextValue);
     lenient().when(processors.getValue(any(DelegateExecution.class))).thenReturn(processorsValue);
 
+    setField(delegate, "scriptEngineService", scriptEngineService);
+
+    lenient().doNothing().when(scriptEngineService).registerScript(anyString(), anyString(), anyString());
+
     if (Objects.nonNull(exception)) {
       assertThrows(exception, () -> delegate.execute(execution));
     } else {
 
       delegate.execute(execution);
 
-      verify(element, times(2)).getName();
+      verify(element, times(1)).getName();
       verify(initialContext, times(1)).getValue(any(DelegateExecution.class));
       verify(processors, times(1)).getValue(any(DelegateExecution.class));
       verify(mapper, times(1)).readValue(eq(initialContextValue), any(TypeReference.class));
@@ -111,16 +112,24 @@ class SetupDelegateTest {
    *     - exception that is expected to be thrown for inputs
    */
   private static Stream<Arguments> executionStream() {
+
+    final String ctx1 = "{ \"a\": 0 }";
+    final String ctx2 = "{ \"a\": 0, \"b\": \"bee\" }";
+    final String prc1 = "[ { \"id\": \"84d0181e-8e0f-4d80-a580-03fe45b3c179\", \"name\": \"Start\", \"description\": \"Start of Example Javascript ScriptTask Workflow.\", \"type\": \"MESSAGE_CORRELATION\", \"deserializeAs\": \"StartEvent\", \"expression\": \"/events/example-scripttask-js/start\" } ]";
+
     return Stream.of(
-      Arguments.of(null, null, NullPointerException.class),
-      Arguments.of(null, "",   NullPointerException.class),
-      Arguments.of(null, "[]", NullPointerException.class),
-      Arguments.of("",   null, MismatchedInputException.class),
-      Arguments.of("",   "",   MismatchedInputException.class),
-      Arguments.of("",   "[]", MismatchedInputException.class),
-      Arguments.of("{}", null, NullPointerException.class),
-      Arguments.of("{}", "",   MismatchedInputException.class),
-      Arguments.of("{}", "[]", null)
+      Arguments.of(null, null, DelegateExecutionFailure.class),
+      Arguments.of(null, "",   DelegateExecutionFailure.class),
+      Arguments.of(null, "[]", DelegateExecutionFailure.class),
+      Arguments.of("",   null, DelegateExecutionFailure.class),
+      Arguments.of("",   "",   DelegateExecutionFailure.class),
+      Arguments.of("",   "[]", DelegateExecutionFailure.class),
+      Arguments.of("{}", null, DelegateExecutionFailure.class),
+      Arguments.of("{}", "",   DelegateExecutionFailure.class),
+      Arguments.of("{}", "[]", null),
+      Arguments.of(ctx1, "[]", null),
+      Arguments.of(ctx2, "[]", null),
+      Arguments.of("{}", prc1, null)
     );
   }
 

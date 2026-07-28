@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,13 +11,16 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Objects;
 import java.util.stream.Stream;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.enums.ScriptType;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.rest.workflow.model.ProcessorTask;
 import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,7 +37,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
@@ -80,6 +83,11 @@ class ProcessorDelegateTest {
     delegate.setProcessor(processor);
   }
 
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(ProcessorTask.class, delegate.fromTask());
+  }
+
   @ParameterizedTest
   @MethodSource("executionStream")
   @SuppressWarnings("unchecked")
@@ -97,11 +105,10 @@ class ProcessorDelegateTest {
     if (Objects.nonNull(exception)) {
       assertThrows(exception, () -> delegate.execute(execution));
     } else {
-
       delegate.execute(execution);
 
-      verify(execution, times(2)).getBpmnModelElementInstance();
-      verify(element, times(2)).getName();
+      verify(execution, times(1)).getBpmnModelElementInstance();
+      verify(element, times(1)).getName();
       verify(processor, times(1)).getValue(any(DelegateExecution.class));
       verify(mapper, times(1)).readValue(processorValue, EmbeddedProcessor.class);
       verify(mapper, times(1)).readValue(eq(inputVariablesValue), any(TypeReference.class));
@@ -159,8 +166,8 @@ class ProcessorDelegateTest {
     String process = om.writeValueAsString(p);
 
     return Stream.of(
-        Arguments.of(null, null, null, NullPointerException.class),
-        Arguments.of("", "", "", MismatchedInputException.class),
+        Arguments.of(null, null, null, DelegateExecutionFailure.class),
+        Arguments.of("", "", "", DelegateExecutionFailure.class),
         Arguments.of(EMPTY_OBJECT, "[]", EMPTY_OBJECT, null),
         Arguments.of(jsTestString, "[]", local, null),
         Arguments.of(groovyTestString, "[]", process, null));

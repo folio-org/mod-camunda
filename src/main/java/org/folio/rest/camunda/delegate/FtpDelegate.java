@@ -10,6 +10,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.VFS;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.enums.SftpOp;
 import org.folio.rest.workflow.model.FtpTask;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -37,9 +38,15 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
 
   private Expression password;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     String originPathValue = this.originPath.getValue(execution).toString();
 
@@ -61,7 +68,13 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
       ? Optional.ofNullable(this.password.getValue(execution).toString())
       : Optional.empty();
 
-    FileSystemManager manager = VFS.getManager();
+    final FileSystemManager manager;
+
+    try {
+      manager = VFS.getManager();
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
 
     String userInfo = null;
 
@@ -76,53 +89,69 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
     switch (opValue) {
       case GET: {
 
-        File file = createFile(destinationPathValue);
+        final File file = createFile(destinationPathValue);
+        final URI uri;
 
-        URI uri = new URI(
-          schemeValue,
-          userInfo,
-          hostValue,
-          portValue,
-          originPathValue,
-          null,
-          null
-        );
+        try {
+          uri = new URI(
+            schemeValue,
+            userInfo,
+            hostValue,
+            portValue,
+            originPathValue,
+            null,
+            null
+          );
+        } catch (Exception e) {
+          throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+        }
 
         try (
-          FileObject local = manager.resolveFile(file.getAbsolutePath());
-          FileObject remote = manager.resolveFile(uri);
+          final FileObject local = manager.resolveFile(file.getAbsolutePath());
+          final FileObject remote = manager.resolveFile(uri);
         ) {
           local.copyFrom(remote, Selectors.SELECT_SELF);
+        } catch (Exception e) {
+          throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
         }
 
-      } break;
+        break;
+      }
+
       case PUT: {
 
-        File file = createFile(originPathValue);
+        final File file = createFile(originPathValue);
+        final URI uri;
 
-        URI uri = new URI(
-          schemeValue,
-          userInfo,
-          hostValue,
-          portValue,
-          destinationPathValue,
-          null,
-          null
-        );
-
-        try (
-          FileObject local = manager.resolveFile(file.getAbsolutePath());
-          FileObject remote = manager.resolveFile(uri);
-        ) {
-          remote.copyFrom(local, Selectors.SELECT_SELF);
+        try {
+          uri = new URI(
+            schemeValue,
+            userInfo,
+            hostValue,
+            portValue,
+            destinationPathValue,
+            null,
+            null
+          );
+        } catch (Exception e) {
+          throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
         }
 
-      } break;
+        try (
+          final FileObject local = manager.resolveFile(file.getAbsolutePath());
+          final FileObject remote = manager.resolveFile(uri);
+        ) {
+          remote.copyFrom(local, Selectors.SELECT_SELF);
+        } catch (Exception e) {
+          throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+        }
+
+        break;
+      }
+
       default:
         break;
     }
-
-    determineEndTime(execution, startTime);
   }
 
   public void setOriginPath(Expression originPath) {

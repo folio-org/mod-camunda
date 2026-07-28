@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
 import java.util.Map;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.ProcessorTask;
@@ -20,9 +21,15 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
   private Expression processor;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     EmbeddedProcessor processorValue = mapper.readValue(this.processor.getValue(execution).toString(), EmbeddedProcessor.class);
 
@@ -34,11 +41,13 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
     JsonNode input = mapper.valueToTree(inputs);
 
-    String output = (String) scriptEngineService.runScript(scriptTypeExtension, scriptName, input);
-
-    setOutput(execution, output);
-
-    determineEndTime(execution, startTime);
+    try {
+      final String output = (String) scriptEngineService.runScript(scriptTypeExtension, scriptName, input);
+  
+      setOutput(execution, output);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
   }
 
   public void setProcessor(Expression processor) {

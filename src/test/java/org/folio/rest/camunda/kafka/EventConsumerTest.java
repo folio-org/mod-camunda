@@ -4,6 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
@@ -16,7 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.runtime.MessageCorrelationBuilder;
@@ -46,15 +48,15 @@ class EventConsumerTest {
 
   @BeforeEach
   void beforeEach() {
-    mapper = Mockito.spy(MapperHelper.build());
-    eventConsumer = Mockito.spy(new EventConsumer(runtimeService, mapper));
+    mapper = spy(MapperHelper.build());
+    eventConsumer = spy(new EventConsumer(runtimeService, mapper));
   }
 
   @ParameterizedTest
   @MethodSource("provideEventStream")
   @SuppressWarnings("unchecked")
   void testReceive(Event event) {
-    try (MockedStatic<ThreadLocalStorage> utility = Mockito.mockStatic(ThreadLocalStorage.class)) {
+    try (MockedStatic<ThreadLocalStorage> utility = mockStatic(ThreadLocalStorage.class)) {
       doReturn(processInstance).when(messageCorrelationBuilder).correlateStartMessage();
       doReturn(messageCorrelationBuilder).when(messageCorrelationBuilder).setVariables(anyMap());
       doReturn(messageCorrelationBuilder).when(messageCorrelationBuilder).tenantId(anyString());
@@ -68,7 +70,7 @@ class EventConsumerTest {
         ThreadLocalStorage.setTenant(event.getTenant());
       });
 
-      Mockito.verify(messageCorrelationBuilder).correlateStartMessage();
+      verify(messageCorrelationBuilder).correlateStartMessage();
     }
   }
 

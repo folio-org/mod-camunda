@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
 import static org.folio.rest.camunda.utility.TestUtility.i;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +24,9 @@ import org.apache.commons.lang.StringUtils;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.rest.workflow.model.FileTask;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -103,6 +106,11 @@ class FileDelegateTest {
     delegate.setLine(line);
     delegate.setOp(op);
     delegate.setTarget(target);
+  }
+
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(FileTask.class, delegate.fromTask());
   }
 
   @ParameterizedTest

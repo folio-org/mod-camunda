@@ -3,8 +3,10 @@ package org.folio.rest.camunda.controller.advice;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.folio.rest.camunda.exception.BpmnModelFailure;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
+import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
 import org.folio.rest.camunda.exception.ScriptEngineUnsupported;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
@@ -24,10 +26,16 @@ class GlobalAdviceTest {
   private BpmnModelFailure bpmnModelFailure;
 
   @Mock
+  private DelegateExecutionFailure delegateExecutionFailure;
+
+  @Mock
   private DelegateSpinFailure delegateSpinFailure;
 
   @Mock
   private EmailDelegateAddressFailure emailDelegateAddressFailure;
+
+  @Mock
+  private RequestMissingWorkflowException requestMissingWorkflowException;
 
   @Mock
   private ScriptEngineLoadFailed scriptEngineLoadFailed;
@@ -54,6 +62,13 @@ class GlobalAdviceTest {
   }
 
   @Test
+  void handleDelegateExecutionFailureTest() {
+    ResponseEntity<String> response = globalAdvice.handleDelegateExecutionFailure(delegateExecutionFailure);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  @Test
   void handleDelegateSpinFailureTest() {
     ResponseEntity<String> response = globalAdvice.handleDelegateSpinFailure(delegateSpinFailure);
 
@@ -65,6 +80,13 @@ class GlobalAdviceTest {
     ResponseEntity<String> response = globalAdvice.handleEmailDelegateAddressFailure(emailDelegateAddressFailure);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
+  @Test
+  void handleRequestMissingWorkflowExceptionTest() {
+    ResponseEntity<String> response = globalAdvice.handleRequestMissingWorkflowException(requestMissingWorkflowException);
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
   @Test
