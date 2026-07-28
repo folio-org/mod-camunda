@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -31,6 +30,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
+import org.folio.rest.camunda.utility.FileUtility;
 import org.folio.rest.workflow.enums.CompressFileContainer;
 import org.folio.rest.workflow.enums.CompressFileFormat;
 import org.folio.rest.workflow.model.CompressFileTask;
@@ -73,8 +73,11 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
   @Override
   protected void performExecute(DelegateExecution execution, String name, String id) {
 
-    String sourcePathTemplate = this.source.getValue(execution).toString();
-    String destinationPathTemplate = this.destination.getValue(execution).toString();
+    final Object sourcePathTemplateValue = this.source == null ? null : this.source.getValue(execution);
+    final Object destinationPathTemplateValue = this.destination == null ? null : this.destination.getValue(execution);
+
+    final String sourcePathTemplate = sourcePathTemplateValue == null ? "" : sourcePathTemplateValue.toString();
+    final String destinationPathTemplate = destinationPathTemplateValue == null ? "" : destinationPathTemplateValue.toString();
 
     StringTemplateLoader pathLoader = new StringTemplateLoader();
     pathLoader.putTemplate("sourcePath", sourcePathTemplate);
@@ -230,11 +233,12 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
   }
 
   private void setupEntryHeader(String path, String parentPath, TarArchiveOutputStream tar, File file) throws IOException {
-    Path filePath = Path.of(path);
-    TarArchiveEntry entry = new TarArchiveEntry(file, parentPath + file.getName());
+
+    final Path filePath = Path.of(path);
+    final TarArchiveEntry entry = FileUtility.createTarArchiveEntry(file, parentPath + file.getName());
 
     if (file.isFile()) {
-      entry.setSize(filesSize(Paths.get(path)));
+      entry.setSize(filesSize(filePath));
     }
 
     entry.setModTime(filesGetLastModifiedTime(filePath).toMillis());
