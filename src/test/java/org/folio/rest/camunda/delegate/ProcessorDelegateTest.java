@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,8 +17,10 @@ import org.folio.rest.workflow.enums.ScriptType;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.rest.workflow.model.ProcessorTask;
 import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -78,6 +81,11 @@ class ProcessorDelegateTest {
 
     // unique per delegate
     delegate.setProcessor(processor);
+  }
+
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(ProcessorTask.class, delegate.fromTask());
   }
 
   @ParameterizedTest

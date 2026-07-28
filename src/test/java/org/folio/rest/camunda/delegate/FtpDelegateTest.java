@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -19,7 +20,9 @@ import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.VFS;
 import org.folio.rest.camunda.service.ScriptEngineService;
+import org.folio.rest.workflow.model.FtpTask;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -105,6 +108,11 @@ class FtpDelegateTest {
     delegate.setPort(port);
     delegate.setUsername(username);
     delegate.setPassword(password);
+  }
+
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(FtpTask.class, delegate.fromTask());
   }
 
   @ParameterizedTest
