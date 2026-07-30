@@ -17,7 +17,7 @@ import java.util.Set;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
-import org.folio.rest.workflow.model.RequestTask;
+import org.folio.rest.workflow.model.FolioRequestTask;
 import org.folio.spring.test.helper.MapperHelper;
 import org.folio.spring.web.service.HttpService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
-class RequestDelegateTest {
+class FolioRequestDelegateTest {
 
   private static final String TOKEN_HEADER_NAME = "X-Okapi-Token";
 
@@ -58,7 +58,7 @@ class RequestDelegateTest {
   private Expression requestExpression;
 
   @InjectMocks
-  private RequestDelegate delegate;
+  private FolioRequestDelegate delegate;
 
   @Mock
   ResponseEntity<Object> responseEntity;
@@ -215,6 +215,7 @@ class RequestDelegateTest {
   void testExecuteWorksWithToken() throws Exception {
     setupExecuteMocking(false);
 
+    when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
     delegate.execute(delegateExecution);
@@ -254,7 +255,7 @@ class RequestDelegateTest {
 
   @Test
   void testFromTaskWorks() {
-    assertEquals(RequestTask.class, delegate.fromTask());
+    assertEquals(FolioRequestTask.class, delegate.fromTask());
   }
 
   /**
@@ -274,6 +275,7 @@ class RequestDelegateTest {
       embeddedVariable.setKey(TOKEN_HEADER_NAME);
       setField(responseEntity, "headers", httpHeaders);
 
+      when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
       when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
     }
 
