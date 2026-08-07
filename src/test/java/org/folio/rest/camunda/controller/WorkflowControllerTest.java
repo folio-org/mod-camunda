@@ -35,15 +35,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 import org.folio.rest.camunda.service.CamundaApiService;
 import org.folio.rest.workflow.model.Setup;
 import org.folio.rest.workflow.model.Workflow;
 import org.folio.spring.tenant.properties.TenantProperties;
+import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,9 +49,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -62,6 +58,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.MultiValueMap;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 @WebMvcTest(WorkflowController.class)
 @ExtendWith(MockitoExtension.class)
@@ -75,8 +74,7 @@ class WorkflowControllerTest {
 
   private MockMvc mvc;
 
-  @Autowired
-  protected ObjectMapper mapper;
+  protected JsonMapper mapper;
 
   @Autowired
   private WorkflowController workflowController;
@@ -88,7 +86,8 @@ class WorkflowControllerTest {
   private TenantProperties tenantProperties;
 
   @BeforeEach
-  void beforeEach() throws JsonProcessingException {
+  void beforeEach() throws JacksonException {
+    mapper = MapperHelper.build();
     mvc = MockMvcBuilders.standaloneSetup(workflowController).build();
   }
 
@@ -117,9 +116,10 @@ class WorkflowControllerTest {
 
     if (status == 200) {
       MediaType responseType = MediaType.parseMediaType(result.getResponse().getContentType());
+      Workflow response = mapper.readValue(result.getResponse().getContentAsString(), Workflow.class);
 
       assertTrue(mediaType.isCompatibleWith(responseType));
-      assertEquals(mapper.writeValueAsString(workflow), result.getResponse().getContentAsString());
+      assertEquals(mapper.writeValueAsString(workflow), mapper.writeValueAsString(response));
     }
   }
 
@@ -148,9 +148,10 @@ class WorkflowControllerTest {
 
     if (status == 200) {
       MediaType responseType = MediaType.parseMediaType(result.getResponse().getContentType());
+      Workflow response = mapper.readValue(result.getResponse().getContentAsString(), Workflow.class);
 
       assertTrue(mediaType.isCompatibleWith(responseType));
-      assertEquals(mapper.writeValueAsString(workflow), result.getResponse().getContentAsString());
+      assertEquals(mapper.writeValueAsString(workflow), mapper.writeValueAsString(response));
     }
   }
 
@@ -183,9 +184,8 @@ class WorkflowControllerTest {
    *     - int status (response HTTP status code).
    *
    * @throws SecurityException
-   * @throws NoSuchMethodException
    */
-  private static Stream<Arguments> provideDeleteGetPatchPutForActivateDeactivateWorkflow() throws NoSuchMethodException, SecurityException {
+  private static Stream<Arguments> provideDeleteGetPatchPutForActivateDeactivateWorkflow() throws SecurityException {
     String[] contentTypes = { APP_JSON, TEXT_PLAIN, APP_STREAM };
     String[] bodys = { JSON_OBJECT, PLAIN_BODY, JSON_OBJECT };
     String[] accepts = { APP_RAML, APP_SCHEMA, APP_JSON, TEXT_PLAIN, APP_STREAM, NULL_STR, APP_STAR, STAR };
@@ -219,9 +219,8 @@ class WorkflowControllerTest {
    *     - int status (response HTTP status code).
    *
    * @throws SecurityException
-   * @throws NoSuchMethodException
    */
-  private static Stream<Arguments> provideHeadersBodyStatusForActivateDeactivateWorkflow() throws NoSuchMethodException, SecurityException {
+  private static Stream<Arguments> provideHeadersBodyStatusForActivateDeactivateWorkflow() throws SecurityException {
     Stream<Arguments> stream1 = Stream.of(
       Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_SCHEMA, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
       Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_JSON,   MT_APP_JSON, NO_PARAM, JSON_OBJECT, 200),

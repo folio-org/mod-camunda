@@ -1,29 +1,14 @@
 package org.folio.rest.camunda.service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.Bpmn;
-import org.camunda.bpm.model.bpmn.BpmnModelInstance;
-import org.camunda.bpm.model.bpmn.GatewayDirection;
-import org.camunda.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
-import org.camunda.bpm.model.bpmn.builder.MultiInstanceLoopCharacteristicsBuilder;
-import org.camunda.bpm.model.bpmn.builder.ProcessBuilder;
-import org.camunda.bpm.model.bpmn.builder.ScriptTaskBuilder;
-import org.camunda.bpm.model.bpmn.builder.StartEventBuilder;
-import org.camunda.bpm.model.bpmn.builder.SubProcessBuilder;
-import org.camunda.bpm.model.bpmn.instance.ExtensionElements;
-import org.camunda.bpm.model.bpmn.instance.camunda.CamundaField;
-import org.camunda.bpm.model.xml.instance.ModelElementInstance;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
+import org.folio.rest.camunda.exception.BpmnModelFailure;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.workflow.enums.StartEventType;
 import org.folio.rest.workflow.model.Condition;
@@ -46,17 +31,30 @@ import org.folio.rest.workflow.model.StartEvent;
 import org.folio.rest.workflow.model.Subprocess;
 import org.folio.rest.workflow.model.Workflow;
 import org.folio.rest.workflow.model.components.Branch;
-import org.folio.rest.workflow.model.components.Conditional;
 import org.folio.rest.workflow.model.components.DelegateTask;
 import org.folio.rest.workflow.model.components.Event;
-import org.folio.rest.workflow.model.components.Gateway;
 import org.folio.rest.workflow.model.components.Navigation;
 import org.folio.rest.workflow.model.components.Task;
 import org.folio.rest.workflow.model.components.Wait;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.Bpmn;
+import org.operaton.bpm.model.bpmn.BpmnModelInstance;
+import org.operaton.bpm.model.bpmn.GatewayDirection;
+import org.operaton.bpm.model.bpmn.builder.AbstractFlowNodeBuilder;
+import org.operaton.bpm.model.bpmn.builder.MultiInstanceLoopCharacteristicsBuilder;
+import org.operaton.bpm.model.bpmn.builder.ProcessBuilder;
+import org.operaton.bpm.model.bpmn.builder.ScriptTaskBuilder;
+import org.operaton.bpm.model.bpmn.builder.StartEventBuilder;
+import org.operaton.bpm.model.bpmn.builder.SubProcessBuilder;
+import org.operaton.bpm.model.bpmn.instance.ExtensionElements;
+import org.operaton.bpm.model.bpmn.instance.operaton.OperatonField;
+import org.operaton.bpm.model.xml.instance.ModelElementInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class BpmnModelFactory {
@@ -65,45 +63,49 @@ public class BpmnModelFactory {
 
   private static final String SETUP_TASK_ID = "setup_task_98832611_3d33_476b_adcc_fcb6c4e8718b";
 
-  // @formatter:off
   private static final Class<?>[] SERIALIZABLE_TYPES = new Class<?>[] {
     String.class,
     Number.class,
     Boolean.class,
     Enum.class
   };
-  // @formatter:on
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  private final JsonMapper mapper;
 
-  @Autowired
-  private List<AbstractWorkflowDelegate> workflowDelegates;
+  private final List<AbstractWorkflowDelegate> workflowDelegates;
+
+  /**
+   * Constructor.
+   *
+   * @param mapper The mapper.
+   * @param workflowDelegates The delegates.
+   */
+  public BpmnModelFactory(JsonMapper mapper, List<AbstractWorkflowDelegate> workflowDelegates) {
+
+    this.mapper = mapper;
+    this.workflowDelegates = workflowDelegates;
+  }
 
   public BpmnModelInstance fromWorkflow(Workflow workflow) throws ScriptTaskDeserializeCodeFailure {
 
-    // @formatter:off
     ProcessBuilder processBuilder = Bpmn.createExecutableProcess().name(workflow.getName())
-        .camundaHistoryTimeToLive(workflow.getHistoryTimeToLive())
-        .camundaVersionTag(workflow.getVersionTag());
-    // @formatter:on
+      .operatonHistoryTimeToLive(workflow.getHistoryTimeToLive())
+      .operatonVersionTag(workflow.getVersionTag());
 
     BpmnModelInstance model = build(processBuilder, workflow);
 
-    // @formatter:off
-    workflow.getNodes().stream()
-      .filter(node -> node instanceof EventSubprocess)
-      .forEach(subprocess -> {
-        try {
-            eventSubprocess(processBuilder, subprocess);
-        } catch (ScriptTaskDeserializeCodeFailure e) {
-            throw new RuntimeException(e);
-        }
-    });
-    // @formatter:on
+    final Iterator<Node> iter = workflow.getNodes().iterator();
+
+    while (iter.hasNext()) {
+      final Node node = iter.next();
+
+      if (node instanceof EventSubprocess) {
+        eventSubprocess(processBuilder, node);
+      }
+    }
 
     setup(model, workflow);
-    expressions(model, workflow.getNodes());
+    expressions(model, workflow, workflow.getNodes());
     return model;
   }
 
@@ -117,8 +119,7 @@ public class BpmnModelFactory {
     AbstractFlowNodeBuilder<?, ?> builder = processBuilder.startEvent();
 
     if (!(nodes.get(0) instanceof StartEvent)) {
-      // TODO: create custom exception and controller advice to handle better
-      throw new RuntimeException("Workflow must start with a start event!");
+      throw new BpmnModelFailure("Workflow must start with a start event!");
     }
 
     builder = build(builder, nodes, Setup.from(workflow.getSetup()));
@@ -127,243 +128,371 @@ public class BpmnModelFactory {
   }
 
   private void eventSubprocess(ProcessBuilder processBuilder, Node node) throws ScriptTaskDeserializeCodeFailure {
-    AbstractFlowNodeBuilder<?, ?> builder = null;
     String identifier = node.getIdentifier();
     String name = node.getName();
-    builder = processBuilder.eventSubProcess(identifier).name(name).startEvent();
-    builder = build(builder, ((EventSubprocess) node).getNodes(), Setup.NONE);
+    AbstractFlowNodeBuilder<?, ?> builder = processBuilder.eventSubProcess(identifier).name(name).startEvent();
+
+    build(builder, ((EventSubprocess) node).getNodes(), Setup.NONE);
   }
 
-  private AbstractFlowNodeBuilder<?, ?> build(AbstractFlowNodeBuilder<?, ?> builder, List<Node> nodes, Setup setup) throws ScriptTaskDeserializeCodeFailure {
+  /**
+   * Build the Workflow.
+   *
+   * @param builder The builder.
+   * @param nodes   All of the nodes.
+   * @param setup   The set up data.
+   *
+   * @return A fully constructed builder representing the Workflow.
+   *
+   * @throws ScriptTaskDeserializeCodeFailure On error.
+   */
+  private AbstractFlowNodeBuilder<?, ?> build(AbstractFlowNodeBuilder<?, ?> builder, List<Node> nodes, Setup setup)
+    throws ScriptTaskDeserializeCodeFailure {
 
     for (Node node : nodes) {
+      builder = switch (node) {
+        case Event event -> buildEvent(builder, event, setup);
 
-      if (node instanceof Event) {
+        case DelegateTask delegateTask -> buildDelegateTask(builder, delegateTask);
 
-        if (node instanceof StartEvent) {
-          if (Boolean.TRUE.equals(((StartEvent) node).getAsyncBefore())) {
-            builder = builder.camundaAsyncBefore();
+        case Branch branch -> {
+          builder = switch (branch) {
+            case ExclusiveGateway exclusiveGateway -> buildBranchExclusiveGateway(builder, exclusiveGateway);
+
+            case InclusiveGateway inclusiveGateway -> buildBranchInclusiveGateway(builder, inclusiveGateway);
+
+            case MoveToLastGateway moveToLastGateway -> buildBranchMoveToLastGateway(builder, moveToLastGateway);
+
+            case MoveToNode moveToNode -> buildBranchMoveToNode(builder, moveToNode);
+
+            case ParallelGateway parallelGateway -> buildBranchParallelGateway(builder, parallelGateway);
+
+            case Subprocess subprocess -> buildBranchSubprocess(builder, subprocess);
+
+            default -> builder;
+          };
+
+          if (!(branch instanceof Subprocess)) {
+            builder = build(builder, branch.getNodes(), Setup.NONE);
           }
 
-          boolean interrupting = Boolean.TRUE.equals(((StartEvent) node).getInterrupting());
-
-          StartEventType type = ((StartEvent) node).getType();
-          String expression = ((StartEvent) node).getExpression();
-
-          if (type != StartEventType.NONE && expression == null) {
-            // TODO: create custom exception and controller advice to handle better
-            throw new RuntimeException(String.format("%s start event requires an expression", type));
-          }
-
-          builder = ((StartEventBuilder) builder).id(node.getIdentifier()).name(node.getName());
-
-          switch (type) {
-          case MESSAGE_CORRELATION:
-            builder = ((StartEventBuilder) builder).message(expression).interrupting(interrupting);
-            break;
-          case SCHEDULED:
-            builder = ((StartEventBuilder) builder).timerWithCycle(expression).interrupting(interrupting);
-            break;
-          case SIGNAL:
-            builder = ((StartEventBuilder) builder).signal(expression).interrupting(interrupting);
-            break;
-          case NONE:
-            builder = ((StartEventBuilder) builder).interrupting(interrupting);
-            break;
-          default:
-            logger.warn("Start Event named {} has an unknown event type of {}.", node.getName(), type);
-            break;
-          }
-
-          if (!setup.equals(Setup.NONE)) {
-            builder = builder.serviceTask(SETUP_TASK_ID).name("Setup").camundaDelegateExpression("${setupDelegate}");
-
-            switch (setup) {
-            case ASYNC_AFTER:
-              builder = builder.camundaAsyncAfter();
-              break;
-            case ASYNC_BEFORE:
-              builder = builder.camundaAsyncBefore();
-              break;
-            case ASYNC_BEFORE_AFTER:
-              builder = builder.camundaAsyncBefore().camundaAsyncAfter();
-              break;
-            case NONE:
-            case SIMPLE:
-              break;
-            default:
-              logger.warn("Start Event named {} has an unknown setup type of {}.", node.getName(), setup);
-              break;
-            }
-          }
-
-        } else if (node instanceof EndEvent) {
-          builder = builder.endEvent(node.getIdentifier()).name(node.getName());
-        } else {
-          logger.warn("Event named {} is of an unknown type.", node.getName());
+          yield builder;
         }
 
-      } else if (node instanceof DelegateTask) {
+        case Condition condition -> builder.condition(condition.getAnswer(), condition.getExpression());
 
-        Optional<AbstractWorkflowDelegate> delegate = workflowDelegates.stream()
-            .filter(d -> d.fromTask().equals(node.getClass())).findAny();
-
-        if (delegate.isPresent()) {
-          builder = builder.serviceTask(node.getIdentifier()).name(node.getName())
-              .camundaDelegateExpression(delegate.get().getExpression());
-        } else {
-          // TODO: create custom exception and controller advice to handle better
-          throw new RuntimeException("Task must have delegate representation!");
-        }
-
-        if (Boolean.TRUE.equals(((DelegateTask) node).getAsyncBefore())) {
-          builder = builder.camundaAsyncBefore();
-        }
-
-        if (Boolean.TRUE.equals(((DelegateTask) node).getAsyncAfter())) {
-          builder = builder.camundaAsyncAfter();
-        }
-
-      } else if (node instanceof Branch) {
-
-        if (node instanceof ExclusiveGateway) {
-
-          builder = builder.exclusiveGateway(node.getIdentifier())
-            .name(node.getName())
-            .gatewayDirection(GatewayDirection.valueOf(((Gateway) node).getDirection().getValue()));
-
-        } else if (node instanceof InclusiveGateway) {
-
-          builder = builder.inclusiveGateway(node.getIdentifier())
-            .name(node.getName())
-            .gatewayDirection(GatewayDirection.valueOf(((Gateway) node).getDirection().getValue()));
-
-        } else if (node instanceof MoveToLastGateway) {
-
-          builder = builder.moveToLastGateway()
-            .gatewayDirection(GatewayDirection.valueOf(((Gateway) node).getDirection().getValue()));
-
-        } else if (node instanceof ParallelGateway) {
-
-          builder = builder.parallelGateway(node.getIdentifier())
-            .name(node.getName())
-            .gatewayDirection(GatewayDirection.valueOf(((Gateway) node).getDirection().getValue()));
-
-        } else if (node instanceof MoveToNode) {
-
-          builder = builder.moveToNode(((MoveToNode) node)
-            .getGatewayId());
-
-        } else if ((node instanceof Subprocess)) {
-
-          SubProcessBuilder subProcessBuilder = builder.subProcess(node.getIdentifier()).name(node.getName());
-
-          if (Boolean.TRUE.equals(((Subprocess) node).getAsyncBefore())) {
-            subProcessBuilder = subProcessBuilder.camundaAsyncBefore();
-          }
-
-          if (Boolean.TRUE.equals(((Subprocess) node).getAsyncAfter())) {
-            subProcessBuilder = subProcessBuilder.camundaAsyncAfter();
-          }
-
-          if (((Subprocess) node).isMultiInstance()) {
-            MultiInstanceLoopCharacteristicsBuilder multiInstanceBuilder = subProcessBuilder.multiInstance();
-
-            EmbeddedLoopReference loopRef = ((Subprocess) node).getLoopRef();
-
-            if (loopRef.hasCardinalityExpression()) {
-              multiInstanceBuilder = multiInstanceBuilder.cardinality(loopRef.getCardinalityExpression());
-            } else if (loopRef.hasDataInput()) {
-              multiInstanceBuilder = multiInstanceBuilder.camundaCollection(loopRef.getDataInputRefExpression())
-                  .camundaElementVariable(loopRef.getInputDataName());
-            }
-
-            if (Boolean.TRUE.equals(loopRef.getParallel())) {
-              multiInstanceBuilder = multiInstanceBuilder.parallel();
-            } else {
-              multiInstanceBuilder = multiInstanceBuilder.sequential();
-            }
-
-            if (loopRef.hasCompleteConditionExpression()) {
-              multiInstanceBuilder = multiInstanceBuilder.completionCondition(loopRef.getCompleteConditionExpression());
-            }
-
-            subProcessBuilder = multiInstanceBuilder.multiInstanceDone();
-          }
-
-          switch (((Subprocess) node).getType()) {
-          case EMBEDDED:
-            builder = subProcessBuilder.embeddedSubProcess().startEvent();
-            builder = build(builder, ((Branch) node).getNodes(), Setup.NONE);
-            builder = builder.subProcessDone();
-            break;
-          case TRANSACTION:
-            // TODO: create custom exception and controller advice to handle better
-            throw new RuntimeException("Transaction subprocess not yet supported!");
-          default:
-            logger.warn("Subprocess named {} is of an unknown type.", node.getName());
-            break;
-          }
-
-        }
-
-        if (!(node instanceof Subprocess)) {
-          builder = build(builder, ((Branch) node).getNodes(), Setup.NONE);
-        }
-
-      } else if (node instanceof Condition) {
-        builder = builder.condition(((Conditional) node).getAnswer(), ((Conditional) node).getExpression());
-      } else if (node instanceof Navigation) {
-
-        if (node instanceof ConnectTo) {
-
-          // TODO: figure out way to get identifier from id
-          builder = builder.connectTo(((ConnectTo) node).getNodeId());
-
-        } else {
-          logger.warn("Navigation named {} is of an unknown type.", node.getName());
-        }
-      } else if (node instanceof Task) {
-        if (node instanceof Wait) {
-          if (node instanceof ReceiveTask) {
-            builder = builder.receiveTask(node.getIdentifier()).name(node.getName())
-              .message(((ReceiveTask) node).getMessage());
+        case Navigation navigation -> {
+          if (navigation instanceof ConnectTo connectTo) {
+            builder = builder.connectTo(connectTo.getNodeId());
           } else {
-            logger.warn("Wait Task named {} is of an unknown type.", node.getName());
-          }
-        } else if (node instanceof ScriptTask) {
-          String code;
-          try {
-            code = objectMapper.readValue(((ScriptTask) node).getCode(), String.class);
-          } catch (JsonProcessingException e) {
-            throw new ScriptTaskDeserializeCodeFailure(node.getId(), e);
+            logger.warn("Navigation named {} is of an unknown type.", node.getName());
           }
 
-          builder = builder.scriptTask(node.getIdentifier()).name(node.getName())
-            .scriptFormat(((ScriptTask) node).getScriptFormat()).scriptText(code);
+          yield builder;
+        }
 
-          if (((ScriptTask) node).hasResultVariable()) {
-            builder = ((ScriptTaskBuilder) builder).camundaResultVariable(((ScriptTask) node).getResultVariable());
+        case Task task -> {
+          if (task instanceof Wait wait) {
+            if (wait instanceof ReceiveTask receiveTask) {
+              builder = builder.receiveTask(receiveTask.getIdentifier()).name(receiveTask.getName())
+                .message(receiveTask.getMessage());
+            } else {
+              logger.warn("Wait Task named {} is of an unknown type.", node.getName());
+            }
+          } else if (task instanceof ScriptTask scriptTask) {
+            final String code;
+
+            try {
+              code = mapper.readValue(scriptTask.getCode(), String.class);
+            } catch (JacksonException e) {
+              throw new ScriptTaskDeserializeCodeFailure(scriptTask.getId(), e);
+            }
+
+            builder = builder.scriptTask(scriptTask.getIdentifier()).name(scriptTask.getName())
+              .scriptFormat(scriptTask.getScriptFormat()).scriptText(code);
+
+            if (scriptTask.hasResultVariable()) {
+              builder = ((ScriptTaskBuilder) builder).operatonResultVariable(scriptTask.getResultVariable());
+            }
+          } else if (task instanceof InputTask inputTask) {
+            builder = builder
+              .userTask(inputTask.getIdentifier())
+              .name(inputTask.getName());
+          } else {
+            logger.warn("Script Task named {} is of an unknown type.", node.getName());
           }
-        } else if (node instanceof InputTask) {
-          builder = builder
-            .userTask(node.getIdentifier())
-            .name(node.getName());
-        } else {
-          logger.warn("Script Task named {} is of an unknown type.", node.getName());
+
+          if (Boolean.TRUE.equals(task.getAsyncBefore())) {
+            builder = builder.operatonAsyncBefore();
+          }
+
+          if (Boolean.TRUE.equals(task.getAsyncAfter())) {
+            builder = builder.operatonAsyncAfter();
+          }
+
+          yield builder;
         }
 
-        if (Boolean.TRUE.equals(((Task) node).getAsyncBefore())) {
-          builder = builder.camundaAsyncBefore();
-        }
+        default -> builder;
+      };
+    }
 
-        if (Boolean.TRUE.equals(((Task) node).getAsyncAfter())) {
-          builder = builder.camundaAsyncAfter();
-        }
+    return builder;
+  }
+
+  /**
+   * Builder for a ExclusiveGateway Node types.
+   *
+   * @param builder The builder.
+   * @param eg      The ExclusiveGateway Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchExclusiveGateway(AbstractFlowNodeBuilder<?, ?> builder, ExclusiveGateway eg) {
+
+    return builder.exclusiveGateway(eg.getIdentifier())
+      .name(eg.getName())
+      .gatewayDirection(GatewayDirection.valueOf(eg.getDirection().getValue()));
+  }
+
+  /**
+   * Builder for a InclusiveGateway Node types.
+   *
+   * @param builder The builder.
+   * @param ig      The InclusiveGateway Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchInclusiveGateway(AbstractFlowNodeBuilder<?, ?> builder, InclusiveGateway ig) {
+
+    return builder.inclusiveGateway(ig.getIdentifier())
+      .name(ig.getName())
+      .gatewayDirection(GatewayDirection.valueOf(ig.getDirection().getValue()));
+  }
+
+  /**
+   * Builder for a MoveToLastGateway Node types.
+   *
+   * @param builder The builder.
+   * @param mlg     The MoveToLastGateway Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchMoveToLastGateway(AbstractFlowNodeBuilder<?, ?> builder, MoveToLastGateway mlg) {
+
+    return builder.moveToLastGateway()
+      .gatewayDirection(GatewayDirection.valueOf(mlg.getDirection().getValue()));
+  }
+
+  /**
+   * Builder for a MoveToNode Node types.
+   *
+   * @param builder The builder.
+   * @param mn      The MoveToNode Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchMoveToNode(AbstractFlowNodeBuilder<?, ?> builder, MoveToNode mn) {
+
+    return builder.moveToNode(mn.getGatewayId());
+  }
+
+  /**
+   * Builder for a ParallelGateway Node types.
+   *
+   * @param builder The builder.
+   * @param pg      The ParallelGateway Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchParallelGateway(AbstractFlowNodeBuilder<?, ?> builder, ParallelGateway pg) {
+
+    return builder.parallelGateway(pg.getIdentifier())
+      .name(pg.getName())
+      .gatewayDirection(GatewayDirection.valueOf(pg.getDirection().getValue()));
+  }
+
+  /**
+   * Builder for a Subprocess Node types.
+   *
+   * @param builder The builder.
+   * @param s       The Subprocess Node.
+   *
+   * @return The builder.
+   *
+   * @throws ScriptTaskDeserializeCodeFailure On error.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildBranchSubprocess(AbstractFlowNodeBuilder<?, ?> builder, Subprocess s)
+    throws ScriptTaskDeserializeCodeFailure {
+
+    SubProcessBuilder subProcessBuilder = builder.subProcess(s.getIdentifier()).name(s.getName());
+
+    if (Boolean.TRUE.equals(s.getAsyncBefore())) {
+      subProcessBuilder = subProcessBuilder.operatonAsyncBefore();
+    }
+
+    if (Boolean.TRUE.equals(s.getAsyncAfter())) {
+      subProcessBuilder = subProcessBuilder.operatonAsyncAfter();
+    }
+
+    if (s.isMultiInstance()) {
+      MultiInstanceLoopCharacteristicsBuilder multiInstanceBuilder = subProcessBuilder.multiInstance();
+
+      EmbeddedLoopReference loopRef = s.getLoopRef();
+
+      if (loopRef.hasCardinalityExpression()) {
+        multiInstanceBuilder = multiInstanceBuilder.cardinality(loopRef.getCardinalityExpression());
+      } else if (loopRef.hasDataInput()) {
+        multiInstanceBuilder = multiInstanceBuilder.operatonCollection(loopRef.getDataInputRefExpression())
+          .operatonElementVariable(loopRef.getInputDataName());
+      }
+
+      if (Boolean.TRUE.equals(loopRef.getParallel())) {
+        multiInstanceBuilder = multiInstanceBuilder.parallel();
+      } else {
+        multiInstanceBuilder = multiInstanceBuilder.sequential();
+      }
+
+      if (loopRef.hasCompleteConditionExpression()) {
+        multiInstanceBuilder = multiInstanceBuilder.completionCondition(loopRef.getCompleteConditionExpression());
+      }
+
+      subProcessBuilder = multiInstanceBuilder.multiInstanceDone();
+    }
+
+    switch (s.getType()) {
+      case EMBEDDED:
+        builder = subProcessBuilder.embeddedSubProcess().startEvent();
+        builder = build(builder, s.getNodes(), Setup.NONE);
+        builder = builder.subProcessDone();
+        break;
+
+      case TRANSACTION:
+        throw new BpmnModelFailure("Transaction subprocess not yet supported!");
+
+      default:
+        logger.warn("Subprocess named {} is of an unknown type.", s.getName());
+        break;
+    }
+
+    return builder;
+  }
+
+  /**
+   * Builder for an DelegateTask Node type.
+   *
+   * @param builder The builder.
+   * @param event   The Event Node.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildDelegateTask(AbstractFlowNodeBuilder<?, ?> builder, DelegateTask delegateTask) {
+
+    final Iterator<AbstractWorkflowDelegate> iter = workflowDelegates.iterator();
+    AbstractWorkflowDelegate delegate = null;
+
+    while (iter.hasNext()) {
+      final AbstractWorkflowDelegate d = iter.next();
+
+      if (d != null && d.fromTask().equals(delegateTask.getClass())) {
+        delegate = d;
+        break;
       }
     }
 
-    // must end in end event or connect to
+    if (delegate != null) {
+      builder = builder
+        .serviceTask(((Node) delegateTask).getIdentifier())
+        .name(((Node) delegateTask).getName())
+        .operatonDelegateExpression(delegate.getExpression());
+    } else {
+      throw new BpmnModelFailure("Task must have delegate representation!");
+    }
+
+    if (Boolean.TRUE.equals(delegateTask.getAsyncBefore())) {
+      builder = builder.operatonAsyncBefore();
+    }
+
+    if (Boolean.TRUE.equals(delegateTask.getAsyncAfter())) {
+      builder = builder.operatonAsyncAfter();
+    }
+
+    return builder;
+  }
+
+  /**
+   * Builder for an Event Node type.
+   *
+   * @param builder The builder.
+   * @param event   The Event Node.
+   * @param setup   The set up data.
+   *
+   * @return The builder.
+   */
+  private AbstractFlowNodeBuilder<?, ?> buildEvent(AbstractFlowNodeBuilder<?, ?> builder, Event event, Setup setup) {
+
+    if (event instanceof StartEvent startEvent) {
+      StartEventBuilder seBuilder = (StartEventBuilder) builder;
+
+      if (Boolean.TRUE.equals(startEvent.getAsyncBefore())) {
+        seBuilder = seBuilder.operatonAsyncBefore();
+      }
+
+      final boolean interrupting = Boolean.TRUE.equals(startEvent.getInterrupting());
+      final StartEventType type = startEvent.getType();
+      final String expression = startEvent.getExpression();
+
+      if (type != StartEventType.NONE && expression == null) {
+        throw new BpmnModelFailure(String.format("%s start event requires an expression", type));
+      }
+
+      seBuilder = seBuilder.id(startEvent.getIdentifier()).name(startEvent.getName());
+
+      switch (type) {
+        case MESSAGE_CORRELATION:
+          seBuilder = seBuilder.message(expression).interrupting(interrupting);
+          break;
+        case SCHEDULED:
+          seBuilder = seBuilder.timerWithCycle(expression).interrupting(interrupting);
+          break;
+        case SIGNAL:
+          seBuilder = seBuilder.signal(expression).interrupting(interrupting);
+          break;
+        case NONE:
+          seBuilder = seBuilder.interrupting(interrupting);
+          break;
+        default:
+          logger.warn("Start Event named {} has an unknown event type of {}.", startEvent.getName(), type);
+          break;
+      }
+
+      builder = seBuilder;
+
+      if (!setup.equals(Setup.NONE)) {
+        builder = builder.serviceTask(SETUP_TASK_ID).name("Setup").operatonDelegateExpression("${setupDelegate}");
+
+        switch (setup) {
+        case ASYNC_AFTER:
+          builder = builder.operatonAsyncAfter();
+          break;
+        case ASYNC_BEFORE:
+          builder = builder.operatonAsyncBefore();
+          break;
+        case ASYNC_BEFORE_AFTER:
+          builder = builder.operatonAsyncBefore().operatonAsyncAfter();
+          break;
+        case NONE, SIMPLE:
+          break;
+        default:
+          logger.warn("Start Event named {} has an unknown setup type of {}.", startEvent.getName(), setup);
+          break;
+        }
+      }
+    } else if (event instanceof EndEvent endEvent) {
+      builder = builder.endEvent(endEvent.getIdentifier()).name(endEvent.getName());
+    } else {
+      logger.warn("Event named {} is of an unknown type.", ((Node) event).getName());
+    }
 
     return builder;
   }
@@ -372,21 +501,21 @@ public class BpmnModelFactory {
     ExtensionElements extensions = model.newInstance(ExtensionElements.class);
 
     Map<String, JsonNode> initialContext = workflow.getInitialContext();
-    CamundaField icField = model.newInstance(CamundaField.class);
-    icField.setCamundaName("initialContext");
+    OperatonField icField = model.newInstance(OperatonField.class);
+    icField.setOperatonName("initialContext");
     try {
-      icField.setCamundaStringValue(objectMapper.writeValueAsString(initialContext));
-    } catch (JsonProcessingException e) {
+      icField.setOperatonStringValue(mapper.writeValueAsString(initialContext));
+    } catch (JacksonException e) {
       logger.warn("Failed to serialize initial context");
     }
     extensions.addChildElement(icField);
 
-    List<EmbeddedProcessor> processors = getProcessorScripts(workflow.getNodes());
-    CamundaField psField = model.newInstance(CamundaField.class);
-    psField.setCamundaName("processors");
+    List<EmbeddedProcessor> processors = getProcessorScripts(workflow, workflow.getNodes());
+    OperatonField psField = model.newInstance(OperatonField.class);
+    psField.setOperatonName("processors");
     try {
-      psField.setCamundaStringValue(objectMapper.writeValueAsString(processors));
-    } catch (JsonProcessingException e) {
+      psField.setOperatonStringValue(mapper.writeValueAsString(processors));
+    } catch (JacksonException e) {
       logger.warn("Failed to serialize processor scripts");
     }
     extensions.addChildElement(psField);
@@ -395,74 +524,85 @@ public class BpmnModelFactory {
     element.addChildElement(extensions);
   }
 
-  private void expressions(BpmnModelInstance model, List<Node> nodes) {
-    nodes.stream().forEach(node -> {
+  private void expressions(BpmnModelInstance model, Workflow workflow, List<Node> nodes) {
 
-      Optional<AbstractWorkflowDelegate> delegate = workflowDelegates.stream()
-          .filter(d -> d.fromTask().equals(node.getClass())).findAny();
+    final Iterator<Node> iter = nodes.iterator();
+
+    while (iter.hasNext()) {
+      final Node node = iter.next();
+
+      final Optional<AbstractWorkflowDelegate> delegate = workflowDelegates.stream()
+        .filter(d -> d.fromTask().equals(node.getClass())).findAny();
 
       if (delegate.isPresent()) {
+        final ExtensionElements extensions = model.newInstance(ExtensionElements.class);
 
-        ExtensionElements extensions = model.newInstance(ExtensionElements.class);
+        FieldUtils.getAllFieldsList(delegate.get().getClass()).forEach((Field df) -> {
+          if (!Expression.class.isAssignableFrom(df.getType())) return;
 
-        FieldUtils.getAllFieldsList(delegate.get().getClass()).stream()
-            .filter(df -> Expression.class.isAssignableFrom(df.getType()))
-            .map(df -> FieldUtils.getField(node.getClass(), df.getName(), true))
-            .filter(Objects::nonNull)
-            .forEach(f -> {
-              try {
-                Object value = f.get(node);
-                if (Objects.nonNull(value)) {
-                  CamundaField field = model.newInstance(CamundaField.class);
-                  field.setCamundaName(f.getName());
-                  field.setCamundaStringValue(serialize(value));
-                  extensions.addChildElement(field);
-                }
-              } catch (JsonProcessingException | IllegalArgumentException | IllegalAccessException e) {
-                // TODO: create custom exception and controller advice to handle better
-                throw new RuntimeException(e);
-              }
-            });
+          final Field f = FieldUtils.getField(node.getClass(), df.getName(), true);
 
-        ModelElementInstance element = model.getModelElementById(node.getIdentifier());
-        element.addChildElement(extensions);
+          if (f != null) {
+            final Object value;
+
+            try {
+              value = f.get(node);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+              throw new BpmnModelFailure(String.format("Workflow '%s' (%s) error: %s", workflow.getName(), workflow.getId(), e.getMessage()), e);
+            }
+
+            if (value != null) {
+              final OperatonField field = model.newInstance(OperatonField.class);
+              field.setOperatonName(f.getName());
+              field.setOperatonStringValue(serialize(value));
+              extensions.addChildElement(field);
+            }
+          }
+        });
+
+        model.getModelElementById(node.getIdentifier()).addChildElement(extensions);
       } else {
-        if (node instanceof Branch) {
-          expressions(model, ((Branch) node).getNodes());
-        } else if (node instanceof Subprocess) {
-          expressions(model, ((Subprocess) node).getNodes());
+        if (node instanceof Branch branch) {
+          expressions(model, workflow, branch.getNodes());
+        } else if (node instanceof Subprocess subprocess) {
+          expressions(model, workflow, subprocess.getNodes());
         } else if (node instanceof DelegateTask) {
-          // TODO: create custom exception and controller advice to handle better
-          throw new RuntimeException("Task must have delegate representation!");
+          throw new BpmnModelFailure(String.format("Task must have delegate representation for Workflow '%s' (%s)!", workflow.getName(), workflow.getId()));
         }
       }
-    });
+    }
   }
 
-  private List<EmbeddedProcessor> getProcessorScripts(List<Node> nodes) {
-    List<EmbeddedProcessor> scripts = new ArrayList<EmbeddedProcessor>();
-    nodes.stream().forEach(node -> {
-      if (node instanceof ProcessorTask) {
-        scripts.add(((ProcessorTask) node).getProcessor());
-      } else if (node instanceof Branch) {
-        scripts.addAll(getProcessorScripts(((Branch) node).getNodes()));
-      } else if (node instanceof Subprocess) {
-        scripts.addAll(getProcessorScripts(((Subprocess) node).getNodes()));
+  private List<EmbeddedProcessor> getProcessorScripts(Workflow workflow, List<Node> nodes) {
+
+    final List<EmbeddedProcessor> scripts = new ArrayList<>();
+
+    nodes.forEach(node -> {
+      if (node instanceof ProcessorTask processorTask) {
+        scripts.add(processorTask.getProcessor());
+      } else if (node instanceof Branch branch) {
+        scripts.addAll(getProcessorScripts(workflow, branch.getNodes()));
+      } else if (node instanceof Subprocess subprocess) {
+        scripts.addAll(getProcessorScripts(workflow, subprocess.getNodes()));
       } else if (node instanceof Task) {
-        logger.warn("Processor Script named {} is a non-processor task.", node.getName());
-      }
-      else {
-        logger.warn("Processor Script named {} is of an unknown type.", node.getName());
+        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor task ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+      } else if (node instanceof Event) {
+        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor event ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+      } else if (node == null) {
+        throw new BpmnModelFailure(String.format("A Process Script Node for Workflow '%s' (%s) is NULL.", workflow.getName(), workflow.getId()));
+      } else {
+        logger.warn("A Process Script named {} for Workflow '{}' ({}) is of an unknown type ({}).", node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
       }
     });
+
     return scripts;
   }
 
-  private String serialize(Object value) throws JsonProcessingException {
+  private String serialize(Object value) throws JacksonException {
     if (isSerializableType(value.getClass())) {
       return value.toString();
     } else {
-      return objectMapper.writeValueAsString(value);
+      return mapper.writeValueAsString(value);
     }
   }
 

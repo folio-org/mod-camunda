@@ -1,8 +1,5 @@
 package org.folio.rest.camunda.delegate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import java.io.FileWriter;
@@ -16,16 +13,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.model.DatabaseQueryTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
+/**
+ * Database query delegate.
+ */
 @Service
 @Scope("prototype")
-public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
+public class DatabaseQueryDelegate extends AbstractDatabaseIODelegate {
 
   private Expression query;
 
@@ -35,9 +39,15 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
 
   private Expression includeHeader;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     String queryTemplate = this.query.getValue(execution).toString();
 
@@ -49,15 +59,22 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
 
     Map<String, Object> inputs = getInputs(execution);
 
-    String key = this.designation.getValue(execution).toString();
-    String queryValue = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("query"), inputs);
+    final String key = this.designation.getValue(execution).toString();
+    final String queryValue;
+
+    try {
+      queryValue = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("query"), inputs);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
 
     Boolean includeHeaderValue = this.includeHeader != null && this.includeHeader.getValue(execution) != null &&
       Boolean.parseBoolean(this.includeHeader.getValue(execution).toString());
 
-    Connection conn = connectionService.getConnection(key);
-
-    try (Statement statement = conn.createStatement()) {
+    try (
+      final Connection conn = connectionService.getConnection(key);
+      final Statement statement = conn.createStatement();
+     ) {
       statement.execute(queryValue);
 
       ResultSet results = null;
@@ -87,17 +104,16 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
           if (hasOutputVariable(execution)) {
             setOutput(execution, count);
           } else {
-            getLogger().info("{} did not specify output variable for result count", getDelegateName(execution));
+            getLogger().info("{} did not specify output variable for result count", name);
           }
         }
 
         resultOp.finish();
       }
-    } finally {
-      conn.close();
     }
-
-    determineEndTime(execution, startTime);
+    catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
   }
 
   public void setQuery(Expression query) {
@@ -145,7 +161,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
 
     @Override
     public void next() throws SQLException {
-      ObjectNode row = objectMapper.createObjectNode();
+      ObjectNode row = mapper.createObjectNode();
       for (int count = 1; count <= metadata.getColumnCount(); ++count) {
         String columnName = metadata.getColumnName(count);
         row.put(columnName, results.getString(columnName));
@@ -154,7 +170,7 @@ public class DatabaseQueryDelegate extends AbstractDatabaseOutputDelegate {
     }
 
     @Override
-    public void finish() throws JsonProcessingException {
+    public void finish() throws JacksonException {
       setOutput(execution, output);
     }
 

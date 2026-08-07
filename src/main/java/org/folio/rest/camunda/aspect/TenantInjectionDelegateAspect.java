@@ -2,8 +2,8 @@ package org.folio.rest.camunda.aspect;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateTask;
 import org.folio.spring.tenant.exception.NoTenantException;
 import org.folio.spring.tenant.properties.TenantProperties;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
@@ -19,17 +19,17 @@ public class TenantInjectionDelegateAspect {
     this.tenantProperties = tenantProperties;
   }
 
-  @Before("execution(* org.camunda.bpm.engine.delegate.JavaDelegate.execute (org.camunda.bpm.engine.delegate.DelegateExecution)) && args(execution)")
+  @Before("execution(* org.operaton.bpm.engine.delegate.JavaDelegate.execute (org.operaton.bpm.engine.delegate.DelegateExecution)) && args(execution)")
   public void beforeDelegateExecution(DelegateExecution execution) {
     setTenant(execution.getTenantId());
   }
 
-  @Before("execution(* org.camunda.bpm.engine.delegate.ExecutionListener.notify (org.camunda.bpm.engine.delegate.DelegateExecution)) && args(execution)")
+  @Before("execution(* org.operaton.bpm.engine.delegate.ExecutionListener.notify (org.operaton.bpm.engine.delegate.DelegateExecution)) && args(execution)")
   public void beforeExecutionListenerNotify(DelegateExecution execution) {
     setTenant(execution.getTenantId());
   }
 
-  @Before("execution(* org.camunda.bpm.engine.delegate.TaskListener.notify (org.camunda.bpm.engine.delegate.DelegateTask)) && args(task)")
+  @Before("execution(* org.operaton.bpm.engine.delegate.TaskListener.notify (org.operaton.bpm.engine.delegate.DelegateTask)) && args(task)")
   public void beforeTaskListenerNotify(DelegateTask task) {
     setTenant(task.getTenantId());
   }

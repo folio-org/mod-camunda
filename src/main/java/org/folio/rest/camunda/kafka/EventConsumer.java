@@ -1,16 +1,15 @@
 package org.folio.rest.camunda.kafka;
 
 import java.util.Map;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.camunda.bpm.engine.RuntimeService;
 import org.folio.spring.messaging.model.Event;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
+import org.operaton.bpm.engine.RuntimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 public class EventConsumer {
@@ -19,11 +18,11 @@ public class EventConsumer {
 
   private RuntimeService runtimeService;
 
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
-  public EventConsumer(RuntimeService runtimeService, ObjectMapper objectMapper) {
+  public EventConsumer(RuntimeService runtimeService, JsonMapper mapper) {
     this.runtimeService = runtimeService;
-    this.objectMapper = objectMapper;
+    this.mapper = mapper;
   }
 
   @KafkaListener(
@@ -43,7 +42,7 @@ public class EventConsumer {
 
     logger.info("Correlating message {}", event.getPathPattern());
 
-    Map<String, Object> variables = objectMapper.convertValue(event.getPayload(),
+    Map<String, Object> variables = mapper.convertValue(event.getPayload(),
         new TypeReference<Map<String, Object>>() {});
 
     runtimeService.createMessageCorrelation(event.getPathPattern())

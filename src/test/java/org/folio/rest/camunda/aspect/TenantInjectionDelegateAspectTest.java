@@ -1,18 +1,18 @@
 package org.folio.rest.camunda.aspect;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.folio.spring.tenant.exception.NoTenantException;
 import org.folio.spring.tenant.properties.TenantProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.DelegateTask;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -38,7 +38,7 @@ class TenantInjectionDelegateAspectTest {
     when(execution.getTenantId()).thenReturn(MOCK_TENANT);
     tenantInjectionDelegateAspect.beforeDelegateExecution(execution);
 
-    Mockito.verify(execution).getTenantId();
+    verify(execution).getTenantId();
 
     when(execution.getTenantId()).thenReturn(null);
     when(tenantProperties.isForceTenant()).thenReturn(true);
@@ -50,7 +50,7 @@ class TenantInjectionDelegateAspectTest {
     when(execution.getTenantId()).thenReturn(MOCK_TENANT);
     tenantInjectionDelegateAspect.beforeExecutionListenerNotify(execution);
 
-    Mockito.verify(execution).getTenantId();
+    verify(execution).getTenantId();
 
     when(execution.getTenantId()).thenReturn(null);
     when(tenantProperties.isForceTenant()).thenReturn(true);
@@ -62,7 +62,7 @@ class TenantInjectionDelegateAspectTest {
     when(task.getTenantId()).thenReturn(MOCK_TENANT);
     tenantInjectionDelegateAspect.beforeTaskListenerNotify(task);
 
-    Mockito.verify(task).getTenantId();
+    verify(task).getTenantId();
 
     when(task.getTenantId()).thenReturn(null);
     when(tenantProperties.isForceTenant()).thenReturn(true);

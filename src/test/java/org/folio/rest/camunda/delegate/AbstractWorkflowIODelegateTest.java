@@ -6,22 +6,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.spring.test.helper.MapperHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractWorkflowIODelegateTest {
@@ -35,14 +37,18 @@ class AbstractWorkflowIODelegateTest {
   @Mock
   private Expression outputVariable;
 
-  @InjectMocks
-  private ObjectMapper objectMapper;
+  private JsonMapper mapper;
 
   @Spy
   private Impl abstractWorkflowIODelegate;
 
+  @BeforeEach
+  void beforeEach() {
+    mapper = spy(MapperHelper.build());
+  }
+
   @Test
-  void testGetOutputVariableWorks() throws JsonProcessingException {
+  void testGetOutputVariableWorks() throws JacksonException {
     final EmbeddedVariable embeddedVariable = new EmbeddedVariable();
     embeddedVariable.setKey(KEY);
     embeddedVariable.setAsJson(true);
@@ -50,9 +56,11 @@ class AbstractWorkflowIODelegateTest {
     embeddedVariable.setSpin(true);
     embeddedVariable.setType(VariableType.LOCAL);
 
-    when(outputVariable.getValue(any())).thenReturn(objectMapper.writeValueAsString(embeddedVariable));
+    final String embeddedString = mapper.writeValueAsString(embeddedVariable);
+
+    when(outputVariable.getValue(any())).thenReturn(embeddedString);
     setField(abstractWorkflowIODelegate, "outputVariable", outputVariable);
-    setField(abstractWorkflowIODelegate, "objectMapper", objectMapper);
+    setField(abstractWorkflowIODelegate, "mapper", mapper);
 
     final EmbeddedVariable responseVariable = abstractWorkflowIODelegate.getOutputVariable(delegateExecution);
 
@@ -102,13 +110,14 @@ class AbstractWorkflowIODelegateTest {
   private static class Impl extends AbstractWorkflowIODelegate {
 
     @Override
-    public void execute(DelegateExecution execution) throws Exception {
+    protected void performExecute(DelegateExecution execution, String name, String id) {
+      // This is a test and should not do anything.
     }
 
     @Override
     public Class<?> fromTask() {
       return null;
     }
-  };
+  }
 
 }

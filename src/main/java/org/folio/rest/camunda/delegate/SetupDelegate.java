@@ -1,18 +1,19 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.camunda.spin.Spin.JSON;
+import static org.operaton.spin.Spin.JSON;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.Map;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.spin.json.SpinJsonNode;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.spin.json.SpinJsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 @Service
 @Scope("prototype")
@@ -28,18 +29,24 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
 
   private Expression processors;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
-    getLogger().info("loading initial context");
+    getLogger().info("loading initial context with definition id {}", execution.getProcessDefinitionId());
 
-    Map<String, Object> context = objectMapper.readValue(initialContext.getValue(execution).toString(),
+    Map<String, Object> context = mapper.readValue(initialContext.getValue(execution).toString(),
       new TypeReference<Map<String, Object>>() {
     });
 
     for (Map.Entry<String, Object> entry : context.entrySet()) {
-      SpinJsonNode node = JSON(objectMapper.writeValueAsString(entry.getValue()));
+      SpinJsonNode node = JSON(mapper.writeValueAsString(entry.getValue()));
       execution.setVariable(entry.getKey(), node);
       getLogger().info("{}: {}", entry.getKey(), node);
     }
@@ -51,7 +58,7 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
 
     getLogger().info("loading scripts");
 
-    List<EmbeddedProcessor> processorsValue = objectMapper.readValue(this.processors.getValue(execution).toString(),
+    List<EmbeddedProcessor> processorsValue = mapper.readValue(this.processors.getValue(execution).toString(),
       new TypeReference<List<EmbeddedProcessor>>() {
     });
 
@@ -59,11 +66,14 @@ public class SetupDelegate extends AbstractRuntimeDelegate {
       String extension = processor.getScriptType().getExtension();
       String functionName = processor.getFunctionName();
       String code = processor.getCode();
-      scriptEngineService.registerScript(extension, functionName, code);
-      getLogger().info("{}: {}", processor.getFunctionName(), processor.getCode());
-    }
 
-    determineEndTime(execution, startTime);
+      try {
+        scriptEngineService.registerScript(extension, functionName, code);
+        getLogger().info("{}: {}", processor.getFunctionName(), processor.getCode());
+      } catch (Exception e) {
+        throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+      }
+    }
   }
 
   public void setInitialContext(Expression initialContext) {

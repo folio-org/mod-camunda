@@ -1,6 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
 import static org.folio.rest.camunda.utility.TestUtility.i;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,9 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,14 +21,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.folio.rest.workflow.model.FileTask;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -39,14 +35,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FileDelegateTest {
 
   @Spy
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   @Spy
   protected RuntimeService runtimeService;
@@ -81,7 +84,6 @@ class FileDelegateTest {
   @InjectMocks
   FileDelegate delegate;
 
-  @SuppressWarnings("serial")
   private final Map<String, Object> mockData = new HashMap<>() {{
     put("data", new ArrayList<>() {{
       add("Hello, World!");
@@ -106,6 +108,11 @@ class FileDelegateTest {
     delegate.setTarget(target);
   }
 
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(FileTask.class, delegate.fromTask());
+  }
+
   @ParameterizedTest
   @MethodSource("executionStream")
   void testExecute(String inputVariablesValue, String outputVariableValue, String pathValue, String lineValue,
@@ -119,7 +126,7 @@ class FileDelegateTest {
 
     when(inputVariables.getValue(any(DelegateExecution.class))).thenReturn(inputVariablesValue);
 
-    Set<EmbeddedVariable> inputs = objectMapper.readValue(inputVariablesValue, new TypeReference<Set<EmbeddedVariable>>() {});
+    Set<EmbeddedVariable> inputs = mapper.readValue(inputVariablesValue, new TypeReference<Set<EmbeddedVariable>>() {});
 
     for (EmbeddedVariable variable : inputs) {
       Object value = mockData.get(variable.getKey());
@@ -153,7 +160,7 @@ class FileDelegateTest {
 
       switch (fileOp) {
         case LIST, READ, READ_LINE, LINE_COUNT:
-          EmbeddedVariable output = objectMapper.readValue(outputVariableValue, EmbeddedVariable.class);
+          EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
           switch (output.getType()) {
             case LOCAL:
               verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
@@ -206,7 +213,7 @@ class FileDelegateTest {
    *     - Class<Exception> target (input variable identifier)
    *
    * @throws IOException
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
   private static Stream<Arguments> executionStream() throws IOException {
 

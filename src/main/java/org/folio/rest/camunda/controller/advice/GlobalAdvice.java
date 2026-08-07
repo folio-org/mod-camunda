@@ -1,8 +1,11 @@
 package org.folio.rest.camunda.controller.advice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.folio.rest.camunda.exception.BpmnModelFailure;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.DelegateSpinFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
+import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptEngineLoadFailed;
 import org.folio.rest.camunda.exception.ScriptEngineUnsupported;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
@@ -12,19 +15,48 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @RestControllerAdvice
 public class GlobalAdvice extends AbstractAdvice {
 
-  ObjectMapper objectMapper;
+  JsonMapper mapper;
 
   public GlobalAdvice() {
-    this.objectMapper = new ObjectMapper();
+    this.mapper = JsonMapper
+      .builderWithJackson2Defaults()
+      .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .configure(MapperFeature.REQUIRE_TYPE_ID_FOR_SUBTYPES, true)
+      .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+      .configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true)
+      .changeDefaultPropertyInclusion(incl -> incl
+        .withValueInclusion(JsonInclude.Include.NON_NULL)
+        .withContentInclusion(JsonInclude.Include.NON_NULL)
+      )
+      .findAndAddModules()
+      .build();
   }
 
   @Override
-  protected ObjectMapper getObjectMapper() {
-    return objectMapper;
+  protected JsonMapper getMapper() {
+    return mapper;
+  }
+
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(BpmnModelFailure.class)
+  public ResponseEntity<String> handleBpmnModelFailure(BpmnModelFailure exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
+  }
+
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(DelegateExecutionFailure.class)
+  public ResponseEntity<String> handleDelegateExecutionFailure(DelegateExecutionFailure exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
   }
 
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -37,6 +69,12 @@ public class GlobalAdvice extends AbstractAdvice {
   @ExceptionHandler(EmailDelegateAddressFailure.class)
   public ResponseEntity<String> handleEmailDelegateAddressFailure(EmailDelegateAddressFailure exception) {
     return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
+  }
+
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(RequestMissingWorkflowException.class)
+  public ResponseEntity<String> handleRequestMissingWorkflowException(RequestMissingWorkflowException exception) {
+    return buildError(exception, HttpStatus.BAD_REQUEST, MediaType.APPLICATION_JSON);
   }
 
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -55,6 +93,19 @@ public class GlobalAdvice extends AbstractAdvice {
   @ExceptionHandler(WorkflowAlreadyActiveException.class)
   public ResponseEntity<String> handleWorkflowAlreadyActiveException(WorkflowAlreadyActiveException exception) {
     return buildError(exception, HttpStatus.BAD_REQUEST, MediaType.APPLICATION_JSON);
+  }
+
+  /**
+   * Catch all exception handler.
+   *
+   * @param exception The exception.
+   *
+   * @return The generated response.
+   */
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<String> handleException(Exception exception) {
+    return buildError(exception, HttpStatus.INTERNAL_SERVER_ERROR, MediaType.APPLICATION_JSON);
   }
 
 }

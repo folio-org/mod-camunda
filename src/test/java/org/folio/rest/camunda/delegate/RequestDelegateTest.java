@@ -7,23 +7,18 @@ import static org.folio.spring.test.mock.MockMvcConstant.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
+import org.folio.spring.test.helper.MapperHelper;
 import org.folio.spring.web.service.HttpService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,11 +26,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class RequestDelegateTest {
@@ -58,7 +58,7 @@ class RequestDelegateTest {
   private Expression requestExpression;
 
   @InjectMocks
-  private RequestDelegate requestDelegate;
+  private RequestDelegate delegate;
 
   @Mock
   ResponseEntity<Object> responseEntity;
@@ -71,13 +71,13 @@ class RequestDelegateTest {
 
   private String requestStr;
 
-  private ObjectMapper mapper;
+  private JsonMapper mapper;
 
   private HttpHeaders httpHeaders;
 
   @BeforeEach
-  void beforeEach() throws JsonProcessingException {
-    mapper = new ObjectMapper();
+  void beforeEach() throws JacksonException {
+    mapper = MapperHelper.build();
 
     request = new Request();
     request.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -102,7 +102,41 @@ class RequestDelegateTest {
 
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
+
+    verify(delegateExecution, never()).setVariable(anyString(), any());
+    verify(delegateExecution, never()).setVariableLocal(anyString(), any());
+  }
+
+  @Test
+  void testExecuteWithEmptyBodyTrueWorks() throws Exception {
+
+    setField(request, "bodyTemplate", null);
+    setField(request, "sendEmptyBody", true);
+    requestStr = "{\"url\":\"http://localhost/\",\"method\":\"GET\",\"contentType\":\"application/json\",\"accept\":\"application/json\",\"bodyTemplate\":null,\"sendEmptyBody\":true,\"iterable\":false,\"iterableKey\":null,\"responseKey\":null}";
+
+    setupExecuteMocking(false);
+
+    when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
+
+    delegate.execute(delegateExecution);
+
+    verify(delegateExecution, never()).setVariable(anyString(), any());
+    verify(delegateExecution, never()).setVariableLocal(anyString(), any());
+  }
+
+  @Test
+  void testExecuteWithEmptyBodyFalseWorks() throws Exception {
+
+    setField(request, "bodyTemplate", null);
+    setField(request, "sendEmptyBody", false);
+    requestStr = "{\"url\":\"http://localhost/\",\"method\":\"GET\",\"contentType\":\"application/json\",\"accept\":\"application/json\",\"bodyTemplate\":null,\"sendEmptyBody\":false,\"iterable\":false,\"iterableKey\":null,\"responseKey\":null}";
+
+    setupExecuteMocking(false);
+
+    when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
+
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -116,7 +150,7 @@ class RequestDelegateTest {
 
     setupExecuteMocking(true);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -131,7 +165,7 @@ class RequestDelegateTest {
 
     setupExecuteMocking(true);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -144,7 +178,7 @@ class RequestDelegateTest {
 
     setupExecuteMocking(true);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution).setVariableLocal(anyString(), any());
@@ -157,7 +191,7 @@ class RequestDelegateTest {
 
     setupExecuteMocking(true);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -171,7 +205,7 @@ class RequestDelegateTest {
 
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -181,10 +215,9 @@ class RequestDelegateTest {
   void testExecuteWorksWithToken() throws Exception {
     setupExecuteMocking(false);
 
-    when(delegateExecution.getVariable(eq(TOKEN_HEADER_NAME))).thenReturn(UUID);
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
     verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
@@ -198,31 +231,30 @@ class RequestDelegateTest {
 
     setupExecuteMocking(true);
 
-    requestDelegate.execute(delegateExecution);
+    delegate.execute(delegateExecution);
 
-    verify(delegateExecution, never()).setVariable(anyString(), any());
     verify(delegateExecution, never()).setVariableLocal(anyString(), any());
   }
 
   @Test
   void testSetHeaderOutputVariablesWorks() {
-    setField(requestDelegate, "headerOutputVariables", null);
+    setField(delegate, "headerOutputVariables", null);
 
-    requestDelegate.setHeaderOutputVariables(requestExpression);
-    assertEquals(requestExpression, getField(requestDelegate, "headerOutputVariables"));
+    delegate.setHeaderOutputVariables(requestExpression);
+    assertEquals(requestExpression, getField(delegate, "headerOutputVariables"));
   }
 
   @Test
   void testSetRequestWorks() {
-    setField(requestDelegate, "request", null);
+    setField(delegate, "request", null);
 
-    requestDelegate.setRequest(requestExpression);
-    assertEquals(requestExpression, getField(requestDelegate, "request"));
+    delegate.setRequest(requestExpression);
+    assertEquals(requestExpression, getField(delegate, "request"));
   }
 
   @Test
   void testFromTaskWorks() {
-    assertEquals(RequestTask.class, requestDelegate.fromTask());
+    assertEquals(RequestTask.class, delegate.fromTask());
   }
 
   /**
@@ -230,19 +262,18 @@ class RequestDelegateTest {
    *
    * @param hasKey Set to TRUE if key is present; FALSE otherwise.
    *
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
-  private void setupExecuteMocking(boolean hasKey) throws JsonProcessingException {
-    setField(requestDelegate, "headerOutputVariables", headerOutputVariablesExpression);
-    setField(requestDelegate, "httpService", httpService);
-    setField(requestDelegate, "request", requestExpression);
-    setField(requestDelegate, "objectMapper", mapper);
+  private void setupExecuteMocking(boolean hasKey) throws JacksonException {
+    setField(delegate, "headerOutputVariables", headerOutputVariablesExpression);
+    setField(delegate, "httpService", httpService);
+    setField(delegate, "request", requestExpression);
+    setField(delegate, "mapper", mapper);
 
     if (hasKey) {
       embeddedVariable.setKey(TOKEN_HEADER_NAME);
       setField(responseEntity, "headers", httpHeaders);
 
-      when(delegateExecution.getVariable(eq(TOKEN_HEADER_NAME))).thenReturn(UUID);
       when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
     }
 

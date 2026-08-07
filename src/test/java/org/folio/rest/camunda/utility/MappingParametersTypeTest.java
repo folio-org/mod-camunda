@@ -6,57 +6,57 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Objects;
 import java.util.stream.Stream;
-import org.folio.AlternativeTitleType;
-import org.folio.Alternativetitletypes;
-import org.folio.CallNumberType;
-import org.folio.Callnumbertypes;
-import org.folio.ClassificationType;
-import org.folio.Classificationtypes;
-import org.folio.ContributorNameType;
-import org.folio.ContributorType;
-import org.folio.Contributornametypes;
-import org.folio.Contributortypes;
-import org.folio.ElectronicAccessRelationship;
-import org.folio.Electronicaccessrelationships;
-import org.folio.HoldingsNoteType;
-import org.folio.HoldingsType;
-import org.folio.Holdingsnotetypes;
-import org.folio.Holdingstypes;
-import org.folio.IdentifierType;
-import org.folio.Identifiertypes;
-import org.folio.IllPolicy;
-import org.folio.Illpolicies;
-import org.folio.InstanceFormat;
-import org.folio.InstanceNoteType;
-import org.folio.InstanceRelationshipType;
-import org.folio.InstanceStatus;
-import org.folio.InstanceType;
-import org.folio.Instanceformats;
-import org.folio.Instancenotetypes;
-import org.folio.Instancerelationshiptypes;
-import org.folio.Instancestatuses;
-import org.folio.Instancetypes;
-import org.folio.IssuanceMode;
-import org.folio.Issuancemodes;
-import org.folio.ItemDamageStatus;
-import org.folio.ItemNoteType;
-import org.folio.Itemdamagedstatuses;
-import org.folio.Itemnotetypes;
-import org.folio.Loantype;
-import org.folio.Loantypes;
-import org.folio.Location;
-import org.folio.Locations;
 import org.folio.MarcFieldProtectionSettingsCollection;
-import org.folio.Materialtypes;
-import org.folio.Mtype;
-import org.folio.NatureOfContentTerm;
-import org.folio.Natureofcontentterms;
-import org.folio.StatisticalCode;
-import org.folio.StatisticalCodeType;
-import org.folio.Statisticalcodes;
-import org.folio.Statisticalcodetypes;
 import org.folio.rest.camunda.utility.MappingParametersType.ParametersTypeLookupException;
+import org.folio.rest.jaxrs.model.AlternativeTitleType;
+import org.folio.rest.jaxrs.model.AlternativeTitleTypes;
+import org.folio.rest.jaxrs.model.CallNumberType;
+import org.folio.rest.jaxrs.model.CallNumberTypes;
+import org.folio.rest.jaxrs.model.ClassificationType;
+import org.folio.rest.jaxrs.model.ClassificationTypes;
+import org.folio.rest.jaxrs.model.ContributorNameType;
+import org.folio.rest.jaxrs.model.ContributorNameTypes;
+import org.folio.rest.jaxrs.model.ContributorType;
+import org.folio.rest.jaxrs.model.ContributorTypes;
+import org.folio.rest.jaxrs.model.ElectronicAccessRelationship;
+import org.folio.rest.jaxrs.model.ElectronicAccessRelationships;
+import org.folio.rest.jaxrs.model.HoldingsNoteType;
+import org.folio.rest.jaxrs.model.HoldingsNoteTypes;
+import org.folio.rest.jaxrs.model.HoldingsType;
+import org.folio.rest.jaxrs.model.HoldingsTypes;
+import org.folio.rest.jaxrs.model.IdentifierType;
+import org.folio.rest.jaxrs.model.IdentifierTypes;
+import org.folio.rest.jaxrs.model.IllPolicies;
+import org.folio.rest.jaxrs.model.IllPolicy;
+import org.folio.rest.jaxrs.model.InstanceFormat;
+import org.folio.rest.jaxrs.model.InstanceFormats;
+import org.folio.rest.jaxrs.model.InstanceNoteType;
+import org.folio.rest.jaxrs.model.InstanceNoteTypes;
+import org.folio.rest.jaxrs.model.InstanceRelationshipType;
+import org.folio.rest.jaxrs.model.InstanceRelationshipTypes;
+import org.folio.rest.jaxrs.model.InstanceStatus;
+import org.folio.rest.jaxrs.model.InstanceStatuses;
+import org.folio.rest.jaxrs.model.InstanceType;
+import org.folio.rest.jaxrs.model.InstanceTypes;
+import org.folio.rest.jaxrs.model.IssuanceMode;
+import org.folio.rest.jaxrs.model.IssuanceModes;
+import org.folio.rest.jaxrs.model.ItemDamageStatus;
+import org.folio.rest.jaxrs.model.ItemDamageStatuses;
+import org.folio.rest.jaxrs.model.ItemNoteType;
+import org.folio.rest.jaxrs.model.ItemNoteTypes;
+import org.folio.rest.jaxrs.model.LoanType;
+import org.folio.rest.jaxrs.model.LoanTypes;
+import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.Locations;
 import org.folio.rest.jaxrs.model.MarcFieldProtectionSetting;
+import org.folio.rest.jaxrs.model.MaterialType;
+import org.folio.rest.jaxrs.model.MaterialTypes;
+import org.folio.rest.jaxrs.model.NatureOfContentTerm;
+import org.folio.rest.jaxrs.model.NatureOfContentTerms;
+import org.folio.rest.jaxrs.model.StatisticalCode;
+import org.folio.rest.jaxrs.model.StatisticalCodeType;
+import org.folio.rest.jaxrs.model.StatisticalCodeTypes;
+import org.folio.rest.jaxrs.model.StatisticalCodes;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -92,10 +92,10 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.ISSUANCE_MODES, IssuanceMode.class),
       Arguments.of(MappingParametersType.ITEM_DAMAGED_STATUSES, ItemDamageStatus.class),
       Arguments.of(MappingParametersType.ITEM_NOTE_TYPES, ItemNoteType.class),
-      Arguments.of(MappingParametersType.LOAN_TYPES, Loantype.class),
+      Arguments.of(MappingParametersType.LOAN_TYPES, LoanType.class),
       Arguments.of(MappingParametersType.LOCATIONS, Location.class),
       Arguments.of(MappingParametersType.MARC_FIELD_PROTECTION_SETTINGS, MarcFieldProtectionSetting.class),
-      Arguments.of(MappingParametersType.MATERIAL_TYPES, Mtype.class),
+      Arguments.of(MappingParametersType.MATERIAL_TYPES, MaterialType.class),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, NatureOfContentTerm.class),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, StatisticalCodeType.class),
       Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class));
@@ -109,31 +109,31 @@ class MappingParametersTypeTest {
 
   static Stream<Arguments> testGetCollectionTypeStream() {
     return Stream.of(
-      Arguments.of(MappingParametersType.ALTERNATIVE_TITLE_TYPES, Alternativetitletypes.class),
-      Arguments.of(MappingParametersType.CALL_NUMBER_TYPES, Callnumbertypes.class),
-      Arguments.of(MappingParametersType.CLASSIFICATION_TYPES, Classificationtypes.class),
-      Arguments.of(MappingParametersType.CONTRIBUTOR_NAME_TYPES, Contributornametypes.class),
-      Arguments.of(MappingParametersType.CONTRIBUTOR_TYPES, Contributortypes.class),
-      Arguments.of(MappingParametersType.ELECTRONIC_ACCESS_RELATIONSHIPS, Electronicaccessrelationships.class),
-      Arguments.of(MappingParametersType.HOLDINGS_NOTE_TYPES, Holdingsnotetypes.class),
-      Arguments.of(MappingParametersType.HOLDINGS_TYPES, Holdingstypes.class),
-      Arguments.of(MappingParametersType.IDENTIFIER_TYPES, Identifiertypes.class),
-      Arguments.of(MappingParametersType.ILL_POLICIES, Illpolicies.class),
-      Arguments.of(MappingParametersType.INSTANCE_FORMATS, Instanceformats.class),
-      Arguments.of(MappingParametersType.INSTANCE_NOTE_TYPES, Instancenotetypes.class),
-      Arguments.of(MappingParametersType.INSTANCE_RELATIONSHIP_TYPES, Instancerelationshiptypes.class),
-      Arguments.of(MappingParametersType.INSTANCE_STATUSES, Instancestatuses.class),
-      Arguments.of(MappingParametersType.INSTANCE_TYPES, Instancetypes.class),
-      Arguments.of(MappingParametersType.ISSUANCE_MODES, Issuancemodes.class),
-      Arguments.of(MappingParametersType.ITEM_DAMAGED_STATUSES, Itemdamagedstatuses.class),
-      Arguments.of(MappingParametersType.ITEM_NOTE_TYPES, Itemnotetypes.class),
-      Arguments.of(MappingParametersType.LOAN_TYPES, Loantypes.class),
+      Arguments.of(MappingParametersType.ALTERNATIVE_TITLE_TYPES, AlternativeTitleTypes.class),
+      Arguments.of(MappingParametersType.CALL_NUMBER_TYPES, CallNumberTypes.class),
+      Arguments.of(MappingParametersType.CLASSIFICATION_TYPES, ClassificationTypes.class),
+      Arguments.of(MappingParametersType.CONTRIBUTOR_NAME_TYPES, ContributorNameTypes.class),
+      Arguments.of(MappingParametersType.CONTRIBUTOR_TYPES, ContributorTypes.class),
+      Arguments.of(MappingParametersType.ELECTRONIC_ACCESS_RELATIONSHIPS, ElectronicAccessRelationships.class),
+      Arguments.of(MappingParametersType.HOLDINGS_NOTE_TYPES, HoldingsNoteTypes.class),
+      Arguments.of(MappingParametersType.HOLDINGS_TYPES, HoldingsTypes.class),
+      Arguments.of(MappingParametersType.IDENTIFIER_TYPES, IdentifierTypes.class),
+      Arguments.of(MappingParametersType.ILL_POLICIES, IllPolicies.class),
+      Arguments.of(MappingParametersType.INSTANCE_FORMATS, InstanceFormats.class),
+      Arguments.of(MappingParametersType.INSTANCE_NOTE_TYPES, InstanceNoteTypes.class),
+      Arguments.of(MappingParametersType.INSTANCE_RELATIONSHIP_TYPES, InstanceRelationshipTypes.class),
+      Arguments.of(MappingParametersType.INSTANCE_STATUSES, InstanceStatuses.class),
+      Arguments.of(MappingParametersType.INSTANCE_TYPES, InstanceTypes.class),
+      Arguments.of(MappingParametersType.ISSUANCE_MODES, IssuanceModes.class),
+      Arguments.of(MappingParametersType.ITEM_DAMAGED_STATUSES, ItemDamageStatuses.class),
+      Arguments.of(MappingParametersType.ITEM_NOTE_TYPES, ItemNoteTypes.class),
+      Arguments.of(MappingParametersType.LOAN_TYPES, LoanTypes.class),
       Arguments.of(MappingParametersType.LOCATIONS, Locations.class),
       Arguments.of(MappingParametersType.MARC_FIELD_PROTECTION_SETTINGS, MarcFieldProtectionSettingsCollection.class),
-      Arguments.of(MappingParametersType.MATERIAL_TYPES, Materialtypes.class),
-      Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, Natureofcontentterms.class),
-      Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, Statisticalcodetypes.class),
-      Arguments.of(MappingParametersType.STATISTICAL_CODES, Statisticalcodes.class));
+      Arguments.of(MappingParametersType.MATERIAL_TYPES, MaterialTypes.class),
+      Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, NatureOfContentTerms.class),
+      Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, StatisticalCodeTypes.class),
+      Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCodes.class));
   }
 
   @ParameterizedTest
@@ -239,10 +239,10 @@ class MappingParametersTypeTest {
       Arguments.of(MappingParametersType.ISSUANCE_MODES, IssuanceMode.class, null),
       Arguments.of(MappingParametersType.ITEM_DAMAGED_STATUSES, ItemDamageStatus.class, null),
       Arguments.of(MappingParametersType.ITEM_NOTE_TYPES, ItemNoteType.class, null),
-      Arguments.of(MappingParametersType.LOAN_TYPES, Loantype.class, null),
+      Arguments.of(MappingParametersType.LOAN_TYPES, LoanType.class, null),
       Arguments.of(MappingParametersType.LOCATIONS, Location.class, null),
       Arguments.of(MappingParametersType.MARC_FIELD_PROTECTION_SETTINGS, MarcFieldProtectionSetting.class, null),
-      Arguments.of(MappingParametersType.MATERIAL_TYPES, Mtype.class, null),
+      Arguments.of(MappingParametersType.MATERIAL_TYPES, MaterialType.class, null),
       Arguments.of(MappingParametersType.NATURE_OF_CONTENT_TERMS, NatureOfContentTerm.class, null),
       Arguments.of(MappingParametersType.STATISTICAL_CODE_TYPES, StatisticalCodeType.class, null),
       Arguments.of(MappingParametersType.STATISTICAL_CODES, StatisticalCode.class, null));

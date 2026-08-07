@@ -1,10 +1,12 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,19 +15,14 @@ import java.io.File;
 import java.net.URI;
 import java.util.Objects;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.VFS;
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
-import org.camunda.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.ScriptEngineService;
+import org.folio.rest.workflow.model.FtpTask;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,17 +30,22 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 class FtpDelegateTest {
 
   @Spy
-  protected ObjectMapper objectMapper;
+  protected JsonMapper mapper;
 
   @Spy
   protected RuntimeService runtimeService;
@@ -108,6 +110,11 @@ class FtpDelegateTest {
     delegate.setPassword(password);
   }
 
+  @Test
+  void testFromTaskWorks() {
+    assertEquals(FtpTask.class, delegate.fromTask());
+  }
+
   @ParameterizedTest
   @MethodSource("executionStream")
   void testExecute(
@@ -140,7 +147,7 @@ class FtpDelegateTest {
     lenient().when(username.getValue(any(DelegateExecution.class))).thenReturn(usernameValue);
     lenient().when(password.getValue(any(DelegateExecution.class))).thenReturn(passwordValue);
 
-    try (MockedStatic<VFS> utility = Mockito.mockStatic(VFS.class)) {
+    try (MockedStatic<VFS> utility = mockStatic(VFS.class)) {
 
       FileSystemManager manager = mock(FileSystemManager.class);
 
@@ -224,7 +231,7 @@ class FtpDelegateTest {
    *         - port
    *         - username
    *         - password
-   * @throws JsonProcessingException
+   * @throws JacksonException
    */
   private static Stream<Arguments> executionStream() {
     // arguments required for delegate expression

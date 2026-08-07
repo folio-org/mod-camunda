@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.folio.rest.camunda.utility.FileUtility.createFile;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import jakarta.mail.internet.AddressException;
@@ -7,11 +9,11 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.File;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.workflow.model.EmailTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -47,9 +49,15 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
     this.emailSender = emailSender;
   }
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
     String subjectTemplate = this.mailSubject.getValue(execution).toString();
     String textTemplate = this.mailText.getValue(execution).toString();
@@ -71,18 +79,39 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
     Configuration cfg = new Configuration(Configuration.VERSION_2_3_23);
     cfg.setTemplateLoader(stringLoader);
 
-    Map<String, Object> inputs = getInputs(execution);
-    String subject = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("subject"), inputs);
-    String plainText = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("text"), inputs);
-    String htmlMarkup = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("markup"), inputs);
-    String to = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("mailTo"), inputs);
-    String from = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("mailFrom"), inputs);
+    final Map<String, Object> inputs = getInputs(execution);
+    final String subject;
+    final String plainText;
+    final String htmlMarkup;
+    final String to;
+    final String from;
+    final String cc;
+    final String bcc;
+    final String attachmentPathValue;
 
-    Optional<String> cc = Objects.nonNull(this.mailCc) ? Optional.ofNullable(this.mailCc.getValue(execution).toString()) : Optional.empty();
-    Optional<String> bcc = Objects.nonNull(this.mailBcc) ? Optional.ofNullable(this.mailBcc.getValue(execution).toString()) : Optional.empty();
-    Optional<String> attachmentPathValue = Objects.nonNull(this.attachmentPath) ? Optional.ofNullable(FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("attachmentPath"), inputs)) : Optional.empty();
+    try {
+      subject = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("subject"), inputs);
+      plainText = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("text"), inputs);
+      htmlMarkup = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("markup"), inputs);
+      to = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("mailTo"), inputs);
+      from = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("mailFrom"), inputs);
 
-    getLogger().debug("E-mail To: {}, E-mail From: {}, E-mail Subject: {}, Has Attachment: {}", to, from, subject, attachmentPathValue.isPresent());
+      cc = mailCc == null
+        ? null
+        : mailCc.getValue(execution).toString();
+
+      bcc = mailBcc == null
+        ? null
+        : mailBcc.getValue(execution).toString();
+
+      attachmentPathValue = attachmentPath == null
+        ? null
+        : FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate("attachmentPath"), inputs);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
+
+    getLogger().debug("E-mail To: {}, E-mail From: {}, E-mail Subject: {}, Has Attachment: {}", to, from, subject, attachmentPathValue == null ? "No" : "Yes");
 
     MimeMessagePreparator preparator = new MimeMessagePreparator() {
       public void prepare(MimeMessage mimeMessage) throws Exception {
@@ -114,8 +143,8 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
           message.setText(plainText, false);
         }
 
-        if (cc.isPresent()) {
-          for (String ccc : cc.get().split(",")) {
+        if (cc != null) {
+          for (String ccc : cc.split(",")) {
             try {
               message.addCc(ccc);
             } catch (AddressException e) {
@@ -124,8 +153,8 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
           }
         }
 
-        if (bcc.isPresent()) {
-          for (String cbcc : bcc.get().split(",")) {
+        if (bcc != null) {
+          for (String cbcc : bcc.split(",")) {
             try {
               message.addCc(cbcc);
             } catch (AddressException e) {
@@ -135,12 +164,12 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
         }
 
         // This is a hot fix to address an issue with the workflow not attaching e-mails.
-        if (attachmentPathValue.isPresent()) {
-          File attachment = new File(attachmentPathValue.get());
+        if (attachmentPathValue != null) {
+          File attachment = createFile(attachmentPathValue);
           if (attachment.exists() && attachment.isFile()) {
             message.addAttachment(attachment.getName(), attachment);
           } else {
-            getLogger().info("{} does not exist", attachmentPathValue.get());
+            getLogger().info("{} does not exist", attachmentPathValue);
           }
         } else {
           getLogger().info("No attachment required");
@@ -149,8 +178,6 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
     };
 
     emailSender.send(preparator);
-
-    determineEndTime(execution, startTime);
   }
 
   public void setMailTo(Expression mailTo) {

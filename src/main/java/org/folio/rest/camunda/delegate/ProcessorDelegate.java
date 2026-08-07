@@ -1,15 +1,16 @@
 package org.folio.rest.camunda.delegate;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.Expression;
+import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.ProcessorTask;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 
 @Service
 @Scope("prototype")
@@ -20,11 +21,17 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
   private Expression processor;
 
+  /**
+   * Perform the execution.
+   *
+   * @param execution The execution data.
+   * @param name      The delegate name.
+   * @param id        The delegate ID.
+   */
   @Override
-  public void execute(DelegateExecution execution) throws Exception {
-    final long startTime = determineStartTime(execution);
+  protected void performExecute(DelegateExecution execution, String name, String id) {
 
-    EmbeddedProcessor processorValue = objectMapper.readValue(this.processor.getValue(execution).toString(), EmbeddedProcessor.class);
+    EmbeddedProcessor processorValue = mapper.readValue(this.processor.getValue(execution).toString(), EmbeddedProcessor.class);
 
     String scriptName = processorValue.getFunctionName();
 
@@ -32,13 +39,15 @@ public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
     Map<String, Object> inputs = getInputs(execution);
 
-    JsonNode input = objectMapper.valueToTree(inputs);
+    JsonNode input = mapper.valueToTree(inputs);
 
-    String output = (String) scriptEngineService.runScript(scriptTypeExtension, scriptName, input);
-
-    setOutput(execution, output);
-
-    determineEndTime(execution, startTime);
+    try {
+      final String output = (String) scriptEngineService.runScript(scriptTypeExtension, scriptName, input);
+  
+      setOutput(execution, output);
+    } catch (Exception e) {
+      throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
+    }
   }
 
   public void setProcessor(Expression processor) {

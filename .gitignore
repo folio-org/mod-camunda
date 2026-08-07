@@ -5,6 +5,10 @@ target/
 .settings/
 !.mvn/wrapper/maven-wrapper.jar
 
+## Maven Release Files
+pom.xml.releaseBackup
+release.properties
+
 ### STS ###
 .apt_generated
 .classpath
