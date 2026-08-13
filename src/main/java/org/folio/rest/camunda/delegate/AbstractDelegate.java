@@ -1,12 +1,12 @@
 package org.folio.rest.camunda.delegate;
 
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.JavaDelegate;
 import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -16,13 +16,18 @@ public abstract class AbstractDelegate implements JavaDelegate {
 
   private final Logger log;
 
-  @Autowired
   protected JsonMapper mapper;
+
+  protected RuntimeService runtimeService;
 
   /**
    * Initializer.
    */
-  AbstractDelegate() {
+  AbstractDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    this.mapper = mapper;
+    this.runtimeService = runtimeService;
+
     // The logger is non-static to ensure that the implementing class name is used for the logger.
     log = LoggerFactory.getLogger(this.getClass());
   }

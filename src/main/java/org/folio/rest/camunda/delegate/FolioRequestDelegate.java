@@ -9,6 +9,7 @@ import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.model.FolioRequestTask;
 import org.folio.spring.web.service.HttpService;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * A delegate for performing already logged in FOLIO HTTP requests.
@@ -26,8 +28,12 @@ import org.springframework.stereotype.Service;
 @Scope("prototype")
 public class FolioRequestDelegate extends RequestDelegate {
 
-  public FolioRequestDelegate(HttpService httpService) {
-    super(httpService);
+  /**
+   * Initializer.
+   */
+  public FolioRequestDelegate(JsonMapper mapper, RuntimeService runtimeService, HttpService httpService) {
+
+    super(mapper, runtimeService, httpService);
   }
 
   @Override

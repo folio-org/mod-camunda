@@ -1,12 +1,13 @@
 package org.folio.rest.camunda.delegate;
 
 import java.util.Objects;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.EmbeddedVariable;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.operaton.bpm.engine.RuntimeService;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Abstract database I/O delegate.
@@ -17,8 +18,17 @@ public abstract class AbstractDatabaseIODelegate extends AbstractWorkflowInputDe
 
   private Expression outputVariable;
 
-  @Autowired
   DatabaseConnectionService connectionService;
+
+  /**
+   * Initializer.
+   */
+  AbstractDatabaseIODelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService) {
+
+    super(mapper, runtimeService);
+
+    this.connectionService = connectionService;
+  }
 
   public void setDesignation(Expression designation) {
     this.designation = designation;

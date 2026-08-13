@@ -10,6 +10,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
 import org.folio.rest.camunda.exception.BpmnModelFailure;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
+import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.workflow.enums.StartEventType;
 import org.folio.rest.workflow.model.Condition;
 import org.folio.rest.workflow.model.ConnectTo;
@@ -63,6 +64,8 @@ public class BpmnModelFactory {
 
   private static final String SETUP_TASK_ID = "setup_task_98832611_3d33_476b_adcc_fcb6c4e8718b";
 
+  private static final String START_EVENT = "start";
+
   private static final Class<?>[] SERIALIZABLE_TYPES = new Class<?>[] {
     String.class,
     Number.class,
@@ -88,7 +91,8 @@ public class BpmnModelFactory {
 
   public BpmnModelInstance fromWorkflow(Workflow workflow) throws ScriptTaskDeserializeCodeFailure {
 
-    ProcessBuilder processBuilder = Bpmn.createExecutableProcess().name(workflow.getName())
+    ProcessBuilder processBuilder = Bpmn.createExecutableProcess()
+      .name(workflow.getName())
       .operatonHistoryTimeToLive(workflow.getHistoryTimeToLive())
       .operatonVersionTag(workflow.getVersionTag());
 
@@ -116,7 +120,7 @@ public class BpmnModelFactory {
       return processBuilder.done();
     }
 
-    AbstractFlowNodeBuilder<?, ?> builder = processBuilder.startEvent();
+    AbstractFlowNodeBuilder<?, ?> builder = processBuilder.startEvent(START_EVENT);
 
     if (!(nodes.get(0) instanceof StartEvent)) {
       throw new BpmnModelFailure("Workflow must start with a start event!");
@@ -208,8 +212,11 @@ public class BpmnModelFactory {
               throw new ScriptTaskDeserializeCodeFailure(scriptTask.getId(), e);
             }
 
-            builder = builder.scriptTask(scriptTask.getIdentifier()).name(scriptTask.getName())
-              .scriptFormat(scriptTask.getScriptFormat()).scriptText(code);
+            builder = builder.scriptTask(scriptTask.getIdentifier())
+              .name(scriptTask.getName())
+              .scriptFormat(scriptTask.getScriptFormat())
+              .scriptText(code)
+              .operatonExecutionListenerClass(START_EVENT, ScriptListener.class);
 
             if (scriptTask.hasResultVariable()) {
               builder = ((ScriptTaskBuilder) builder).operatonResultVariable(scriptTask.getResultVariable());

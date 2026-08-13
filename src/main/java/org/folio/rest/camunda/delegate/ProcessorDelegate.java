@@ -5,21 +5,31 @@ import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.ScriptEngineService;
 import org.folio.rest.workflow.model.EmbeddedProcessor;
 import org.folio.rest.workflow.model.ProcessorTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Scope("prototype")
 public class ProcessorDelegate extends AbstractWorkflowIODelegate {
 
-  @Autowired
   private ScriptEngineService scriptEngineService;
 
   private Expression processor;
+
+  /**
+   * Initializer.
+   */
+  public ProcessorDelegate(JsonMapper mapper, RuntimeService runtimeService, ScriptEngineService scriptEngineService) {
+
+    super(mapper, runtimeService);
+
+    this.scriptEngineService = scriptEngineService;
+  }
 
   /**
    * Perform the execution.

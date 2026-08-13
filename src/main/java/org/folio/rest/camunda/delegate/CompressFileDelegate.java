@@ -34,11 +34,13 @@ import org.folio.rest.camunda.utility.FileUtility;
 import org.folio.rest.workflow.enums.CompressFileContainer;
 import org.folio.rest.workflow.enums.CompressFileFormat;
 import org.folio.rest.workflow.model.CompressFileTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Compress file delegate.
@@ -62,6 +64,14 @@ public class CompressFileDelegate extends AbstractWorkflowIODelegate {
   private Expression format;
 
   private Expression container;
+
+  /**
+   * Initializer.
+   */
+  public CompressFileDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    super(mapper, runtimeService);
+  }
 
   /**
    * Perform the execution.

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
+import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.DatabaseQueryTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -38,6 +41,14 @@ public class DatabaseQueryDelegate extends AbstractDatabaseIODelegate {
   private Expression resultType;
 
   private Expression includeHeader;
+
+  /**
+   * Initializer.
+   */
+  public DatabaseQueryDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService) {
+
+    super(mapper, runtimeService, connectionService);
+  }
 
   /**
    * Perform the execution.

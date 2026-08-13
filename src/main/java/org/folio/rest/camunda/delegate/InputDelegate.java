@@ -1,10 +1,12 @@
 package org.folio.rest.camunda.delegate;
 
 import org.folio.rest.workflow.model.InputTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Scope("prototype")
@@ -16,8 +18,9 @@ public class InputDelegate extends AbstractWorkflowIODelegate {
   /**
    * Initializer.
    */
-  public InputDelegate() {
-    // Should be empty.
+  public InputDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    super(mapper, runtimeService);
   }
 
   /**

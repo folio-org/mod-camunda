@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,14 @@ class AbstractDelegateTest {
   }
 
   private static class Impl extends AbstractDelegate {
+
+    Impl() {
+      super(null, null);
+    }
+
+    Impl(JsonMapper mapper, RuntimeService runtimeService) {
+      super(mapper, runtimeService);
+    }
 
     @Override
     protected void performExecute(DelegateExecution execution, String name, String id) {

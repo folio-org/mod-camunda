@@ -21,6 +21,7 @@ import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.RequestTask;
 import org.folio.spring.web.service.HttpService;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * A delegate for performing already logged in FOLIO HTTP requests.
@@ -52,7 +54,13 @@ public class RequestDelegate extends AbstractWorkflowIODelegate {
 
   protected Expression headerOutputVariables;
 
-  public RequestDelegate(HttpService httpService) {
+  /**
+   * Initializer.
+   */
+  public RequestDelegate(JsonMapper mapper, RuntimeService runtimeService, HttpService httpService) {
+
+    super(mapper, runtimeService);
+
     this.httpService = httpService;
   }
 

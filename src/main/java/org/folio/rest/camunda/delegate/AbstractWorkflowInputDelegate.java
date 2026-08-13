@@ -2,11 +2,13 @@ package org.folio.rest.camunda.delegate;
 
 import java.util.Objects;
 import java.util.Set;
+import org.folio.rest.workflow.model.EmbeddedVariable;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
-import org.folio.rest.workflow.model.EmbeddedVariable;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Abstract workflow input delegate.
@@ -15,8 +17,12 @@ public abstract class AbstractWorkflowInputDelegate extends AbstractWorkflowDele
 
   private Expression inputVariables;
 
-  protected AbstractWorkflowInputDelegate() {
-    super();
+  /**
+   * Initializer.
+   */
+  AbstractWorkflowInputDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    super(mapper, runtimeService);
   }
 
   public Set<EmbeddedVariable> getInputVariables(DelegateExecution execution) throws JacksonException {

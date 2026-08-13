@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.spring.test.helper.MapperHelper;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import tools.jackson.core.JacksonException;
@@ -105,6 +107,14 @@ class AbstractDatabaseIODelegateTest {
   }
 
   private static class Impl extends AbstractDatabaseIODelegate {
+
+    Impl() {
+      super(null, null, null);
+    }
+
+    Impl(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService) {
+      super(mapper, runtimeService, connectionService);
+    }
 
     @Override
     protected void performExecute(DelegateExecution execution, String name, String id) {
