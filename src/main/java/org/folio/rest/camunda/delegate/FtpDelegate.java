@@ -13,10 +13,12 @@ import org.apache.commons.vfs2.VFS;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.enums.SftpOp;
 import org.folio.rest.workflow.model.FtpTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Scope("prototype")
@@ -37,6 +39,14 @@ public class FtpDelegate extends AbstractWorkflowIODelegate {
   private Expression username;
 
   private Expression password;
+
+  /**
+   * Initializer.
+   */
+  public FtpDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    super(mapper, runtimeService);
+  }
 
   /**
    * Perform the execution.

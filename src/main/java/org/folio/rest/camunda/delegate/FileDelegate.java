@@ -20,12 +20,14 @@ import org.apache.commons.io.FileUtils;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.FileTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Scope("prototype")
@@ -45,6 +47,14 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
   private Expression op;
 
   private Expression target;
+
+  /**
+   * Initializer.
+   */
+  public FileDelegate(JsonMapper mapper, RuntimeService runtimeService) {
+
+    super(mapper, runtimeService);
+  }
 
   /**
    * Perform the execution.

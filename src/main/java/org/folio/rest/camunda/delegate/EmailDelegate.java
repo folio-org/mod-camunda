@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.exception.EmailDelegateAddressFailure;
 import org.folio.rest.workflow.model.EmailTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
@@ -20,6 +21,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Scope("prototype")
@@ -45,7 +47,13 @@ public class EmailDelegate extends AbstractWorkflowInputDelegate {
 
   private Expression includeAttachment;
 
-  public EmailDelegate(JavaMailSender emailSender) {
+  /**
+   * Initializer.
+   */
+  public EmailDelegate(JsonMapper mapper, RuntimeService runtimeService, JavaMailSender emailSender) {
+
+    super(mapper, runtimeService);
+
     this.emailSender = emailSender;
   }
 

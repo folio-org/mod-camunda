@@ -16,16 +16,16 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.sql.SQLException;
 import java.util.Properties;
-import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
-import org.operaton.bpm.model.bpmn.instance.FlowElement;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.operaton.bpm.engine.delegate.Expression;
+import org.operaton.bpm.model.bpmn.instance.FlowElement;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseConnectionDelegateTest {
@@ -58,7 +58,7 @@ class DatabaseConnectionDelegateTest {
   @Mock
   private Expression usernameExpression;
 
-  @Spy
+  @InjectMocks
   private DatabaseConnectionDelegate databaseConnectionDelegate;
 
   @Test

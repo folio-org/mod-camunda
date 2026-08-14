@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import tools.jackson.core.JacksonException;
@@ -106,6 +107,14 @@ class AbstractWorkflowInputDelegateTest {
   }
 
   private static class Impl extends AbstractWorkflowInputDelegate {
+
+    Impl() {
+      super(null, null);
+    }
+
+    Impl(JsonMapper mapper, RuntimeService runtimeService) {
+      super(mapper, runtimeService);
+    }
 
     @Override
     protected void performExecute(DelegateExecution execution, String name, String id) {

@@ -2,11 +2,14 @@ package org.folio.rest.camunda.delegate;
 
 import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
+import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Database connection delegate.
@@ -18,6 +21,14 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
   private Expression url;
   private Expression username;
   private Expression password;
+
+  /**
+   * Initializer.
+   */
+  public DatabaseConnectionDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService) {
+
+    super(mapper, runtimeService, connectionService);
+  }
 
   /**
    * Perform the execution.
