@@ -14,6 +14,7 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Set;
+import org.folio.rest.camunda.model.FolioEnvDefaultsItem;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
 import org.folio.rest.workflow.model.EmbeddedVariable;
@@ -49,6 +50,9 @@ class FolioRequestDelegateTest {
   private FlowElement flowElementBpmn;
 
   @Mock
+  private FolioEnvDefaultsItem folioEnvDefaultsItem;
+
+  @Mock
   private DelegateExecution delegateExecution;
 
   @Mock
@@ -57,11 +61,11 @@ class FolioRequestDelegateTest {
   @Mock
   private Expression requestExpression;
 
+  @Mock
+  private ResponseEntity<Object> responseEntity;
+
   @InjectMocks
   private FolioRequestDelegate delegate;
-
-  @Mock
-  ResponseEntity<Object> responseEntity;
 
   private EmbeddedVariable embeddedVariable;
 
