@@ -3,6 +3,7 @@ package org.folio.rest.camunda.service;
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
+import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
 import org.operaton.bpm.engine.AuthorizationException;
@@ -58,6 +59,10 @@ public class CamundaApiService {
 
     ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
     RepositoryService repositoryService = processEngine.getRepositoryService();
+
+    processEngine.getProcessEngineConfiguration()
+      .setClassLoader(ScriptListener.class.getClassLoader())
+      .setJobExecutorDeploymentAware(true);
 
     try {
       Deployment deployment = repositoryService.createDeployment().name(workflow.getName())

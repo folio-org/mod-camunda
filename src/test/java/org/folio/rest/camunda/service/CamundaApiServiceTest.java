@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.ProcessEngineConfiguration;
 import org.operaton.bpm.engine.ProcessEngines;
 import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotValidException;
@@ -49,6 +50,9 @@ class CamundaApiServiceTest {
 
   @Mock
   private ProcessEngine processEngine;
+
+  @Mock
+  ProcessEngineConfiguration processEngineConfiguration;
 
   @Mock
   private RepositoryService repositoryService;
@@ -77,6 +81,9 @@ class CamundaApiServiceTest {
     lenient().when(deploymentBuilder.tenantId(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.deploy()).thenReturn(deployment);
     lenient().when(deployment.getId()).thenReturn("deploymentId");
+    lenient().when(processEngine.getProcessEngineConfiguration()).thenReturn(processEngineConfiguration);
+    lenient().when(processEngineConfiguration.setClassLoader(any())).thenReturn(processEngineConfiguration);
+    lenient().when(processEngineConfiguration.setJobExecutorDeploymentAware(anyBoolean())).thenReturn(processEngineConfiguration);
   }
 
   @Test
