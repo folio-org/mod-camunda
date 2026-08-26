@@ -33,12 +33,14 @@ import static org.folio.rest.camunda.utility.TestUtility.treeNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.folio.MarcFieldProtectionSettingsCollection;
+import org.folio.rest.camunda.cache.FolioTokenCache;
 import org.folio.rest.jaxrs.model.AlternativeTitleTypes;
 import org.folio.rest.jaxrs.model.CallNumberTypes;
 import org.folio.rest.jaxrs.model.ClassificationTypes;
@@ -68,9 +70,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.client.RestClientException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -85,7 +89,13 @@ class MappingUtilityTest {
   private OkapiRestTemplate mockRestTemplate;
 
   @Mock
+  private ApplicationContext applicationContext;
+
+  @Mock
   private DelegateExecution delegateExecution;
+
+  @Mock
+  private FolioTokenCache folioTokenCache;
 
   @BeforeEach
   void beforeEach() throws RestClientException, IOException {
@@ -124,22 +134,29 @@ class MappingUtilityTest {
   @MethodSource("testMapRecordToInsanceStream")
   void testMapRecordToInsance(Parameters<String, String> data) throws JacksonException {
     String marcJson = data.input;
-    String token = "token";
 
     when(delegateExecution.getTenantId()).thenReturn("diku");
     when(delegateExecution.getVariable(GATEWAY_URL)).thenReturn(OKAPI_URL);
 
-    if (Objects.nonNull(data.exception)) {
-      assertThrows(data.exception.getClass(),
-        () -> MappingUtility.mapRecordToInstance(marcJson, delegateExecution));
-    } else {
-      ObjectNode expected = (ObjectNode) treeNode(data.expected);
-      expected.remove("id");
+      try (MockedStatic<MappingUtilityContext> mocked = mockStatic(MappingUtilityContext.class)) {
+        mocked.when(() -> MappingUtilityContext.getBean(ApplicationContext.class))
+          .thenReturn(applicationContext);
 
-      ObjectNode actual = (ObjectNode) treeNode(MappingUtility.mapRecordToInstance(marcJson, delegateExecution));
-      actual.remove("id");
+        mocked.when(() -> MappingUtilityContext.getBean(FolioTokenCache.class))
+          .thenReturn(folioTokenCache);
 
-      assertEquals(expected, actual);
+        if (Objects.nonNull(data.exception)) {
+          assertThrows(data.exception.getClass(),
+            () -> MappingUtility.mapRecordToInstance(marcJson, delegateExecution));
+        } else {
+          ObjectNode expected = (ObjectNode) treeNode(data.expected);
+          expected.remove("id");
+
+          ObjectNode actual = (ObjectNode) treeNode(MappingUtility.mapRecordToInstance(marcJson, delegateExecution));
+          actual.remove("id");
+
+          assertEquals(expected, actual);
+        }
     }
   }
 

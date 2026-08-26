@@ -77,7 +77,6 @@ public class SetupDelegate extends AbstractDelegate {
     String timestamp = String.valueOf(System.currentTimeMillis());
 
     execution.setVariable(TIMESTAMP, timestamp);
-    execution.setVariable(TENANT_ID, execution.getTenantId());
 
     loadEnvConfig(execution);
 

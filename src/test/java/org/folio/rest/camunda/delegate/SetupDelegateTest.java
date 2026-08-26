@@ -8,7 +8,6 @@ import static org.folio.spring.test.mock.MockMvcConstant.JSON_ARRAY;
 import static org.folio.spring.test.mock.MockMvcConstant.JSON_OBJECT;
 import static org.folio.spring.test.mock.MockMvcConstant.NULL_STR;
 import static org.folio.spring.test.mock.MockMvcConstant.UUID;
-import static org.folio.spring.test.mock.MockMvcConstant.VALUE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,9 +19,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 import org.folio.rest.camunda.config.FolioEnvConfig;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
@@ -51,7 +50,12 @@ class SetupDelegateTest {
 
   private static final String PRC1 = "[ { \"id\": \"84d0181e-8e0f-4d80-a580-03fe45b3c179\", \"name\": \"Start\", \"description\": \"Start of Example Javascript ScriptTask Workflow.\", \"type\": \"MESSAGE_CORRELATION\", \"deserializeAs\": \"StartEvent\", \"expression\": \"/events/example-scripttask-js/start\" } ]";
 
-  private static final String SECURE_NAME = "secure_name";
+  private static final String NAME1 = "name1";
+  private static final String NAME2 = "name2";
+  private static final String NAME3 = "name3";
+  private static final String NAME4 = "name4";
+  private static final String SECURE_NAME1 = "secure_name1";
+  private static final String SECURE_NAME2 = "secure_name2";
   private static final String SECURE_OTHER = "secure_other";
   private static final String URL_VALUE = "http://localhost";
   private static final String URL_PATH_VALUE = "/location";
@@ -73,7 +77,7 @@ class SetupDelegateTest {
 
   FolioEnvConfig folioEnvConfig;
 
-  List<FolioEnvDefaultsItem> defaults;
+  ConcurrentMap<String, FolioEnvDefaultsItem> defaults;
 
   @Mock
   ScriptEngineService scriptEngineService;
@@ -85,7 +89,7 @@ class SetupDelegateTest {
   void beforeEach() {
     folioEnvConfig = new FolioEnvConfig();
 
-    defaults = new ArrayList<>();
+    defaults = new ConcurrentHashMap<>();
     setField(folioEnvConfig, "defaults", defaults);
 
     delegate.setInitialContext(initialContext);
@@ -141,9 +145,6 @@ class SetupDelegateTest {
 
     when(execution.getTenantId()).thenReturn("diku");
     when(execution.getBpmnModelElementInstance()).thenReturn(element);
-    when(execution.hasVariable(VALUE)).thenReturn(false);
-    when(execution.hasVariable(SECURE_NAME)).thenReturn(true);
-    when(execution.hasVariable(SECURE_OTHER)).thenReturn(false);
     when(element.getName()).thenReturn(delegate.getClass().getSimpleName());
     when(initialContext.getValue(any(DelegateExecution.class))).thenReturn(JSON_OBJECT);
     when(processors.getValue(any(DelegateExecution.class))).thenReturn(PRC1);
@@ -151,13 +152,13 @@ class SetupDelegateTest {
     setField(delegate, "folioEnvConfig", folioEnvConfig);
     setField(delegate, "scriptEngineService", scriptEngineService);
 
-    defaults.add(new FolioEnvDefaultsItem(true, VALUE, LITERAL, UUID));
-    defaults.add(new FolioEnvDefaultsItem(true, VALUE, SECURE, UUID));
-    defaults.add(new FolioEnvDefaultsItem(true, SECURE_NAME, SECURE, UUID));
-    defaults.add(new FolioEnvDefaultsItem(true, VALUE, URL, URL_VALUE));
-    defaults.add(new FolioEnvDefaultsItem(true, VALUE, URL_PATH, URL_PATH_VALUE));
-    defaults.add(new FolioEnvDefaultsItem(false, SECURE_NAME, SECURE, UUID));
-    defaults.add(new FolioEnvDefaultsItem(false, SECURE_OTHER, SECURE, UUID));
+    defaults.put(NAME1, new FolioEnvDefaultsItem(true, NAME1, LITERAL, UUID));
+    defaults.put(NAME2, new FolioEnvDefaultsItem(true, NAME2, SECURE, UUID));
+    defaults.put(SECURE_NAME1, new FolioEnvDefaultsItem(true, SECURE_NAME1, SECURE, UUID));
+    defaults.put(NAME3, new FolioEnvDefaultsItem(true, NAME3, URL, URL_VALUE));
+    defaults.put(NAME4, new FolioEnvDefaultsItem(true, NAME4, URL_PATH, URL_PATH_VALUE));
+    defaults.put(SECURE_NAME2, new FolioEnvDefaultsItem(false, SECURE_NAME2, SECURE, UUID));
+    defaults.put(SECURE_OTHER, new FolioEnvDefaultsItem(false, SECURE_OTHER, SECURE, UUID));
 
     lenient().doNothing().when(scriptEngineService).registerScript(anyString(), anyString(), anyString());
 
@@ -211,7 +212,7 @@ class SetupDelegateTest {
     setField(delegate, "folioEnvConfig", folioEnvConfig);
     setField(delegate, "scriptEngineService", scriptEngineService);
 
-    defaults.add(new FolioEnvDefaultsItem(true, VALUE, LITERAL, UUID));
+    defaults.put(NAME1, new FolioEnvDefaultsItem(true, NAME1, LITERAL, UUID));
 
     doThrow(new RuntimeException()).when(scriptEngineService).registerScript(anyString(), anyString(), anyString());
 

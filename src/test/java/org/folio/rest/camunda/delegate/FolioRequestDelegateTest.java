@@ -14,6 +14,7 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Set;
+import org.folio.rest.camunda.cache.FolioTokenCache;
 import org.folio.rest.camunda.model.FolioEnvDefaultsItem;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.enums.VariableType;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
 import org.operaton.bpm.model.bpmn.instance.FlowElement;
@@ -64,6 +66,12 @@ class FolioRequestDelegateTest {
   @Mock
   private ResponseEntity<Object> responseEntity;
 
+  @Mock
+  private RuntimeService runtimeService;
+
+  @Mock
+  private FolioTokenCache folioTokenCache;
+
   @InjectMocks
   private FolioRequestDelegate delegate;
 
@@ -81,6 +89,7 @@ class FolioRequestDelegateTest {
 
   @BeforeEach
   void beforeEach() throws JacksonException {
+
     mapper = MapperHelper.build();
 
     request = new Request();
@@ -219,7 +228,8 @@ class FolioRequestDelegateTest {
   void testExecuteWorksWithToken() throws Exception {
     setupExecuteMocking(false);
 
-    when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
+    when(folioTokenCache.verifyTokens(any())).thenReturn(UUID);
+
     when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
 
     delegate.execute(delegateExecution);
@@ -270,16 +280,17 @@ class FolioRequestDelegateTest {
    * @throws JacksonException
    */
   private void setupExecuteMocking(boolean hasKey) throws JacksonException {
+    setField(delegate, "folioTokenCache", folioTokenCache);
     setField(delegate, "headerOutputVariables", headerOutputVariablesExpression);
     setField(delegate, "httpService", httpService);
     setField(delegate, "request", requestExpression);
+    setField(delegate, "runtimeService", runtimeService);
     setField(delegate, "mapper", mapper);
 
     if (hasKey) {
       embeddedVariable.setKey(TOKEN_HEADER_NAME);
       setField(responseEntity, "headers", httpHeaders);
 
-      when(delegateExecution.getVariable(TOKEN_HEADER_NAME)).thenReturn(UUID);
       when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
     }
 
