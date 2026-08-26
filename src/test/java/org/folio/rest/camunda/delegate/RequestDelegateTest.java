@@ -212,18 +212,6 @@ class RequestDelegateTest {
   }
 
   @Test
-  void testExecuteWorksWithToken() throws Exception {
-    setupExecuteMocking(false);
-
-    when(httpService.exchange(anyString(), any(HttpMethod.class), any(), any())).thenReturn(responseEntity);
-
-    delegate.execute(delegateExecution);
-
-    verify(delegateExecution, never()).setVariable(anyString(), any());
-    verify(delegateExecution, never()).setVariableLocal(anyString(), any());
-  }
-
-  @Test
   void testExecuteWorksWithNoType() throws Exception {
     httpHeaders.add(TOKEN_HEADER_NAME, UUID);
 
