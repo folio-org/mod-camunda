@@ -22,8 +22,8 @@ import tools.jackson.databind.json.JsonMapper;
 @Scope("prototype")
 public class SetupDelegate extends AbstractDelegate {
 
-  private static final String TIMESTAMP_VARIABLE_NAME = "timestamp";
-  private static final String TENANT_VARIABLE_NAME = "tenantId";
+  private static final String TIMESTAMP = "timestamp";
+  private static final String TENANT_ID = "tenantId";
 
   private ScriptEngineService scriptEngineService;
 
@@ -76,8 +76,7 @@ public class SetupDelegate extends AbstractDelegate {
 
     String timestamp = String.valueOf(System.currentTimeMillis());
 
-    execution.setVariable(TIMESTAMP_VARIABLE_NAME, timestamp);
-    execution.setVariable(TENANT_VARIABLE_NAME, execution.getTenantId());
+    execution.setVariable(TIMESTAMP, timestamp);
 
     loadEnvConfig(execution);
 
@@ -106,54 +105,27 @@ public class SetupDelegate extends AbstractDelegate {
    *
    * All variables are loaded and exported to the Operaton engine.
    *
+   * The Tenant ID is also exposed.
+   *
    * @param execution The delegate execution data.
    */
   private void loadEnvConfig(final DelegateExecution execution) {
 
-    final List<FolioEnvDefaultsItem> defaults = folioEnvConfig.getDefaults();
+    folioEnvConfig.eachItem((key, item) -> loadEnvConfigItem(execution, item));
 
-    if (defaults != null) {
-      defaults.forEach(item -> {
-        switch (item.getType()) {
-          case LITERAL -> loadEnvConfigItemNormal(execution, item);
-          case SECURE -> loadEnvConfigItemSecure(execution, item);
-          case URL -> loadEnvConfigItemNormal(execution, item);
-          case URL_PATH -> loadEnvConfigItemNormal(execution, item);
-        }
-      });
-    }
+    execution.setVariable(TENANT_ID, execution.getTenantId());
   }
 
   /**
-   * Handle normal item types.
+   * Load items into the variables, but only if exposed.
    *
    * @param execution The delegate execution data.
    * @param item      The item to load into a Operaton variable.
    */
-  private void loadEnvConfigItemNormal(final DelegateExecution execution, final FolioEnvDefaultsItem item) {
-
-    execution.setVariable(item.getName(), item.getValue());
-  }
-
-  /**
-   * Handle the SECURE item type.
-   *
-   * Secure variables have their values stored in Java memory rather than Operaton.
-   * If the variable already exists, then delete it at the start, unless exposed.
-   *
-   * If exposed, then extract it and add it as a variable.
-   *
-   * @param execution The delegate execution data.
-   * @param item      The item to load into a Operaton variable.
-   */
-  private void loadEnvConfigItemSecure(final DelegateExecution execution, final FolioEnvDefaultsItem item) {
+  private void loadEnvConfigItem(final DelegateExecution execution, final FolioEnvDefaultsItem item) {
 
     if (Boolean.TRUE.equals(item.getExpose())) {
-      if (!execution.hasVariable(item.getName())) {
-        item.getSecure(chars -> execution.setVariable(item.getName(), new String(chars)));
-      }
-    } else if (execution.hasVariable(item.getName())) {
-      execution.removeVariable(item.getName());
+      execution.setVariable(item.getName(), item.getValue());
     }
   }
 
