@@ -116,10 +116,11 @@ spring:
   jersey.application-path: camunda
 
 operaton:
-  # see: https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/
+  # see: https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/
   bpm:
     webapp:
       application-path: ui
+      session-cookie-path-enforcement: true
     auto-deployment-enabled: false
     database:
       schema-name: ${DB_SCHEMA:diku_mod_camunda}
@@ -159,6 +160,9 @@ operaton:
         enable-fetch-script-engine-from-process-application: false
     metrics:
       enabled: false
+
+   # Enable custom operaton health end point, see: https://docs.operaton.org/docs/documentation/reference/release-notes/2_1/#operaton-run--dedicated-health-endpoint .
+   #run.health.rest-endpoint.enabled: true
 
 springdoc:
   api-docs:
@@ -276,6 +280,9 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+
+    # Custom operaton health indicator (set this to false to disable spring-boot's and allow support operatons custom `operaton.run.health.rest-endpoint.enabled=true`), see https://docs.operaton.org/docs/documentation/reference/release-notes/2_1/#spring-boot-integration .
+    #operaton.enabled: false
   info:
     env.enabled: true
     java.enabled: true
