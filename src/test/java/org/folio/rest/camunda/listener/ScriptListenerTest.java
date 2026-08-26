@@ -14,6 +14,8 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 import org.folio.rest.camunda.config.FolioEnvConfig;
 import org.folio.rest.camunda.model.FolioEnvDefaultsItem;
@@ -46,7 +48,7 @@ class ScriptListenerTest {
 
   @ParameterizedTest
   @MethodSource("provideNotifyEnvDefaultsValues")
-  void notifyEnvDefaultsTest(final List<FolioEnvDefaultsItem> defaults, final VerificationMode times, final Scope scope) throws Exception {
+  void notifyEnvDefaultsTest(final ConcurrentMap<String, FolioEnvDefaultsItem>defaults, final VerificationMode times, final Scope scope) throws Exception {
 
     setField(folioEnvConfig, "defaults", defaults);
 
@@ -84,16 +86,18 @@ class ScriptListenerTest {
   private static Stream<Arguments> provideNotifyEnvDefaultsValues() {
 
     final List<Arguments> arguments = new ArrayList<>();
-    final List<FolioEnvDefaultsItem> defaultsNull = null;
-    final List<FolioEnvDefaultsItem> defaultsEmpty = new ArrayList<>();
-    final List<FolioEnvDefaultsItem> defaults1 = new ArrayList<>();
-    final List<FolioEnvDefaultsItem> defaults2 = new ArrayList<>();
-    final FolioEnvDefaultsItem item1 = new FolioEnvDefaultsItem(false, VALUE, LITERAL, UUID);
-    final FolioEnvDefaultsItem item2 = new FolioEnvDefaultsItem(true, VALUE, LITERAL, UUID);
 
-    defaults1.add(item1);
-    defaults2.add(item1);
-    defaults2.add(item2);
+    final ConcurrentMap<String, FolioEnvDefaultsItem> defaultsNull = null;
+    final ConcurrentMap<String, FolioEnvDefaultsItem> defaultsEmpty = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, FolioEnvDefaultsItem> defaults1 = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, FolioEnvDefaultsItem> defaults2 = new ConcurrentHashMap<>();
+
+    final FolioEnvDefaultsItem item1 = new FolioEnvDefaultsItem(false, VALUE, LITERAL, UUID);
+    final FolioEnvDefaultsItem item2 = new FolioEnvDefaultsItem(true, VALUE + "2", LITERAL, UUID);
+
+    defaults1.put(item1.getName(), item1);
+    defaults2.put(item1.getName(), item1);
+    defaults2.put(item2.getName(), item2);
 
     arguments.add(Arguments.of(defaultsNull,  never(),  Scope.NONE));
     arguments.add(Arguments.of(defaultsEmpty, never(),  Scope.NONE));

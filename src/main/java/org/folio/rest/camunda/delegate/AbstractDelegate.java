@@ -53,6 +53,10 @@ public abstract class AbstractDelegate implements JavaDelegate {
     } catch (Exception e) {
       determineEndTime(execution, startTime, name, true);
 
+      if (e instanceof DelegateExecutionFailure) {
+        throw e;
+      }
+
       throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
     }
   }

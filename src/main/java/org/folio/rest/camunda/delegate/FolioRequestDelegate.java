@@ -1,10 +1,13 @@
 package org.folio.rest.camunda.delegate;
 
+import static org.folio.rest.camunda.cache.FolioTokenCache.FOLIO_ACCESS_TOKEN;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.util.Map;
+import org.folio.rest.camunda.cache.FolioTokenCache;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.dto.Request;
 import org.folio.rest.workflow.model.FolioRequestTask;
@@ -17,6 +20,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -28,12 +34,16 @@ import tools.jackson.databind.json.JsonMapper;
 @Scope("prototype")
 public class FolioRequestDelegate extends RequestDelegate {
 
+  private FolioTokenCache folioTokenCache;
+
   /**
    * Initializer.
    */
-  public FolioRequestDelegate(JsonMapper mapper, RuntimeService runtimeService, HttpService httpService) {
+  public FolioRequestDelegate(JsonMapper mapper, RuntimeService runtimeService, HttpService httpService, FolioTokenCache folioTokenCache) {
 
     super(mapper, runtimeService, httpService);
+
+    this.folioTokenCache = folioTokenCache;
   }
 
   @Override
@@ -79,7 +89,6 @@ public class FolioRequestDelegate extends RequestDelegate {
     final String contentType = requestValue.getContentType();
 
     final String tenant = execution.getTenantId();
-    final Object token = execution.getVariable("X-Okapi-Token");
 
     getLogger().info("url: {}", url);
     getLogger().debug("method: {}", method);
@@ -95,20 +104,29 @@ public class FolioRequestDelegate extends RequestDelegate {
     headers.add("X-Okapi-Tenant", tenant);
     headers.add("X-Okapi-Url", okapiUrl);
 
-    if (token != null) {
-      headers.add("X-Okapi-Token", token.toString());
-    }
-
     final HttpEntity<Object> entity = shouldSendBody(body, sendEmptyBody, method)
       ? new HttpEntity<>(body, headers)
       : new HttpEntity<>(headers);
 
-    final ResponseEntity<Object> response = httpService.exchange(url, method, entity, Object.class);
+    final String accessToken = folioTokenCache.verifyTokens(execution);
 
-    setOutput(execution, response.getBody());
+    if (accessToken != null) {
+      headers.add("Cookie", String.format("%s=%s", FOLIO_ACCESS_TOKEN, accessToken));
+      headers.add("X-Okapi-Token", accessToken);
+    }
 
-    getHeaderOutputVariables(execution)
-      .forEach(headerOutputVariable -> performExecuteHeaderOutputVariables(execution, headerOutputVariable, response));
+    try {
+      final ResponseEntity<Object> response = httpService.exchange(url, method, entity, Object.class);
+
+      setOutput(execution, response.getBody());
+
+      getHeaderOutputVariables(execution)
+        .forEach(headerOutputVariable -> performExecuteHeaderOutputVariables(execution, headerOutputVariable, response));
+    } catch (ResourceAccessException e) {
+      throwExternalRequestException(tenant, url, null, null, e.getMessage(), e);
+    } catch (HttpClientErrorException | HttpServerErrorException e) {
+      throwExternalRequestException(tenant, url, e.getResponseHeaders(), e.getStatusCode(), e.getResponseBodyAsString(), e);
+    }
   }
 
 }
