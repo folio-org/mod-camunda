@@ -27,7 +27,7 @@
 
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <graalvm.llvm.version>25.0.1</graalvm.llvm.version>
-    <graalvm.polyglot.version>25.2.4</graalvm.polyglot.version>
+    <graalvm.polyglot.version>25.3.4.1</graalvm.polyglot.version>
     <graalvm.ruby.version>25.0.0</graalvm.ruby.version>
     <maven.javadoc.skip>true</maven.javadoc.skip>
     <openapi.server.port>9000</openapi.server.port>
@@ -255,7 +255,7 @@
     <dependency>
       <groupId>com.googlecode.libphonenumber</groupId>
       <artifactId>libphonenumber</artifactId>
-      <version>9.0.37</version>
+      <version>9.0.38</version>
     </dependency>
 
     <dependency>
