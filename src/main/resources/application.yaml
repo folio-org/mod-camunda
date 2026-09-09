@@ -7,7 +7,7 @@ logging:
       zaxxer:
         hikari: INFO
     org:
-      apache.kafka.clients: WARN
+      apache.kafka.clients: ERROR
       folio: INFO
       hibernate: INFO
       operaton: INFO
