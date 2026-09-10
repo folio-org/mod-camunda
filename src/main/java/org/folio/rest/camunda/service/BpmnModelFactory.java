@@ -81,10 +81,8 @@ public class BpmnModelFactory {
   /**
    * Constructor.
    *
-   * @param mapper
-   *          The mapper.
-   * @param workflowDelegates
-   *          The delegates.
+   * @param mapper            The mapper.
+   * @param workflowDelegates The delegates.
    */
   public BpmnModelFactory(JsonMapper mapper, List<AbstractWorkflowDelegate> workflowDelegates) {
 
@@ -145,12 +143,9 @@ public class BpmnModelFactory {
   /**
    * Build the Workflow.
    *
-   * @param builder
-   *          The builder.
-   * @param nodes
-   *          All of the nodes.
-   * @param setup
-   *          The set up data.
+   * @param builder The builder.
+   * @param nodes   All of the nodes.
+   * @param setup   The set up data.
    *
    * @return A fully constructed builder representing the Workflow.
    *
@@ -257,10 +252,8 @@ public class BpmnModelFactory {
   /**
    * Builder for a ExclusiveGateway Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param eg
-   *          The ExclusiveGateway Node.
+   * @param builder The builder.
+   * @param eg      The ExclusiveGateway Node.
    *
    * @return The builder.
    */
@@ -274,10 +267,8 @@ public class BpmnModelFactory {
   /**
    * Builder for a InclusiveGateway Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param ig
-   *          The InclusiveGateway Node.
+   * @param builder The builder.
+   * @param ig      The InclusiveGateway Node.
    *
    * @return The builder.
    */
@@ -291,10 +282,8 @@ public class BpmnModelFactory {
   /**
    * Builder for a MoveToLastGateway Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param mlg
-   *          The MoveToLastGateway Node.
+   * @param builder The builder.
+   * @param mlg     The MoveToLastGateway Node.
    *
    * @return The builder.
    */
@@ -307,10 +296,8 @@ public class BpmnModelFactory {
   /**
    * Builder for a MoveToNode Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param mn
-   *          The MoveToNode Node.
+   * @param builder The builder.
+   * @param mn      The MoveToNode Node.
    *
    * @return The builder.
    */
@@ -322,10 +309,8 @@ public class BpmnModelFactory {
   /**
    * Builder for a ParallelGateway Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param pg
-   *          The ParallelGateway Node.
+   * @param builder The builder.
+   * @param pg      The ParallelGateway Node.
    *
    * @return The builder.
    */
@@ -339,15 +324,12 @@ public class BpmnModelFactory {
   /**
    * Builder for a Subprocess Node types.
    *
-   * @param builder
-   *          The builder.
-   * @param s
-   *          The Subprocess Node.
+   * @param builder The builder.
+   * @param s       The Subprocess Node.
    *
    * @return The builder.
    *
-   * @throws ScriptTaskDeserializeCodeFailure
-   *           On error.
+   * @throws ScriptTaskDeserializeCodeFailure On error.
    */
   private AbstractFlowNodeBuilder<?, ?> buildBranchSubprocess(AbstractFlowNodeBuilder<?, ?> builder, Subprocess s)
     throws ScriptTaskDeserializeCodeFailure {
@@ -408,10 +390,8 @@ public class BpmnModelFactory {
   /**
    * Builder for an DelegateTask Node type.
    *
-   * @param builder
-   *          The builder.
-   * @param event
-   *          The Event Node.
+   * @param builder The builder.
+   * @param event   The Event Node.
    *
    * @return The builder.
    */
