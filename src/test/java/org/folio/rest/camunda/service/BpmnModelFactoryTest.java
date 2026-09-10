@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
@@ -19,6 +20,7 @@ import java.util.List;
 import org.folio.rest.camunda.delegate.AbstractWorkflowDelegate;
 import org.folio.rest.camunda.delegate.InputDelegate;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
+import org.folio.rest.camunda.listener.LogListener;
 import org.folio.rest.workflow.model.EndEvent;
 import org.folio.rest.workflow.model.InputTask;
 import org.folio.rest.workflow.model.Node;
@@ -237,6 +239,7 @@ class BpmnModelFactoryTest {
 
     lenient().when(startEventBuilder.id(anyString())).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.name(anyString())).thenReturn(startEventBuilder);
+    lenient().when(startEventBuilder.operatonExecutionListenerClass(anyString(), eq(LogListener.class))).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.message(anyString())).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.timerWithCycle(anyString())).thenReturn(startEventBuilder);
     lenient().when(startEventBuilder.signal(anyString())).thenReturn(startEventBuilder);
@@ -254,6 +257,7 @@ class BpmnModelFactoryTest {
     lenient().when(userTaskBuilder.done()).thenReturn(bpmnModelInstance);
 
     lenient().when(endEventBuilder.name(anyString())).thenReturn(endEventBuilder);
+    lenient().when(endEventBuilder.operatonExecutionListenerClass(anyString(), eq(LogListener.class))).thenReturn(endEventBuilder);
     lenient().when(endEventBuilder.done()).thenReturn(bpmnModelInstance);
 
     lenient().when(processBuilderMocked.startEvent(anyString())).thenReturn(startEventBuilder);

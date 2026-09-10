@@ -1,42 +1,53 @@
 package org.folio.rest.camunda.config;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.util.ReflectionTestUtils.getField;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.folio.rest.camunda.resolver.ScriptEngineResolver;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { CamundaConfig.class })
 class CamundaConfigTest {
 
-  @Spy
-  ProcessEngineConfigurationImpl processEngineConfiguration;
+  @Autowired
+  private ApplicationContext context;
 
-  CamundaEngineConfig camundaEngineConfig;
+  @ParameterizedTest
+  @MethodSource("provideBeanExistsTestValues")
+  void beanExistsTest(String name) {
 
-  @BeforeEach
-  void beforeEach() {
-    camundaEngineConfig = new CamundaEngineConfig();
+    assertNotNull(context.getBean(CamundaConfig.class));
+
+    assertTrue(context.containsBean(name));
   }
 
-  @Test
-  void preInitSetsScriptEngineTest() {
-    setField(processEngineConfiguration, "scriptEngineResolver", null);
+  /**
+   * Provide variables for beanExistsTest.
+   *
+   * @return
+   *   The arguments array stream with the stream columns as:
+   *     - name: The bean name (essentially the name of the function with the `@Bean`).
+   */
+  private static Stream<Arguments> provideBeanExistsTestValues() {
 
-    camundaEngineConfig.preInit(processEngineConfiguration);
+    final List<Arguments> arguments = new ArrayList<>();
 
-    verify(processEngineConfiguration, times(1)).setScriptEngineResolver(any(ScriptEngineResolver.class));
+    arguments.add(Arguments.of("clock"));
+    arguments.add(Arguments.of("concurrentFolioTokensRecordHashMap"));
+    arguments.add(Arguments.of("loggerProvider"));
+    arguments.add(Arguments.of("processEnginePlugin"));
 
-    assertNotNull(getField(processEngineConfiguration, "scriptEngineResolver"));
+    return arguments.stream();
   }
 
 }

@@ -83,7 +83,6 @@ class CamundaApiServiceTest {
     lenient().when(deployment.getId()).thenReturn("deploymentId");
     lenient().when(processEngine.getProcessEngineConfiguration()).thenReturn(processEngineConfiguration);
     lenient().when(processEngineConfiguration.setClassLoader(any())).thenReturn(processEngineConfiguration);
-    lenient().when(processEngineConfiguration.setJobExecutorDeploymentAware(anyBoolean())).thenReturn(processEngineConfiguration);
   }
 
   @Test
