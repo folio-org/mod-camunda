@@ -591,8 +591,7 @@ public class BpmnModelFactory {
         final ExtensionElements extensions = model.newInstance(ExtensionElements.class);
 
         FieldUtils.getAllFieldsList(delegate.get().getClass()).forEach((Field df) -> {
-          if (!Expression.class.isAssignableFrom(df.getType()))
-            return;
+          if (!Expression.class.isAssignableFrom(df.getType())) return;
 
           final Field f = FieldUtils.getField(node.getClass(), df.getName(), true);
 
@@ -603,7 +602,9 @@ public class BpmnModelFactory {
               value = f.get(node);
             } catch (IllegalArgumentException | IllegalAccessException e) {
               throw new BpmnModelFailure(
-                String.format("Workflow '%s' (%s) error: %s", workflow.getName(), workflow.getId(), e.getMessage()), e);
+                String.format("Workflow '%s' (%s) error: %s", workflow.getName(), workflow.getId(), e.getMessage()),
+                e
+              );
             }
 
             if (value != null) {
@@ -641,17 +642,25 @@ public class BpmnModelFactory {
       } else if (node instanceof Subprocess subprocess) {
         scripts.addAll(getProcessorScripts(workflow, subprocess.getNodes()));
       } else if (node instanceof Task) {
-        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor task ({}).", node.getName(),
-          workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+        logger.debug(
+          "A Process Script named {} for Workflow '{}' ({}) is a non-processor task ({}).",
+          node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName()
+        );
       } else if (node instanceof Event) {
-        logger.debug("A Process Script named {} for Workflow '{}' ({}) is a non-processor event ({}).", node.getName(),
-          workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+        logger.debug(
+          "A Process Script named {} for Workflow '{}' ({}) is a non-processor event ({}).",
+          node.getName(), workflow.getName(), workflow.getId(), node.getClass().getSimpleName()
+        );
       } else if (node == null) {
-        throw new BpmnModelFailure(
-          String.format("A Process Script Node for Workflow '%s' (%s) is NULL.", workflow.getName(), workflow.getId()));
+        throw new BpmnModelFailure(String.format(
+          "A Process Script Node for Workflow '%s' (%s) is NULL.",
+          workflow.getName(), workflow.getId())
+        );
       } else {
-        logger.warn("A Process Script named {} for Workflow '{}' ({}) is of an unknown type ({}).", node.getName(),
-          workflow.getName(), workflow.getId(), node.getClass().getSimpleName());
+        logger.warn(
+          "A Process Script named {} for Workflow '{}' ({}) is of an unknown type ({}).",
+          node.getName(),workflow.getName(), workflow.getId(), node.getClass().getSimpleName()
+        );
       }
     });
 
