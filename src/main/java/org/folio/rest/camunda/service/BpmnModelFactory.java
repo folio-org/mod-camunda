@@ -149,8 +149,7 @@ public class BpmnModelFactory {
    *
    * @return A fully constructed builder representing the Workflow.
    *
-   * @throws ScriptTaskDeserializeCodeFailure
-   *           On error.
+   * @throws ScriptTaskDeserializeCodeFailure On error.
    */
   private AbstractFlowNodeBuilder<?, ?> build(AbstractFlowNodeBuilder<?, ?> builder, List<Node> nodes, Setup setup)
     throws ScriptTaskDeserializeCodeFailure {
