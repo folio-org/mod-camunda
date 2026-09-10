@@ -1,9 +1,9 @@
 package org.folio.rest.camunda.listener;
 
+import org.folio.rest.camunda.provider.LoggerProvider;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.ExecutionListener;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,19 @@ import org.springframework.stereotype.Service;
 @Scope("prototype")
 public class LogListener implements ExecutionListener {
 
-  private static final Logger LOG = LoggerFactory.getLogger(LogListener.class);
+  private final Logger logger;
+
+  /**
+   * Initializer.
+   *
+   * This initializes logger this way so that unit tests are easier to write.
+   *
+   * @param loggerProvider The logger provider used to initialize the logger.
+   */
+  public LogListener(LoggerProvider loggerProvider) {
+
+    this.logger = loggerProvider.forClass(LogListener.class);
+  }
 
   @Override
   public void notify(DelegateExecution execution) throws Exception {
@@ -29,7 +41,7 @@ public class LogListener implements ExecutionListener {
       .singleResult()
       .getName();
 
-    LOG.info("Workflow '{}', Definition ID '{}', Activity '{}' ({}).", processName, processId, activityName, activityId);
+    logger.info("Workflow '{}', Definition ID '{}', Activity '{}' ({}).", processName, processId, activityName, activityId);
   }
 
 }

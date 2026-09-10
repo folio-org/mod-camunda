@@ -2,6 +2,7 @@ package org.folio.rest.camunda.config;
 
 import java.time.Clock;
 import java.util.concurrent.ConcurrentHashMap;
+import org.folio.rest.camunda.provider.LoggerProvider;
 import org.operaton.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.operaton.bpm.spring.boot.starter.configuration.Ordering;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,12 @@ public class CamundaConfig {
   ConcurrentHashMap<String, String> concurrentFolioTokensRecordHashMap() {
 
     return new ConcurrentHashMap<>();
+  }
+
+  @Bean
+  LoggerProvider loggerProvider() {
+
+    return new LoggerProvider();
   }
 
   @Bean
