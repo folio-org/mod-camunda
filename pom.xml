@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>mod-camunda</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1-SNAPSHOT</version>
 
   <name>Okapi Camunda Module</name>
 
@@ -711,6 +711,6 @@
     <url>https://github.com/folio-org/mod-camunda</url>
     <connection>scm:git:git://github.com:folio-org/mod-camunda.git</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-camunda.git</developerConnection>
-    <tag>v1.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
