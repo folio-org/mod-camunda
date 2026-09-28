@@ -196,34 +196,32 @@ class FileDelegateTest {
               utilityMock.when(() -> FileUtility.filesReadAllBytes(any())).thenReturn("".getBytes());
             }
 
-            if (LIST.equals(fileOp)) {
-              if (StringUtils.isNotEmpty(pathValue)) {
-                final File[] files = {
-                  file2,
-                  directory1
-                };
+            if (LIST.equals(fileOp) && StringUtils.isNotEmpty(pathValue)) {
+              final File[] files = {
+                file2,
+                directory1
+              };
 
-                final File[] withDir = {
-                  directory2
-                };
+              final File[] withDir = {
+                directory2
+              };
 
-                final File[] empty = {
-                };
+              final File[] empty = {
+              };
 
-                when(file1.isDirectory()).thenReturn(true);
-                when(file1.listFiles()).thenReturn(files);
+              when(file1.isDirectory()).thenReturn(true);
+              when(file1.listFiles()).thenReturn(files);
 
-                when(file2.isFile()).thenReturn(true);
-                when(file2.getAbsolutePath()).thenReturn("");
+              when(file2.isFile()).thenReturn(true);
+              when(file2.getAbsolutePath()).thenReturn("");
 
-                when(directory1.isFile()).thenReturn(false);
-                when(directory1.isDirectory()).thenReturn(true);
-                when(directory1.listFiles()).thenReturn(withDir);
+              when(directory1.isFile()).thenReturn(false);
+              when(directory1.isDirectory()).thenReturn(true);
+              when(directory1.listFiles()).thenReturn(withDir);
 
-                when(directory2.isFile()).thenReturn(false);
-                when(directory2.isDirectory()).thenReturn(true);
-                when(directory2.listFiles()).thenReturn(empty);
-              }
+              when(directory2.isFile()).thenReturn(false);
+              when(directory2.isDirectory()).thenReturn(true);
+              when(directory2.listFiles()).thenReturn(empty);
             }
             break;
 
