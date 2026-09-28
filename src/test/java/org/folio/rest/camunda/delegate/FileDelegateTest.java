@@ -64,6 +64,10 @@ import tools.jackson.databind.json.JsonMapper;
 @ExtendWith(MockitoExtension.class)
 class FileDelegateTest {
 
+  private static final String EXISTS = "/exists.txt";
+
+  private static final String NOT_DIR = "/not_dir.txt";
+
   @Spy
   protected JsonMapper mapper;
 
@@ -92,19 +96,19 @@ class FileDelegateTest {
   Expression target;
 
   @Mock
-  File pathFile;
+  File file1;
 
   @Mock
-  File pathFile2;
+  File file2;
 
   @Mock
-  File pathDirectory1;
+  File fileTarget;
 
   @Mock
-  File pathDirectory2;
+  File directory1;
 
   @Mock
-  File targetFile;
+  File directory2;
 
   @Mock
   DelegateExecution execution;
@@ -127,12 +131,9 @@ class FileDelegateTest {
 
   @BeforeEach
   void beforeEach() {
-    // input delegate
-    delegate.setInputVariables(inputVariables);
-    // output delegate
-    delegate.setOutputVariable(outputVariable);
 
-    // unique per delegate
+    delegate.setInputVariables(inputVariables);
+    delegate.setOutputVariable(outputVariable);
     delegate.setPath(path);
     delegate.setLine(line);
     delegate.setOp(op);
@@ -147,7 +148,7 @@ class FileDelegateTest {
   @ParameterizedTest
   @MethodSource("provideExecutionValues")
   void testExecute(String inputVariablesValue, String outputVariableValue, String pathValue, String lineValue,
-    FileOp fileOp, String targetValue, Class<Exception> exception ) throws Exception {
+    FileOp fileOp, String targetValue, Class<Exception> exception) throws Exception {
 
     when(execution.getBpmnModelElementInstance()).thenReturn(element);
     when(element.getName()).thenReturn(delegate.getClass().getSimpleName());
@@ -182,13 +183,13 @@ class FileDelegateTest {
       assertThrows(exception, () -> delegate.execute(execution));
     } else {
       try (MockedStatic<FileUtility> utilityMock = mockStatic(FileUtility.class)) {
-        utilityMock.when(() -> FileUtility.createFile(pathValue)).thenReturn(pathFile);
-        utilityMock.when(() -> FileUtility.createFile(targetValue)).thenReturn(targetFile);
+        utilityMock.when(() -> FileUtility.createFile(pathValue)).thenReturn(file1);
+        utilityMock.when(() -> FileUtility.createFile(targetValue)).thenReturn(fileTarget);
 
         switch (fileOp) {
           case LIST, READ, READ_LINE, LINE_COUNT:
             if (StringUtils.isNotEmpty(pathValue)) {
-              when(pathFile.exists()).thenReturn(true);
+              when(file1.exists()).thenReturn(true);
             }
 
             if (READ.equals(fileOp)) {
@@ -196,31 +197,33 @@ class FileDelegateTest {
             }
 
             if (LIST.equals(fileOp)) {
-              final File[] files = {
-                pathFile2,
-                pathDirectory1
-              };
+              if (StringUtils.isNotEmpty(pathValue)) {
+                final File[] files = {
+                  file2,
+                  directory1
+                };
 
-              final File[] withDir = {
-                pathDirectory2
-              };
+                final File[] withDir = {
+                  directory2
+                };
 
-              final File[] empty = {
-              };
+                final File[] empty = {
+                };
 
-              when(pathFile.isDirectory()).thenReturn(true);
-              when(pathFile.listFiles()).thenReturn(files);
+                when(file1.isDirectory()).thenReturn(true);
+                when(file1.listFiles()).thenReturn(files);
 
-              when(pathFile2.isFile()).thenReturn(true);
-              when(pathFile2.getAbsolutePath()).thenReturn("");
+                when(file2.isFile()).thenReturn(true);
+                when(file2.getAbsolutePath()).thenReturn("");
 
-              when(pathDirectory1.isFile()).thenReturn(false);
-              when(pathDirectory1.isDirectory()).thenReturn(true);
-              when(pathDirectory1.listFiles()).thenReturn(withDir);
+                when(directory1.isFile()).thenReturn(false);
+                when(directory1.isDirectory()).thenReturn(true);
+                when(directory1.listFiles()).thenReturn(withDir);
 
-              when(pathDirectory2.isFile()).thenReturn(false);
-              when(pathDirectory2.isDirectory()).thenReturn(true);
-              when(pathDirectory2.listFiles()).thenReturn(empty);
+                when(directory2.isFile()).thenReturn(false);
+                when(directory2.isDirectory()).thenReturn(true);
+                when(directory2.listFiles()).thenReturn(empty);
+              }
             }
             break;
 
@@ -229,20 +232,33 @@ class FileDelegateTest {
 
           case COPY:
             if (StringUtils.isNotEmpty(pathValue)) {
-              when(pathFile.exists()).thenReturn(true);
-              when(targetFile.exists()).thenReturn(true);
+              when(file1.exists()).thenReturn(true);
+              when(fileTarget.exists()).thenReturn(true);
             }
             break;
 
           case MOVE:
             if (StringUtils.isNotEmpty(pathValue)) {
-              when(pathFile.exists()).thenReturn(false);
-              when(targetFile.exists()).thenReturn(true);
+              if (EXISTS.equals(pathValue)) {
+                when(file1.exists()).thenReturn(true);
+              } else {
+                when(file1.exists()).thenReturn(false);
+                when(fileTarget.exists()).thenReturn(true);
+              }
             }
             break;
 
           case DELETE:
-            when(pathFile.exists()).thenReturn(false);
+            if (EXISTS.equals(pathValue)) {
+              when(file1.exists())
+                .thenReturn(true)
+                .thenReturn(false);
+
+              when(file1.delete()).thenReturn(true);
+            } else {
+              when(file1.exists()).thenReturn(false);
+            }
+
             break;
 
           default:
@@ -253,39 +269,45 @@ class FileDelegateTest {
 
         switch (fileOp) {
           case LIST, READ, READ_LINE, LINE_COUNT:
-            EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
-            switch (output.getType()) {
-              case LOCAL:
-                verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
-                break;
-              case PROCESS:
-                verify(execution, times(1)).setVariable(eq(output.getKey()), any());
-                break;
-              default:
-                break;
+            if (StringUtils.isNotEmpty(pathValue)) {
+              EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
+              switch (output.getType()) {
+                case LOCAL:
+                  verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
+                  break;
+                case PROCESS:
+                  verify(execution, times(1)).setVariable(eq(output.getKey()), any());
+                  break;
+                default:
+                  break;
+              }
             }
             break;
 
           case WRITE:
-            utilityMock.verify(() -> FileUtility.fileUtilsWriteStringToFile(eq(pathFile), anyString(), any()), times(1));
+            utilityMock.verify(() -> FileUtility.fileUtilsWriteStringToFile(eq(file1), anyString(), any()), times(1));
             break;
 
           case COPY:
             if (StringUtils.isNotEmpty(pathValue)) {
-              assertTrue(pathFile.exists());
-              assertTrue(targetFile.exists());
+              assertTrue(file1.exists());
+              assertTrue(fileTarget.exists());
             }
             break;
 
           case MOVE:
             if (StringUtils.isNotEmpty(pathValue)) {
-              assertFalse(pathFile.exists());
-              assertTrue(targetFile.exists());
+              if (EXISTS.equals(pathValue)) {
+                assertTrue(file1.exists());
+              } else {
+                assertFalse(file1.exists());
+                assertTrue(fileTarget.exists());
+              }
             }
             break;
 
           case DELETE:
-            assertFalse(pathFile.exists());
+            assertFalse(file1.exists());
             break;
 
           default:
@@ -300,12 +322,13 @@ class FileDelegateTest {
    *
    * @return
    *   The arguments array stream with the stream columns as:
-   *     - inputVariables: Set of EmbeddedVariable as JSON.
-   *     - outputVariable: EmbeddedVariable as JSON.
-   *     - path:           The path of source file.
-   *     - line:           The line in source file.
-   *     - op:             The REST request type, such as GET.
-   *     - target:         The input variable identifier.
+   *     - inputVariablesValue: Set of EmbeddedVariable as JSON.
+   *     - outputVariableValue: EmbeddedVariable as JSON.
+   *     - pathValue:           The path of source file.
+   *     - lineValue:           The line in source file.
+   *     - fileOp:              The file operation, such as LIST.
+   *     - targetValue:         The input variable identifier.
+   *     - exception:           The exception thrown, if any.
    *
    * @throws IOException
    * @throws JacksonException
@@ -330,7 +353,10 @@ class FileDelegateTest {
 
     return Stream.of(
       Arguments.of(JSON_ARRAY,  local,       files,        zero, LIST,       emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  local,       emptyStr,     zero, LIST,       emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  local,       NOT_DIR,      zero, LIST,       emptyStr,     NULL_STR),
       Arguments.of(JSON_ARRAY,  data,        plainTxt,     zero, READ,       emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  data,        emptyStr,     zero, READ,       emptyStr,     NULL_STR),
       Arguments.of(JSON_ARRAY,  data,        plainTxt,     zero, LINE_COUNT, emptyStr,     NULL_STR),
       Arguments.of(JSON_ARRAY,  data,        plainTxt,     one,  READ_LINE,  emptyStr,     NULL_STR),
       Arguments.of(write,       JSON_OBJECT, tempOutput,   zero, WRITE,      dataTarget,   NULL_STR),
@@ -339,7 +365,9 @@ class FileDelegateTest {
       Arguments.of(JSON_ARRAY,  JSON_OBJECT, emptyStr,     zero, MOVE,       tempPlainTxt, NULL_STR),
       Arguments.of(JSON_ARRAY,  JSON_OBJECT, plainTxt,     zero, COPY,       tempPlainTxt, NULL_STR),
       Arguments.of(JSON_ARRAY,  JSON_OBJECT, plainTxt,     zero, DELETE,     emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, EXISTS,       zero, DELETE,     emptyStr,     NULL_STR),
       Arguments.of(JSON_ARRAY,  JSON_OBJECT, tempPlainTxt, zero, MOVE,       plainTxt,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, EXISTS,       zero, MOVE,       plainTxt,     NULL_STR),
       Arguments.of(JSON_ARRAY,  JSON_OBJECT, tempOutput,   zero, DELETE,     emptyStr,     NULL_STR)
     );
   }
