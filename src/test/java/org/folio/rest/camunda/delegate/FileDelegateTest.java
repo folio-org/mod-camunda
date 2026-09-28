@@ -1,12 +1,26 @@
 package org.folio.rest.camunda.delegate;
 
 import static org.folio.rest.camunda.utility.TestUtility.i;
+import static org.folio.rest.workflow.enums.FileOp.COPY;
+import static org.folio.rest.workflow.enums.FileOp.DELETE;
+import static org.folio.rest.workflow.enums.FileOp.LINE_COUNT;
+import static org.folio.rest.workflow.enums.FileOp.LIST;
+import static org.folio.rest.workflow.enums.FileOp.MOVE;
+import static org.folio.rest.workflow.enums.FileOp.READ;
+import static org.folio.rest.workflow.enums.FileOp.READ_LINE;
+import static org.folio.rest.workflow.enums.FileOp.WRITE;
+import static org.folio.spring.test.mock.MockMvcConstant.JSON_ARRAY;
+import static org.folio.spring.test.mock.MockMvcConstant.JSON_OBJECT;
+import static org.folio.spring.test.mock.MockMvcConstant.NULL_STR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.folio.rest.camunda.service.ScriptEngineService;
+import org.folio.rest.camunda.utility.FileUtility;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.EmbeddedVariable;
 import org.folio.rest.workflow.model.FileTask;
@@ -33,6 +48,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.RuntimeService;
@@ -76,6 +92,21 @@ class FileDelegateTest {
   Expression target;
 
   @Mock
+  File pathFile;
+
+  @Mock
+  File pathFile2;
+
+  @Mock
+  File pathDirectory1;
+
+  @Mock
+  File pathDirectory2;
+
+  @Mock
+  File targetFile;
+
+  @Mock
   DelegateExecution execution;
 
   @Mock
@@ -114,13 +145,10 @@ class FileDelegateTest {
   }
 
   @ParameterizedTest
-  @MethodSource("executionStream")
+  @MethodSource("provideExecutionValues")
   void testExecute(String inputVariablesValue, String outputVariableValue, String pathValue, String lineValue,
-      String opValue, String targetValue, Class<Exception> exception ) throws Exception {
+    FileOp fileOp, String targetValue, Class<Exception> exception ) throws Exception {
 
-    FileOp fileOp = FileOp.valueOf(opValue);
-
-    // mock all expression variables from parameters here
     when(execution.getBpmnModelElementInstance()).thenReturn(element);
     when(element.getName()).thenReturn(delegate.getClass().getSimpleName());
 
@@ -146,56 +174,123 @@ class FileDelegateTest {
 
     when(path.getValue(any(DelegateExecution.class))).thenReturn(pathValue);
     when(line.getValue(any(DelegateExecution.class))).thenReturn(lineValue);
-    when(op.getValue(any(DelegateExecution.class))).thenReturn(opValue);
+    when(op.getValue(any(DelegateExecution.class))).thenReturn(fileOp.toString());
 
     lenient().when(target.getValue(any(DelegateExecution.class))).thenReturn(targetValue);
 
     if (Objects.nonNull(exception)) {
       assertThrows(exception, () -> delegate.execute(execution));
     } else {
+      try (MockedStatic<FileUtility> utilityMock = mockStatic(FileUtility.class)) {
+        utilityMock.when(() -> FileUtility.createFile(pathValue)).thenReturn(pathFile);
+        utilityMock.when(() -> FileUtility.createFile(targetValue)).thenReturn(targetFile);
 
-      delegate.execute(execution);
+        switch (fileOp) {
+          case LIST, READ, READ_LINE, LINE_COUNT:
+            if (StringUtils.isNotEmpty(pathValue)) {
+              when(pathFile.exists()).thenReturn(true);
+            }
 
-      // verify lenient mock method calls were as expected
+            if (READ.equals(fileOp)) {
+              utilityMock.when(() -> FileUtility.filesReadAllBytes(any())).thenReturn("".getBytes());
+            }
 
-      switch (fileOp) {
-        case LIST, READ, READ_LINE, LINE_COUNT:
-          EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
-          switch (output.getType()) {
-            case LOCAL:
-              verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
-              break;
-            case PROCESS:
-              verify(execution, times(1)).setVariable(eq(output.getKey()), any());
-              break;
-            default:
-              break;
-          }
-          break;
-        case WRITE:
-          assertTrue(new File(pathValue).exists());
-          break;
-        case COPY:
-          // for when file doesn't exist and no exception thrown
-          if (StringUtils.isNotEmpty(pathValue)) {
-            assertTrue(new File(pathValue).exists());
-            assertTrue(new File(targetValue).exists());
-          }
-          break;
-        case MOVE:
-          // for when file doesn't exist and no exception thrown
-          if (StringUtils.isNotEmpty(pathValue)) {
-            assertTrue(!new File(pathValue).exists());
-            assertTrue(new File(targetValue).exists());
-          }
-          break;
-        case DELETE:
-          assertTrue(!new File(pathValue).exists());
-          break;
-        // case POP:
-        // case PUSH:
-        default:
-          break;
+            if (LIST.equals(fileOp)) {
+              final File[] files = {
+                pathFile2,
+                pathDirectory1
+              };
+
+              final File[] withDir = {
+                pathDirectory2
+              };
+
+              final File[] empty = {
+              };
+
+              when(pathFile.isDirectory()).thenReturn(true);
+              when(pathFile.listFiles()).thenReturn(files);
+
+              when(pathFile2.isFile()).thenReturn(true);
+              when(pathFile2.getAbsolutePath()).thenReturn("");
+
+              when(pathDirectory1.isFile()).thenReturn(false);
+              when(pathDirectory1.isDirectory()).thenReturn(true);
+              when(pathDirectory1.listFiles()).thenReturn(withDir);
+
+              when(pathDirectory2.isFile()).thenReturn(false);
+              when(pathDirectory2.isDirectory()).thenReturn(true);
+              when(pathDirectory2.listFiles()).thenReturn(empty);
+            }
+            break;
+
+          case WRITE:
+            break;
+
+          case COPY:
+            if (StringUtils.isNotEmpty(pathValue)) {
+              when(pathFile.exists()).thenReturn(true);
+              when(targetFile.exists()).thenReturn(true);
+            }
+            break;
+
+          case MOVE:
+            if (StringUtils.isNotEmpty(pathValue)) {
+              when(pathFile.exists()).thenReturn(false);
+              when(targetFile.exists()).thenReturn(true);
+            }
+            break;
+
+          case DELETE:
+            when(pathFile.exists()).thenReturn(false);
+            break;
+
+          default:
+            break;
+        }
+
+        delegate.execute(execution);
+
+        switch (fileOp) {
+          case LIST, READ, READ_LINE, LINE_COUNT:
+            EmbeddedVariable output = mapper.readValue(outputVariableValue, EmbeddedVariable.class);
+            switch (output.getType()) {
+              case LOCAL:
+                verify(execution, times(1)).setVariableLocal(eq(output.getKey()), any());
+                break;
+              case PROCESS:
+                verify(execution, times(1)).setVariable(eq(output.getKey()), any());
+                break;
+              default:
+                break;
+            }
+            break;
+
+          case WRITE:
+            utilityMock.verify(() -> FileUtility.fileUtilsWriteStringToFile(eq(pathFile), anyString(), any()), times(1));
+            break;
+
+          case COPY:
+            if (StringUtils.isNotEmpty(pathValue)) {
+              assertTrue(pathFile.exists());
+              assertTrue(targetFile.exists());
+            }
+            break;
+
+          case MOVE:
+            if (StringUtils.isNotEmpty(pathValue)) {
+              assertFalse(pathFile.exists());
+              assertTrue(targetFile.exists());
+            }
+            break;
+
+          case DELETE:
+            assertFalse(pathFile.exists());
+            break;
+
+          default:
+            break;
+        }
       }
     }
   }
@@ -205,66 +300,47 @@ class FileDelegateTest {
    *
    * @return
    *   The arguments array stream with the stream columns as:
-   *     - String inputVariables (set of EmbeddedVariable as JSON)
-   *     - String outputVariable (EmbeddedVariable as JSON)
-   *     - String path (path of source)
-   *     - String line (line in file)
-   *     - String op (GET, PUT)
-   *     - Class<Exception> target (input variable identifier)
+   *     - inputVariables: Set of EmbeddedVariable as JSON.
+   *     - outputVariable: EmbeddedVariable as JSON.
+   *     - path:           The path of source file.
+   *     - line:           The line in source file.
+   *     - op:             The REST request type, such as GET.
+   *     - target:         The input variable identifier.
    *
    * @throws IOException
    * @throws JacksonException
    */
-  private static Stream<Arguments> executionStream() throws IOException {
+  private static Stream<Arguments> provideExecutionValues() throws IOException {
 
-    // Read input variables and output variable from files.
-    String inputVariables = "[]";
-    String outputVariable = "{}";
-    String files = "src/test/resources/files";
-    String plainTxt = files + "/plain.txt";
-    String zero = "0";
-    String one = "1";
-    String no_path = "";
+    final String files = "src/test/resources/files";
+    final String plainTxt = files + "/plain.txt";
+    final String zero = "0";
+    final String one = "1";
+    final String emptyStr = "";
 
-    // Must match an input variable key or target file path.
-    String noTarget = "";
-    String dataTarget = "data";
-    String simpleTarget = "simple";
-    String tempPlainTxt = files + "/temp/plain.txt";
-    String tempOutput = files + "/temp/output";
+    final String dataTarget = "data";
+    final String simpleTarget = "simple";
+    final String tempPlainTxt = files + "/temp/plain.txt";
+    final String tempOutput = files + "/temp/output";
 
-    // Arguments for whether to expect exception thrown.
-    String noException = null;
+    final String data = i("/output/file_task/data.json");
+    final String local = i("/output/file_task/local.json");
+    final String write = i("/input/file_task/write.json");
+    final String writeSimple = i("/input/file_task/write_simple.json");
 
     return Stream.of(
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), files, zero, FileOp.LIST.toString(), noTarget, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, zero, FileOp.READ.toString(), noTarget, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, zero, FileOp.LINE_COUNT.toString(), noTarget, noException),
-      Arguments.of(inputVariables, i("/output/file_task/data.json"), plainTxt, one, FileOp.READ_LINE.toString(), noTarget, noException),
-      Arguments.of(i("/input/file_task/write.json"), outputVariable, tempOutput, zero, FileOp.WRITE.toString(), dataTarget, noException),
-      Arguments.of(i("/input/file_task/write_simple.json"), outputVariable, tempOutput, zero, FileOp.WRITE.toString(), simpleTarget, noException),
-
-      // Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.PUSH.toString(), no_target, noException),
-      // Arguments.of(inputVariables, outputVariable, plain_txt, zero, FileOp.POP.toString(), no_target, noException),
-
-      // fails silently
-      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.COPY.toString(), tempPlainTxt, noException),
-      // fails silently
-      Arguments.of(inputVariables, outputVariable, no_path, zero, FileOp.MOVE.toString(), tempPlainTxt, noException),
-
-      // must be done last
-
-      // copy file
-      Arguments.of(inputVariables, outputVariable, plainTxt, zero, FileOp.COPY.toString(), tempPlainTxt, noException),
-
-      // delete a file
-      Arguments.of(inputVariables, outputVariable, plainTxt, zero, FileOp.DELETE.toString(), noTarget, noException),
-
-      // move file
-      Arguments.of(inputVariables, outputVariable, tempPlainTxt, zero, FileOp.MOVE.toString(), plainTxt, noException),
-
-      // delete temp_output
-      Arguments.of(inputVariables, outputVariable, tempOutput, zero, FileOp.DELETE.toString(), noTarget, noException)
+      Arguments.of(JSON_ARRAY,  local,       files,        zero, LIST,       emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  data,        plainTxt,     zero, READ,       emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  data,        plainTxt,     zero, LINE_COUNT, emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  data,        plainTxt,     one,  READ_LINE,  emptyStr,     NULL_STR),
+      Arguments.of(write,       JSON_OBJECT, tempOutput,   zero, WRITE,      dataTarget,   NULL_STR),
+      Arguments.of(writeSimple, JSON_OBJECT, tempOutput,   zero, WRITE,      simpleTarget, NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, emptyStr,     zero, COPY,       tempPlainTxt, NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, emptyStr,     zero, MOVE,       tempPlainTxt, NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, plainTxt,     zero, COPY,       tempPlainTxt, NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, plainTxt,     zero, DELETE,     emptyStr,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, tempPlainTxt, zero, MOVE,       plainTxt,     NULL_STR),
+      Arguments.of(JSON_ARRAY,  JSON_OBJECT, tempOutput,   zero, DELETE,     emptyStr,     NULL_STR)
     );
   }
 
