@@ -2,6 +2,9 @@ package org.folio.rest.camunda.delegate;
 
 import static org.folio.rest.camunda.utility.FileUtility.createFile;
 import static org.folio.rest.camunda.utility.FileUtility.fileUtilsCopyFile;
+import static org.folio.rest.camunda.utility.FileUtility.fileUtilsMoveFile;
+import static org.folio.rest.camunda.utility.FileUtility.fileUtilsWriteStringToFile;
+import static org.folio.rest.camunda.utility.FileUtility.filesReadAllBytes;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -16,7 +19,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.workflow.enums.FileOp;
 import org.folio.rest.workflow.model.FileTask;
@@ -125,9 +127,9 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
             String targetTemplate = this.target.getValue(execution).toString();
             templateLoader.putTemplate(TARGET_KEY, targetTemplate);
             String targetPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(TARGET_KEY), inputs);
-  
+
             File targetFile = createFile(targetPath);
-  
+
             fileUtilsCopyFile(file, targetFile);
           } catch (Exception e) {
             throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
@@ -143,10 +145,10 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
             String targetTemplate = this.target.getValue(execution).toString();
             templateLoader.putTemplate(TARGET_KEY, targetTemplate);
             String targetPath = FreeMarkerTemplateUtils.processTemplateIntoString(cfg.getTemplate(TARGET_KEY), inputs);
-  
+
             File targetFile = createFile(targetPath);
-  
-            FileUtils.moveFile(file, targetFile);
+
+            fileUtilsMoveFile(file, targetFile);
           } catch (Exception e) {
             throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
           }
@@ -201,7 +203,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
       case READ:
         if (file.exists()) {
           try {
-            String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+            String content = new String(filesReadAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
             setOutput(execution, content);
             getLogger().info(MSG_READ, filePath);
           } catch (Exception e) {
@@ -213,8 +215,6 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
         break;
 
       case WRITE:
-        // iterate over `target` input varaible
-        // writing entry per line
         String targetInputVariable = this.target.getValue(execution).toString();
         StringBuilder content = new StringBuilder();
         Object obj = inputs.get(targetInputVariable);
@@ -244,7 +244,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
         }
 
         try {
-          FileUtils.writeStringToFile(file, content.toString(), StandardCharsets.UTF_8);
+          fileUtilsWriteStringToFile(file, content.toString(), StandardCharsets.UTF_8);
         } catch (Exception e) {
           throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
         }
@@ -276,7 +276,7 @@ public class FileDelegate extends AbstractWorkflowIODelegate {
   }
 
   public void setLine(Expression line) {
-      this.line = line;
+    this.line = line;
   }
 
   public void setOp(Expression op) {

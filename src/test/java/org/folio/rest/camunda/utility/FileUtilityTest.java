@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -161,6 +162,35 @@ class FileUtilityTest {
   }
 
   @Test
+  void fileUtilsMoveFileTest() throws IOException {
+
+    try (MockedStatic<FileUtils> utility = mockStatic(FileUtils.class)) {
+
+      final File arg1 = mock(File.class);
+      final File arg2 = mock(File.class);
+
+      FileUtility.fileUtilsMoveFile(arg1, arg2);
+
+      utility.verify(() -> FileUtils.moveFile(arg1, arg2));
+    }
+  }
+
+  @Test
+  void fileUtilsWriteStringToFileTest() throws IOException {
+
+    try (MockedStatic<FileUtils> utility = mockStatic(FileUtils.class)) {
+
+      final File arg1 = mock(File.class);
+      final String arg2 = "";
+      final Charset arg3 = mock(Charset.class);
+
+      FileUtility.fileUtilsWriteStringToFile(arg1, arg2, arg3);
+
+      utility.verify(() -> FileUtils.writeStringToFile(arg1, arg2, arg3));
+    }
+  }
+
+  @Test
   void filesCopyTest() throws IOException {
 
     try (MockedStatic<Files> utility = mockStatic(Files.class)) {
@@ -185,6 +215,33 @@ class FileUtilityTest {
       FileUtility.filesGetLastModifiedTime(arg1, arg2);
 
       utility.verify(() -> Files.getLastModifiedTime(arg1, arg2));
+    }
+  }
+
+  @Test
+  void filesNewBufferedReaderTest() throws IOException {
+
+    try (MockedStatic<Files> utility = mockStatic(Files.class)) {
+
+      final Path arg1 = mock(Path.class);
+      final Charset arg2 = mock(Charset.class);
+
+      FileUtility.filesNewBufferedReader(arg1, arg2);
+
+      utility.verify(() -> Files.newBufferedReader(arg1, arg2));
+    }
+  }
+
+  @Test
+  void filesReadAllBytes() throws IOException {
+
+    try (MockedStatic<Files> utility = mockStatic(Files.class)) {
+
+      final Path arg1 = mock(Path.class);
+
+      FileUtility.filesReadAllBytes(arg1);
+
+      utility.verify(() -> Files.readAllBytes(arg1));
     }
   }
 

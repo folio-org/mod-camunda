@@ -2,6 +2,7 @@ package org.folio.rest.camunda.utility;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -129,9 +131,9 @@ public class FileUtility {
   /**
    * Wrap new TarArchiveOutputStream() method in such a way that unit tests can be more easily written.
    *
-   * @param stream     The OutputStream.
-   * @param blockSize  the block size to use
-   * @param recordSize the record size to use. Must be 512 bytes.
+   * @param stream    The OutputStream.
+   * @param blockSize The block size to use
+   * @param charset   The character encoding to use.
    *
    * @return The new TarArchiveOutputStream.
    */
@@ -166,6 +168,33 @@ public class FileUtility {
   }
 
   /**
+   * Wrap FileUtils.moveFile() method in such a way that unit tests can be more easily written.
+   *
+   * @param input  The file to read.
+   * @param output The file to write.
+   *
+   * @throws IOException On error.
+   */
+  public static void fileUtilsMoveFile(File input, File output) throws IOException {
+
+    FileUtils.moveFile(input, output);
+  }
+
+  /**
+   * Wrap FileUtils.writeStringToFile() method in such a way that unit tests can be more easily written.
+   *
+   * @param file    The file to write to.
+   * @param data    The data to write to the file.
+   * @param charset The character encoding to use.
+   *
+   * @throws IOException On error.
+   */
+  public static void fileUtilsWriteStringToFile(final File file, final String data, final Charset charset) throws IOException {
+
+    FileUtils.writeStringToFile(file, data, charset);
+  }
+
+  /**
    * Wrap Files.copy() method in such a way that unit tests can be more easily written.
    *
    * @param path    The path to the file.
@@ -193,6 +222,35 @@ public class FileUtility {
   public static FileTime filesGetLastModifiedTime(Path path, LinkOption... options) throws IOException {
 
     return Files.getLastModifiedTime(path, options);
+  }
+
+  /**
+   * Wrap Files.newBufferedReader() method in such a way that unit tests can be more easily written.
+   *
+   * @param path    The path to the file.
+   * @param charset The character encoding to use.
+   *
+   * @return The buffered reader.
+   *
+   * @throws IOException On error.
+   */
+  public static BufferedReader filesNewBufferedReader(Path path, Charset charset) throws IOException {
+
+    return Files.newBufferedReader(path, charset);
+  }
+
+  /**
+   * Wrap Files.filesReadAllBytes() method in such a way that unit tests can be more easily written.
+   *
+   * @param path The path to the file.
+   *
+   * @return The bytes read.
+   *
+   * @throws IOException On error.
+   */
+  public static byte[] filesReadAllBytes(Path path) throws IOException {
+
+    return Files.readAllBytes(path);
   }
 
   /**
