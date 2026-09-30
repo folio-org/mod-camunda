@@ -30,7 +30,7 @@ public interface Input {
   public abstract void setInputVariables(Expression inputVariables);
 
   public default Map<String, Object> getInputs(DelegateExecution execution) throws JacksonException {
-    Map<String, Object> inputs = new HashMap<>();
+    final Map<String, Object> inputs = new HashMap<>();
 
     if (!hasInputVariables(execution)) {
       getLogger().warn("Input variables for execution {} is null", execution.getId());
@@ -46,7 +46,10 @@ public interface Input {
       } else if (type == null) {
         getLogger().warn("Variable type not present for {}", key);
       } else if (type == VariableType.LOCAL || type == VariableType.PROCESS) {
-        Object value = type == VariableType.LOCAL ? execution.getVariableLocal(key) : execution.getVariable(key);
+        final Object value = type == VariableType.LOCAL
+          ? execution.getVariableLocal(key)
+          : execution.getVariable(key);
+
         defaultGetInputsLoop(variable, key, type, value, inputs);
       } else {
         getLogger().warn("Could not find value for {} from {}", key, type);
@@ -73,23 +76,31 @@ public interface Input {
       return;
     }
 
-    JacksonJsonNode node = (JacksonJsonNode) value;
+    final JacksonJsonNode node = (JacksonJsonNode) value;
+
+    Object input = null;
+
     if (node == null) {
       getLogger().warn("Could not find node for value for {} from {}", key, type);
     } else if (Boolean.TRUE.equals(variable.getAsJson())) {
-      inputs.put(key, getMapper().writeValueAsString(node.unwrap()));
-    } else if (node.isObject()) {
-      inputs.put(key, getMapper().convertValue(node.unwrap(), new TypeReference<Map<String, Object>>() {}));
+      input = node.unwrap();
     } else if (Boolean.TRUE.equals(node.isArray())) {
-      inputs.put(key, getMapper().convertValue(node.unwrap(), new TypeReference<List<Object>>() {}));
+      input = getMapper().convertValue(node.unwrap(), new TypeReference<List<Object>>() {});
+    } else if (node.isObject()) {
+      input = getMapper().convertValue(node.unwrap(), new TypeReference<Map<String, Object>>() {});
     } else if (Boolean.TRUE.equals(node.isValue())) {
+      // E-mails may embed JSON into a string, so attempt to treat as JSON and if its not then this will fail.
+      // On Failure, put the value directly as is.
       try {
-        // Try read tree if value is JSON string.
-        inputs.put(key, getMapper().readTree((String) node.value()));
+        input = getMapper().readTree((String) node.value());
       } catch (Exception e) {
-        inputs.put(key, node.value());
+        input = node.value();
       }
+    } else {
+      getLogger().debug("Unknown condition for Jackson deserialization of node for value for {} from {}", key, type);
     }
+
+    inputs.put(key, input);
   }
 
 }
