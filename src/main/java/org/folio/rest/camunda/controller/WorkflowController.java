@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.controller;
 
+import java.util.List;
+
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.camunda.service.CamundaApiService;
@@ -8,6 +10,7 @@ import org.folio.spring.tenant.annotation.TenantHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,15 +29,18 @@ public class WorkflowController {
   }
 
   @PostMapping(value = "/activate", produces = { MediaType.APPLICATION_JSON_VALUE })
-  public Workflow activateWorkflow(@RequestBody Workflow workflow, @TenantHeader String tenant)
+  public String activateWorkflow(@RequestBody Workflow workflow, @TenantHeader String tenant)
       throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
     LOG.debug("Activating Workflow: {}", workflow == null ? null : workflow.getId());
     return camundaApiService.deployWorkflow(workflow, tenant);
   }
 
   @PostMapping(value = "/deactivate", produces = { MediaType.APPLICATION_JSON_VALUE })
-  public Workflow deactivateWorkflow(@RequestBody Workflow workflow) {
-    LOG.debug("Deactivating Workflow: {}", workflow == null ? null : workflow.getId());
-    return camundaApiService.undeployWorkflow(workflow);
+  public ResponseEntity<Object> deactivateWorkflows(@RequestBody List<String> ids, @TenantHeader String tenant) {
+    LOG.debug("Deactivating Workflows: {}", ids);
+    camundaApiService.undeployWorkflows(ids, tenant);
+
+    // Ensure that a HTTP 204 is returned on success.
+    return ResponseEntity.noContent().build();
   }
 }

@@ -30,12 +30,14 @@ import static org.folio.spring.test.mock.MockMvcRequest.invokeRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.stream.Stream;
 import org.folio.rest.camunda.service.CamundaApiService;
 import org.folio.rest.workflow.model.Setup;
@@ -72,6 +74,12 @@ class WorkflowControllerTest {
 
   private static final String PATH_DEACTIVATE = PATH + "/deactivate";
 
+  private static final String DEPLOYMENT_ID = "deploymentId";
+
+  private static final List<String> DEPLOYMENT_IDS = List.of(DEPLOYMENT_ID);
+
+  private static final String JSON_ARRAY = "[]";
+
   private MockMvc mvc;
 
   protected JsonMapper mapper;
@@ -92,7 +100,7 @@ class WorkflowControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideHeadersBodyStatusForActivateDeactivateWorkflow")
+  @MethodSource("provideHeadersBodyStatusForActivateWorkflow")
   void activateWorkflowTest(HttpHeaders headers, String contentType, String accept, MediaType mediaType, MultiValueMap<String, String> parameters, String body, int status) throws Exception {
     ObjectNode objectNode = mapper.createObjectNode();
     objectNode.put(KEY, VALUE);
@@ -103,10 +111,10 @@ class WorkflowControllerTest {
     workflow.setDescription("description");
     workflow.setVersionTag("versionTag");
     workflow.setHistoryTimeToLive(90);
-    workflow.setDeploymentId("deploymentId");
+    workflow.setDeploymentIds(DEPLOYMENT_IDS);
     workflow.setSetup(new Setup());
 
-    lenient().when(camundaApiService.deployWorkflow(any(), any())).thenReturn(workflow);
+    lenient().when(camundaApiService.deployWorkflow(any(), any())).thenReturn(DEPLOYMENT_ID);
 
     MockHttpServletRequestBuilder request = appendHeaders(post(PATH_ACTIVATE), headers, contentType, accept);
     request = appendParameters(request, parameters);
@@ -116,43 +124,28 @@ class WorkflowControllerTest {
 
     if (status == 200) {
       MediaType responseType = MediaType.parseMediaType(result.getResponse().getContentType());
-      Workflow response = mapper.readValue(result.getResponse().getContentAsString(), Workflow.class);
+      String response = result.getResponse().getContentAsString();
 
       assertTrue(mediaType.isCompatibleWith(responseType));
-      assertEquals(mapper.writeValueAsString(workflow), mapper.writeValueAsString(response));
+      assertEquals(DEPLOYMENT_ID, response);
     }
   }
 
   @ParameterizedTest
-  @MethodSource("provideHeadersBodyStatusForActivateDeactivateWorkflow")
+  @MethodSource("provideHeadersBodyStatusForDeactivateWorkflow")
   void deactivateWorkflowTest(HttpHeaders headers, String contentType, String accept, MediaType mediaType, MultiValueMap<String, String> parameters, String body, int status) throws Exception {
     ObjectNode objectNode = mapper.createObjectNode();
     objectNode.put(KEY, VALUE);
 
-    Workflow workflow = new Workflow();
-    workflow.setId("id");
-    workflow.setName("name");
-    workflow.setDescription("description");
-    workflow.setVersionTag("versionTag");
-    workflow.setHistoryTimeToLive(90);
-    workflow.setDeploymentId("deploymentId");
-    workflow.setSetup(new Setup());
-
-    lenient().when(camundaApiService.undeployWorkflow(any())).thenReturn(workflow);
+    lenient().doNothing().when(camundaApiService).undeployWorkflows(any(), any());
 
     MockHttpServletRequestBuilder request = appendHeaders(post(PATH_DEACTIVATE), headers, contentType, accept);
     request = appendParameters(request, parameters);
+    request = appendBody(request, body);
 
-    MvcResult result = mvc.perform(appendBody(request, body))
-      .andDo(log()).andExpect(status().is(status)).andReturn();
-
-    if (status == 200) {
-      MediaType responseType = MediaType.parseMediaType(result.getResponse().getContentType());
-      Workflow response = mapper.readValue(result.getResponse().getContentAsString(), Workflow.class);
-
-      assertTrue(mediaType.isCompatibleWith(responseType));
-      assertEquals(mapper.writeValueAsString(workflow), mapper.writeValueAsString(response));
-    }
+    mvc.perform(request)
+      .andDo(log()).andExpect(status().is(status))
+      .andReturn();
   }
 
   @ParameterizedTest
@@ -220,7 +213,7 @@ class WorkflowControllerTest {
    *
    * @throws SecurityException
    */
-  private static Stream<Arguments> provideHeadersBodyStatusForActivateDeactivateWorkflow() throws SecurityException {
+  private static Stream<Arguments> provideHeadersBodyStatusForActivateWorkflow() throws SecurityException {
     Stream<Arguments> stream1 = Stream.of(
       Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_SCHEMA, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
       Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_JSON,   MT_APP_JSON, NO_PARAM, JSON_OBJECT, 200),
@@ -266,6 +259,75 @@ class WorkflowControllerTest {
     stream1 = Stream.concat(stream, stream2);
 
     stream2 = buildArguments1(OKAPI_HEAD_TENANT, contentTypesValid, accepts, mediaTypes, params, bodysValid, 200);
+    stream = Stream.concat(stream1, stream2);
+
+    stream1 = buildArguments1(OKAPI_HEAD_TENANT, contentTypesInvalid, accepts, mediaTypes, params, bodysInvalid, 415);
+    return Stream.concat(stream, stream1);
+  }
+
+  /**
+   * Helper function for parameterized test providing tests with headers, body, and status for activate workflow end point.
+   *
+   * This is intended to be used for when the correct HTTP method is being used in the request.
+   *
+   * @return
+   *   The arguments array stream with the stream columns as:
+   *     - HttpHeaders headers.
+   *     - String contentType (Content-Type request).
+   *     - String accept (ask for this Content-Type on response).
+   *       String mediaType (response Content-Type).
+   *     - MultiValueMap<String, String> parameters.
+   *     - String body (request body).
+   *     - int status (response HTTP status code).
+   *
+   * @throws SecurityException
+   */
+  private static Stream<Arguments> provideHeadersBodyStatusForDeactivateWorkflow() throws SecurityException {
+    Stream<Arguments> stream1 = Stream.of(
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_SCHEMA, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_JSON,   MT_APP_JSON, NO_PARAM, JSON_ARRAY, 204),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   TEXT_PLAIN, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_STREAM, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   NULL_STR,   MT_APP_JSON, NO_PARAM, JSON_ARRAY, 204),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   APP_STAR,   MT_APP_JSON, NO_PARAM, JSON_ARRAY, 204),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_JSON,   STAR,       MT_APP_JSON, NO_PARAM, JSON_ARRAY, 204),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, APP_SCHEMA, MT_APP_JSON, NO_PARAM, PLAIN_BODY,  406),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, APP_JSON,   MT_APP_JSON, NO_PARAM, PLAIN_BODY,  415),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, TEXT_PLAIN, MT_APP_JSON, NO_PARAM, PLAIN_BODY,  406),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, APP_STREAM, MT_APP_JSON, NO_PARAM, PLAIN_BODY,  406),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, NULL_STR,   MT_APP_JSON, NO_PARAM, PLAIN_BODY,  415),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, STAR,       MT_APP_JSON, NO_PARAM, PLAIN_BODY,  415),
+      Arguments.of(OKAPI_HEAD_TENANT, TEXT_PLAIN, APP_STAR,   MT_APP_JSON, NO_PARAM, PLAIN_BODY,  415),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, APP_SCHEMA, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, APP_JSON,   MT_APP_JSON, NO_PARAM, JSON_OBJECT, 415),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, TEXT_PLAIN, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, APP_STREAM, MT_APP_JSON, NO_PARAM, JSON_OBJECT, 406),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, NULL_STR,   MT_APP_JSON, NO_PARAM, JSON_OBJECT, 415),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, APP_STAR,   MT_APP_JSON, NO_PARAM, JSON_OBJECT, 415),
+      Arguments.of(OKAPI_HEAD_TENANT, APP_STREAM, STAR,       MT_APP_JSON, NO_PARAM, JSON_OBJECT, 415)
+    );
+
+    String[] contentTypes = { APP_JSON, TEXT_PLAIN, APP_STREAM };
+    String[] contentTypesValid = { APP_JSON };
+    String[] contentTypesInvalid = { TEXT_PLAIN, APP_STREAM };
+    String[] bodys = { JSON_ARRAY, PLAIN_BODY, JSON_OBJECT };
+    String[] bodysValid = { JSON_ARRAY };
+    String[] bodysInvalid = { PLAIN_BODY, JSON_OBJECT };
+    String[] accepts = { APP_JSON, NULL_STR, APP_STAR, STAR };
+    String[] acceptsInvalid = { APP_SCHEMA, TEXT_PLAIN, APP_STREAM };
+    MediaType[] mediaTypes = { MT_APP_JSON };
+    Object[] params = { NO_PARAM };
+
+    Stream<Arguments> stream2 = buildArguments1(OKAPI_HEAD_TOKEN, contentTypes, acceptsInvalid, mediaTypes, params, bodys, 406);
+    Stream<Arguments> stream = Stream.concat(stream1, stream2);
+
+    stream1 = buildArguments1(OKAPI_HEAD_TOKEN, contentTypesValid, accepts, mediaTypes, params, bodysValid, 204);
+    stream2 = Stream.concat(stream, stream1);
+
+    stream = buildArguments1(OKAPI_HEAD_TOKEN, contentTypesInvalid, accepts, mediaTypes, params, bodysInvalid, 415);
+    stream1 = Stream.concat(stream, stream2);
+
+    stream2 = buildArguments1(OKAPI_HEAD_TENANT, contentTypesValid, accepts, mediaTypes, params, bodysValid, 204);
     stream = Stream.concat(stream1, stream2);
 
     stream1 = buildArguments1(OKAPI_HEAD_TENANT, contentTypesInvalid, accepts, mediaTypes, params, bodysInvalid, 415);

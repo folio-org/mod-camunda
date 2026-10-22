@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.service;
 
+import java.util.List;
+
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
@@ -14,6 +16,7 @@ import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotFoundException;
 import org.operaton.bpm.engine.exception.NotValidException;
 import org.operaton.bpm.engine.repository.Deployment;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 import org.slf4j.Logger;
@@ -40,10 +43,10 @@ public class CamundaApiService {
     this.bpmnModelFactory = bpmnModelFactory;
   }
 
-  public Workflow deployWorkflow(Workflow workflow, String tenant)
+  public String deployWorkflow(Workflow workflow, String tenant)
       throws WorkflowAlreadyActiveException, ScriptTaskDeserializeCodeFailure {
 
-    if (workflow == null) {
+    if (workflow == null || tenant == null || !tenant.equals(workflow.getTenantId())) {
       throw new RequestMissingWorkflowException("deploy");
     }
 
@@ -70,37 +73,41 @@ public class CamundaApiService {
         .source("mod-workflow")
         .tenantId(tenant).deploy();
 
-      String deploymentId = deployment.getId();
-
-      workflow.setActive(true);
-      workflow.setDeploymentId(deploymentId);
+      return deployment.getId();
     } catch (NotFoundException | NotValidException | ParseException | AuthorizationException e) {
       Bpmn.writeModelToStream(debugStream, modelInstance);
 
       throw e;
     }
-
-    return workflow;
   }
 
-  public Workflow undeployWorkflow(Workflow workflow) {
+  public void undeployWorkflows(List<String> ids, String tenant) {
 
-    if (workflow == null) {
+    if (ids == null) {
       throw new RequestMissingWorkflowException("undeploy");
     }
 
-    if (Boolean.FALSE.equals(workflow.getActive())) {
-      return workflow;
+    if (ids.isEmpty()) {
+      return;
     }
 
     ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
     RepositoryService repositoryService = processEngine.getRepositoryService();
-    repositoryService.deleteDeployment(workflow.getDeploymentId(), true);
 
-    workflow.setActive(false);
-    workflow.setDeploymentId(null);
+    for (String id : ids) {
 
-    return workflow;
+      final List<ProcessDefinition> activeProcesses = repositoryService
+        .createProcessDefinitionQuery()
+        .deploymentId(id)
+        .tenantIdIn(tenant)
+        .active()
+        .list();
+
+      activeProcesses.forEach(process -> {
+        repositoryService.deleteDeployment(process.getId(), true);
+      });
+    }
+    
   }
 
 }

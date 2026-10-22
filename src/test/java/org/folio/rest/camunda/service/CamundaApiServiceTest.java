@@ -2,7 +2,6 @@ package org.folio.rest.camunda.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -12,6 +11,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
@@ -31,6 +32,8 @@ import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotValidException;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.engine.repository.DeploymentBuilder;
+import org.operaton.bpm.engine.repository.ProcessDefinition;
+import org.operaton.bpm.engine.repository.ProcessDefinitionQuery;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 
@@ -38,6 +41,8 @@ import org.operaton.bpm.model.bpmn.BpmnModelInstance;
 class CamundaApiServiceTest {
 
   private static final String TENANT = "testTenant";
+
+  private static final String DEPLOYMENT_ID = "deploymentId";
 
   @Mock
   private BpmnModelFactory bpmnModelFactory;
@@ -63,26 +68,43 @@ class CamundaApiServiceTest {
   @Mock
   private Deployment deployment;
 
+  @Mock
+  private ProcessDefinitionQuery processDefinitionQuery;
+
+  @Mock
+  private ProcessDefinition processDefinition;
+
   private Workflow workflow;
+
+  private List<ProcessDefinition> processDefinitionList;
 
   @BeforeEach
   void setUp() throws ScriptTaskDeserializeCodeFailure {
     workflow = new Workflow();
     workflow.setActive(false);
     workflow.setName("Test Workflow");
+    workflow.setTenantId(TENANT);
+
+    processDefinitionList = List.of(processDefinition);
 
     lenient().when(bpmnModelFactory.fromWorkflow(workflow)).thenReturn(modelInstance);
     lenient().when(processEngine.getRepositoryService()).thenReturn(repositoryService);
     lenient().when(repositoryService.createDeployment()).thenReturn(deploymentBuilder);
+    lenient().when(repositoryService.createProcessDefinitionQuery()).thenReturn(processDefinitionQuery);
     lenient().when(deploymentBuilder.name(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.addModelInstance(anyString(), any(BpmnModelInstance.class)))
       .thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.source(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.tenantId(anyString())).thenReturn(deploymentBuilder);
     lenient().when(deploymentBuilder.deploy()).thenReturn(deployment);
-    lenient().when(deployment.getId()).thenReturn("deploymentId");
+    lenient().when(deployment.getId()).thenReturn(DEPLOYMENT_ID);
     lenient().when(processEngine.getProcessEngineConfiguration()).thenReturn(processEngineConfiguration);
     lenient().when(processEngineConfiguration.setClassLoader(any())).thenReturn(processEngineConfiguration);
+    lenient().when(processDefinitionQuery.deploymentId(any())).thenReturn(processDefinitionQuery);
+    lenient().when(processDefinitionQuery.tenantIdIn(any())).thenReturn(processDefinitionQuery);
+    lenient().when(processDefinitionQuery.active()).thenReturn(processDefinitionQuery);
+    lenient().when(processDefinitionQuery.list()).thenReturn(processDefinitionList);
+    lenient().when(processDefinition.getId()).thenReturn(DEPLOYMENT_ID);
   }
 
   @Test
@@ -94,11 +116,13 @@ class CamundaApiServiceTest {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
-      Workflow result = camundaApiService.deployWorkflow(workflow, TENANT);
+      String result = camundaApiService.deployWorkflow(workflow, TENANT);
 
       assertNotNull(result);
-      assertEquals(true, result.getActive());
-      assertEquals("deploymentId", result.getDeploymentId());
+      assertEquals(DEPLOYMENT_ID, result);
+
+      workflow.getDeploymentIds().add(result);
+      workflow.setActive(true);
 
       verify(bpmnModelFactory).fromWorkflow(workflow);
       verify(repositoryService).createDeployment();
@@ -127,7 +151,7 @@ class CamundaApiServiceTest {
 
   @Test
   void testUndeployWorkflowMissingWOrkflowException() {
-    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.undeployWorkflow(null));
+    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.undeployWorkflows(null, TENANT));
   }
 
   @Test
@@ -144,13 +168,9 @@ class CamundaApiServiceTest {
     try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
 
-      Workflow result = camundaApiService.undeployWorkflow(workflow);
+      camundaApiService.undeployWorkflows(workflow.getDeploymentIds(), TENANT);
 
-      assertNotNull(result);
-      assertEquals(false, result.getActive());
-      assertNull(result.getDeploymentId());
-
-      verify(repositoryService).deleteDeployment("deploymentId", true);
+      verify(repositoryService).deleteDeployment(DEPLOYMENT_ID, true);
     }
   }
 
@@ -159,11 +179,7 @@ class CamundaApiServiceTest {
     try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
       utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
 
-      Workflow result = camundaApiService.undeployWorkflow(workflow);
-
-      assertNotNull(result);
-      assertEquals(false, result.getActive());
-      assertNull(result.getDeploymentId());
+      camundaApiService.undeployWorkflows(workflow.getDeploymentIds(), TENANT);
 
       verify(repositoryService, never()).deleteDeployment(anyString(), anyBoolean());
     }
