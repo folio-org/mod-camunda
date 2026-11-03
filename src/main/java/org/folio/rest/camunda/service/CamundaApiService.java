@@ -98,7 +98,7 @@ public class CamundaApiService {
         .list();
       
       activeProcesses.forEach(process -> {
-        repositoryService.deleteDeployment(process.getId(), true);
+        repositoryService.deleteDeployment(process.getDeploymentId(), true);
       });
     }
   }
