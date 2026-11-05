@@ -9,10 +9,12 @@ import org.folio.rest.workflow.model.Workflow;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
 import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.ProcessEngineConfiguration;
 import org.operaton.bpm.engine.ProcessEngines;
 import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotFoundException;
 import org.operaton.bpm.engine.exception.NotValidException;
+import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
@@ -57,7 +59,7 @@ public class CamundaApiService {
 
     Bpmn.validateModel(modelInstance);
 
-    ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
+    ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
 
     processEngine.getProcessEngineConfiguration()
@@ -93,7 +95,7 @@ public class CamundaApiService {
       return workflow;
     }
 
-    ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
+    ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
     repositoryService.deleteDeployment(workflow.getDeploymentId(), true);
 
@@ -101,6 +103,28 @@ public class CamundaApiService {
     workflow.setDeploymentId(null);
 
     return workflow;
+  }
+
+  /**
+   * A programatic initializer for process engines to be associated with each provided tenant.
+   * 
+   * If an engine is already present, the existing engine will be fetched.
+   * 
+   * If no engine is present, the database schema will checked, updated if not present, then
+   * the new engine will be initialized.
+   * 
+   * @param tenant The tenant to be associated with the engine.
+   */
+  private ProcessEngine getProcessEngine(String tenant) {
+    ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
+    if (processEngine == null) {
+      processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
+        .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
+        .setJdbcUrl()
+        .setJobExecutorActivate(true)
+        .buildProcessEngine();
+    }
+    return processEngine;
   }
 
 }
