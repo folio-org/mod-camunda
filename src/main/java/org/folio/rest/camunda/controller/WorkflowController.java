@@ -33,8 +33,8 @@ public class WorkflowController {
   }
 
   @PostMapping(value = "/deactivate", produces = { MediaType.APPLICATION_JSON_VALUE })
-  public Workflow deactivateWorkflow(@RequestBody Workflow workflow) {
+  public Workflow deactivateWorkflow(@RequestBody Workflow workflow, @TenantHeader String tenant) {
     LOG.debug("Deactivating Workflow: {}", workflow == null ? null : workflow.getId());
-    return camundaApiService.undeployWorkflow(workflow);
+    return camundaApiService.undeployWorkflow(workflow, tenant);
   }
 }

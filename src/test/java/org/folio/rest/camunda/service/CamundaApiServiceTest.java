@@ -91,7 +91,7 @@ class CamundaApiServiceTest {
         MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class);
         MockedStatic<Bpmn> utilityBpmn = mockStatic(Bpmn.class);
       ) {
-      utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
+      utilityProcessEngines.when(() -> ProcessEngines.getProcessEngine(TENANT)).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
       Workflow result = camundaApiService.deployWorkflow(workflow, TENANT);
@@ -111,7 +111,7 @@ class CamundaApiServiceTest {
         MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class);
         MockedStatic<Bpmn> utilityBpmn = mockStatic(Bpmn.class);
     ) {
-      utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
+      utilityProcessEngines.when(() -> ProcessEngines.getProcessEngine(TENANT)).thenReturn(processEngine);
       utilityBpmn.when(() -> Bpmn.validateModel(modelInstance)).thenAnswer(answer -> null);
 
       when(deploymentBuilder.deploy()).thenThrow(new NotValidException());
@@ -127,7 +127,7 @@ class CamundaApiServiceTest {
 
   @Test
   void testUndeployWorkflowMissingWOrkflowException() {
-    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.undeployWorkflow(null));
+    assertThrows(RequestMissingWorkflowException.class, () -> camundaApiService.undeployWorkflow(null, TENANT));
   }
 
   @Test
@@ -142,9 +142,9 @@ class CamundaApiServiceTest {
     testDeployWorkflow();
 
     try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
-      utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
+      utilityProcessEngines.when(() -> ProcessEngines.getProcessEngine(TENANT)).thenReturn(processEngine);
 
-      Workflow result = camundaApiService.undeployWorkflow(workflow);
+      Workflow result = camundaApiService.undeployWorkflow(workflow, TENANT);
 
       assertNotNull(result);
       assertEquals(false, result.getActive());
@@ -157,9 +157,9 @@ class CamundaApiServiceTest {
   @Test
   void testUndeployWorkflowNotActive() {
     try (MockedStatic<ProcessEngines> utilityProcessEngines = mockStatic(ProcessEngines.class)) {
-      utilityProcessEngines.when(ProcessEngines::getDefaultProcessEngine).thenReturn(processEngine);
+      utilityProcessEngines.when(() -> ProcessEngines.getProcessEngine(TENANT)).thenReturn(processEngine);
 
-      Workflow result = camundaApiService.undeployWorkflow(workflow);
+      Workflow result = camundaApiService.undeployWorkflow(workflow, TENANT);
 
       assertNotNull(result);
       assertEquals(false, result.getActive());

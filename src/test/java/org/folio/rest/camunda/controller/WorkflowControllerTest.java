@@ -138,7 +138,7 @@ class WorkflowControllerTest {
     workflow.setDeploymentId("deploymentId");
     workflow.setSetup(new Setup());
 
-    lenient().when(camundaApiService.undeployWorkflow(any())).thenReturn(workflow);
+    lenient().when(camundaApiService.undeployWorkflow(any(), any())).thenReturn(workflow);
 
     MockHttpServletRequestBuilder request = appendHeaders(post(PATH_DEACTIVATE), headers, contentType, accept);
     request = appendParameters(request, parameters);

@@ -57,7 +57,7 @@ public class CamundaApiService {
 
     Bpmn.validateModel(modelInstance);
 
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+    ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
 
     processEngine.getProcessEngineConfiguration()
@@ -83,7 +83,7 @@ public class CamundaApiService {
     return workflow;
   }
 
-  public Workflow undeployWorkflow(Workflow workflow) {
+  public Workflow undeployWorkflow(Workflow workflow, String tenant) {
 
     if (workflow == null) {
       throw new RequestMissingWorkflowException("undeploy");
@@ -93,7 +93,7 @@ public class CamundaApiService {
       return workflow;
     }
 
-    ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+    ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
     repositoryService.deleteDeployment(workflow.getDeploymentId(), true);
 
