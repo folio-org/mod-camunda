@@ -140,6 +140,11 @@
 
     <dependency>
       <groupId>org.operaton.bpm.springboot</groupId>
+      <artifactId>operaton-bpm-spring-boot-starter-webapp-neo</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.operaton.bpm.springboot</groupId>
       <artifactId>operaton-bpm-spring-boot-starter-rest</artifactId>
     </dependency>
 
