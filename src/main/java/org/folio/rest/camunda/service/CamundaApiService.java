@@ -1,11 +1,13 @@
 package org.folio.rest.camunda.service;
 
+import org.folio.rest.camunda.config.SpringConfig;
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
+import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
 import org.operaton.bpm.engine.ProcessEngine;
@@ -15,6 +17,7 @@ import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotFoundException;
 import org.operaton.bpm.engine.exception.NotValidException;
 import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.operaton.bpm.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
@@ -30,16 +33,22 @@ public class CamundaApiService {
 
   private static final LoggerStream debugStream = new LoggerStream(logger, Level.DEBUG);
 
-  private BpmnModelFactory bpmnModelFactory;
+  private final BpmnModelFactory bpmnModelFactory;
+
+  private final SpringConfig springConfig;
+
+  private final SchemaService schemaService;
 
   /**
    * Initializer.
    *
    * @param bpmnModelFactory The model factory.
    */
-  public CamundaApiService(BpmnModelFactory bpmnModelFactory) {
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SpringConfig springConfig, SchemaService schemaService) {
 
     this.bpmnModelFactory = bpmnModelFactory;
+    this.springConfig = springConfig;
+    this.schemaService = schemaService;
   }
 
   public Workflow deployWorkflow(Workflow workflow, String tenant)
@@ -58,6 +67,8 @@ public class CamundaApiService {
     BpmnModelInstance modelInstance = bpmnModelFactory.fromWorkflow(workflow);
 
     Bpmn.validateModel(modelInstance);
+    
+    // EXISTENCE CHECK HERE.
 
     ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
@@ -94,6 +105,8 @@ public class CamundaApiService {
     if (Boolean.FALSE.equals(workflow.getActive())) {
       return workflow;
     }
+    
+    // PROCESS HERE.
 
     ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
@@ -116,17 +129,27 @@ public class CamundaApiService {
    * @param tenant The tenant to be associated with the engine.
    */
   private ProcessEngine getProcessEngine(String tenant) {
+
     ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
+
     if (processEngine == null) {
+
+      final String baseUrl = springConfig.getSpringDatasourceConfig().getUrl();
+      final String schema = schemaService.getSchema(tenant);
+
+      final String formattedUrl = baseUrl + "?currentSchema=" + schema + ",public";
+
       processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
         .setProcessEngineName(tenant)
+        .setJdbcDriver(springConfig.getSpringDatasourceConfig().getDriverClassName())
+        .setJdbcUrl(formattedUrl)
+        .setJdbcUsername(springConfig.getSpringDatasourceConfig().getUsername())
+        .setJdbcPassword(springConfig.getSpringDatasourceConfig().getPassword())
         .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-        .setJdbcUrl("")
-        .setJdbcUsername("")
-        .setJdbcPassword("")
         .setJobExecutorActivate(true)
         .buildProcessEngine();
     }
+
     return processEngine;
   }
 
