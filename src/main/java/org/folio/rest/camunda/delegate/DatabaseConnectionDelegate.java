@@ -46,6 +46,7 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
     Properties info = new Properties();
     info.setProperty("user", this.username.getValue(execution).toString());
     info.setProperty("password", this.password.getValue(execution).toString());
+    info.setProperty("tenant", execution.getTenantId());
 
     try {
       connectionService.createPool(key, urlValue, info);

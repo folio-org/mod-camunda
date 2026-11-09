@@ -119,8 +119,11 @@ public class CamundaApiService {
     ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
     if (processEngine == null) {
       processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
+        .setProcessEngineName(tenant)
         .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-        .setJdbcUrl()
+        .setJdbcUrl("")
+        .setJdbcUsername("")
+        .setJdbcPassword("")
         .setJobExecutorActivate(true)
         .buildProcessEngine();
     }

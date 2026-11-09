@@ -6,18 +6,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.folio.spring.tenant.service.SchemaService;
+import org.springframework.stereotype.Service;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import org.springframework.stereotype.Service;
 
 @Service
 public class DatabaseConnectionService {
 
   private final Map<String, HikariDataSource> pools;
 
-  public DatabaseConnectionService() {
+  private final SchemaService schemaService;
+
+  public DatabaseConnectionService(SchemaService schemaService) {
     this.pools = new HashMap<>();
+    this.schemaService = schemaService;
   }
 
   public synchronized void createPool(String key, String url, Properties info) throws SQLException {
@@ -40,6 +44,9 @@ public class DatabaseConnectionService {
       // config.setDataSourceProperties(info);
 
       HikariDataSource dataSource = new HikariDataSource(config);
+
+      final String tenant = info.getProperty("tenant");
+      dataSource.setConnectionInitSql(String.format("SET search_path TO %s, public", schemaService.getSchema(tenant)));
 
       this.pools.put(key, dataSource);
     }
