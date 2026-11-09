@@ -1,6 +1,6 @@
 # mod-camunda
 
-Copyright (C) 2018-2025 The Open Library Foundation.
+Copyright (C) 2018-2026 The Open Library Foundation.
 
 This software is distributed under the terms of the Apache License, Version 2.0.
 See the file ["LICENSE"](LICENSE) for more information.
@@ -8,14 +8,27 @@ See the file ["LICENSE"](LICENSE) for more information.
 
 # Table of Contents
 
-1. [Docker deployment](#docker-deployment)
+1. [Operaton Note](#operaton-note)
+2. [Docker deployment](#docker-deployment)
   1. [Publish docker image](#publish-docker-image)
-2. [Manual Build and Run](#manual-build-and-run)
-3. [Camunda Module Dependencies](#camunda-module-dependencies)
-4. [Workflow Project Structure](#workflow-project-structure)
-5. [Camunda APIs](#camunda-apis)
-6. [Kafka Message Broker](#kafka-message-broker)
-7. [Issue Tracker](#issue-tracker)
+3. [Manual Build and Run](#manual-build-and-run)
+4. [Camunda Module Dependencies](#camunda-module-dependencies)
+5. [Workflow Project Structure](#workflow-project-structure)
+6. [Camunda APIs](#camunda-apis)
+7. [Kafka Message Broker](#kafka-message-broker)
+8. [Issue Tracker](#issue-tracker)
+
+
+## Operaton Note
+
+The **Camunda 7** engine is now replaced with the **Operaton** engine.
+This repository name is to remain `mod-camunda` at this time, despite the difference of the engines.
+
+The **Operaton** engine is the future of **Camunda 7** and may be found here:
+  - https://operaton.org/
+
+**Operaton** also brings in a new user interface called **Neo**.
+Details on switching to **Neo** are described below.
 
 
 ## Docker deployment
@@ -55,7 +68,7 @@ DB_PORT=5432 \
 SERVER_PORT=9000 \
 GATEWAY_URL=http://remote_gateway:8000 \
 SPRING_JPA_HIBERNATE_DDLAUTO="update" \
-CAMUNDA_BPM_DATABASE_SCHEMAUPDATE=true \
+OPERATON_BPM_DATABASE_SCHEMAUPDATE=true \
 TENANT_INITIALIZEDEFAULTENANT=true \
 TENANT_RECREATEDEFAULTTENANT=true \
 SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_CHECKSERVERIDENTITY=false \
@@ -68,7 +81,7 @@ mvn clean spring-boot:run
 ```
 
 The above example explicitly defines the Postgresql database settings.
-The `SPRING_JPA_HIBERNATE_DDLAUTO`, `CAMUNDA_BPM_DATABASE_SCHEMAUPDATE`, `TENANT_INITIALIZEDEFAULTENANT`, and `TENANT_RECREATEDEFAULTTENANT` environment variables are defined this way so that the database is deleted and re-created on each run. If this is not desired, then they should be set to `false`.
+The `SPRING_JPA_HIBERNATE_DDLAUTO`, `OPERATON_BPM_DATABASE_SCHEMAUPDATE`, `TENANT_INITIALIZEDEFAULTENANT`, and `TENANT_RECREATEDEFAULTTENANT` environment variables are defined this way so that the database is deleted and re-created on each run. If this is not desired, then they should be set to `false`.
 Note that the `SPRING_JPA_HIBERNATE_DDLAUTO` could be set to `None`, but `update` is still safe when preserving the database between runs.
 
 The `SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_CHECKSERVERIDENTITY` is only needed on a local machine because there might not be a valid mail server certificate for the local machine.
@@ -93,30 +106,34 @@ In such a case, this could be set to the local `mod-workflow` instance, such as 
 
 ## Camunda Module Dependencies
 
-This module depends on spring-module-core and brings in Camunda BPM to enable workflow capabilities.
-Camunda is an open-source BPM platform that is embedded in this module.
+This module depends on spring-module-core and brings in **Operaton** **BPM** to enable workflow capabilities.
+**Operaton** is an open-source **BPM** platform that is embedded in this module.
 The [pom.xml](pom.xml) described these versions and dependencies.
 
-- `camunda-bpm-spring-boot-starter`
-  - Adds the Camunda engine.
-  - [https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/](https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/)
-  - [https://github.com/camunda/camunda-bpm-spring-boot-starter](https://github.com/camunda/camunda-bpm-spring-boot-starter)
-  - The Camunda engine requires a database schema to be configured on startup.
-    - Details on the process engine database schema configuration can be found in the [spring boot integration configuration](https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/configuration/).
-- `camunda-bpm-spring-boot-starter-webapp`
-  - Enables Web Applications such as Camunda Cockpit and Tasklist.
-  - [https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/webapps/](https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/webapps/)
-- `camunda-bpm-spring-boot-starter-rest`
-  - Enables the Camunda REST API.
-  - [https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/rest-api/](https://docs.camunda.org/manual/develop/user-guide/spring-boot-integration/rest-api/)
-  - [https://docs.camunda.org/manual/latest/reference/rest/](https://docs.camunda.org/manual/latest/reference/rest/)
-  - The Camunda REST API uses Jersey so we use spring boot's common application properties to configure the path to be /camunda in the application.yml file.
+- `operaton-bpm-spring-boot-starter`
+  - Adds the **Operaton** engine.
+  - https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/
+  - https://github.com/operaton/operaton/tree/main/spring-boot-starter
+  - The **Operaton** engine requires a database schema to be configured on startup.
+    - Details on the process engine database schema configuration can be found in the [spring boot integration configuration](https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/configuration).
+- `operaton-bpm-spring-boot-starter-webapp`
+  - Enables the classic web application, such as **Operaton** cockpit and tasklist.
+  - https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/webapps
+- `operaton-bpm-spring-boot-starter-webapp-neo`
+  - Enables the **Neo** web application exclusively by **Operaton**.
+  - https://docs.operaton.org/docs/documentation/reference/release-notes/2_2/
+- `operaton-bpm-spring-boot-starter-rest`
+  - Enables the **Operaton** **REST API**.
+  - https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/rest-api
+  - https://docs.operaton.org/docs/documentation/reference/rest/
+  - The **Operaton** **REST API** uses Jersey so we use spring boot's common application properties to configure the path to be `/ui` in the `application.yml` file.
     - `spring.jersey.application-path=camunda`
+    - The path is left as `camunda` instead of being changed to `operaton` because the module is still named `mod-camunda` and the **FOLIO** module descriptors must reflect this still.
 
 
 ## Workflow Project Structure
 
-Business Process Models and Decision Models are built using the [Camunda Modeler](https://camunda.com/products/modeler/) which implements **BPMN 2.0** and **DMN 1.1** specifications.
+Business Process Models and Decision Models are built using the [Operaton Modeler](https://docs.operaton.org/docs/documentation/installation/operaton-modeler) which implements **BPMN 2.0** and **DMN 1.1** specifications.
 
 The UI module [ui-workflow](https://github.com/folio-org/ui-workflow) provides a way to facilitate building, activating, and running individual workflows.
 
@@ -190,48 +207,51 @@ The most notable environment variables for deployment are described in the [Modu
 
 The following is a summary of many of them.
 
-| Name                                 |       Default value         | Description
-|:-------------------------------------|:----------------------------|:-------------------------------------------------------
-| DB_CHARSET                           | UTF-8                       | Database charset.
-| DB_DATABASE                          | okapi_modules               | Postgres database name.
-| DB_SCHEMA                            | diku_mod_camunda            | Postgres database schema name.
-| DB_HOST                              | postgres                    | Postgres host name.
-| DB_MAXPOOLSIZE                       | 5                           | Database max pool size.
-| DB_PASSWORD                          | folio_admin                 | Postgres user password (be sure to change this).
-| DB_PORT                              | 5432                        | Postgres port.
-| DB_QUERYTIMEOUT                      | 60000                       | Database query timeout.
-| DB_USERNAME                          | folio_admin                 | Postgres user name.
-| FOLIO_ENV_DEFAULTS_LOGLEVEL_EXPOSE   | true                        | Set the `logLevel` variable expose value.
-| FOLIO_ENV_DEFAULTS_LOGLEVEL_NAME     | logLevel                    | Set the `logLevel` variable name.
-| FOLIO_ENV_DEFAULTS_LOGLEVEL_TYPE     | literal                     | Set the `logLevel` variable type.
-| FOLIO_ENV_DEFAULTS_LOGLEVEL_VALUE    | INFO                        | Set the `logLevel` variable value.
-| FOLIO_ENV_DEFAULTS_GATEWAYURL_VALUE  | `http://localhost:9130`     | Set to the same value as `OKAPI_URL`, something like `https://kong:8000`.
-| FOLIO_LOGIN_PATH                     | `/authn/login-with-expiry`  | Set the log in path.
-| JAVA_OPTIONS                         | `-XX:MaxRAMPercentage=75.0` | Java options.
-| KAFKA_HOST                           | kafka                       | Kafka broker host name.
-| KAFKA_PORT                           | 9092                        | Kafka broker port.
-| KAFKA_SECURITY_PROTOCOL              | PLAINTEXT                   | Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT).
-| KAFKA_SSL_KEYSTORE_LOCATION          | -                           | The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client.
-| KAFKA_SSL_KEYSTORE_PASSWORD          | -                           | The store password for the Kafka key store file. This is optional for client and only needed if `ssl.keystore.location` is configured.
-| KAFKA_SSL_TRUSTSTORE_LOCATION        | -                           | The location of the Kafka trust store file.
-| KAFKA_SSL_TRUSTSTORE_PASSWORD        | -                           | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.
-| OKAPI_AUTH_ACCESSCOOKIENAME          | `folioAccessToken`          | The OKAPI cookie name for the Access token; This is generally never changed.
-| OKAPI_AUTH_REFRESHCOOKIENAME         | `folioRefreshToken`         | The OKAPI cookie name for the Refresh token; This is generally never changed.
-| OKAPI_AUTH_TOKENHEADERNAME           | `x-okapi-token`             | The OKAPI header token name; This is generally never changed.
-| OKAPI_URL                            | `http://localhost:9130`     | Gateway URL, such as `https://kong:8000`.
-| OPERATON_BPM_ADMINUSER_EMAIL         | `admin@localhost`           | The e-mail address of the Operaton administration user.
-| OPERATON_BPM_ADMINUSER_ID            | admin                       | The account name of the Operaton administration user.
-| OPERATON_BPM_ADMINUSER_PASSWORD      | admin                       | The password of the Operaton administration user.
-| OPERATON_BPM_DATABASE_SCHEMAUPDATE   | true                        | If Operaton should auto-update the BPM database schema (may result in dropping existing data).
-| OPERATON_BPM_METRICS                 | false                       | Enable or disable Camunda metrics by default.
-| SERVER_PORT                          | 8081                        | The port the `mod-camunda` service listens on.
-| SERVER_SERVLET_CONTEXTPATH           | `/`                         | The context path, or base path, to host at.
-| SPRING_FLYWAY_ENABLED                | false                       | Database migration support via Spring Flyway.
-| SPRING_JPA_HIBERNATE_DDLAUTO         | update                      | Auto-configure database on startup.
-| TENANT_DEFAULTTENANT                 | diku                        | The name of the default tenant to use.
-| TENANT_FORCETENANT                   | false                       | Forcibly add or overwrite the tenant name using the default tenant.
-| TENANT_INITIALIZEDEFAULTENANT        | true                        | Perform initial auto-creation of tenant in the database (schema, tables, etc..).
-| TENANT_RECREATEDEFAULTTENANT         | false                       | When `TENANT_INITIALIZEDEFAULTTENANT` is true and the database already exists, then drop and re-create the database on start.
+| Name                                    |       Default value         | Description
+|:----------------------------------------|:----------------------------|:-------------------------------------------------------
+| DB_CHARSET                              | UTF-8                       | Database charset.
+| DB_DATABASE                             | okapi_modules               | Postgres database name.
+| DB_SCHEMA                               | diku_mod_camunda            | Postgres database schema name.
+| DB_HOST                                 | postgres                    | Postgres host name.
+| DB_MAXPOOLSIZE                          | 5                           | Database max pool size.
+| DB_PASSWORD                             | folio_admin                 | Postgres user password (be sure to change this).
+| DB_PORT                                 | 5432                        | Postgres port.
+| DB_QUERYTIMEOUT                         | 60000                       | Database query timeout.
+| DB_USERNAME                             | folio_admin                 | Postgres user name.
+| FOLIO_ENV_DEFAULTS_LOGLEVEL_EXPOSE      | true                        | Set the `logLevel` variable expose value.
+| FOLIO_ENV_DEFAULTS_LOGLEVEL_NAME        | logLevel                    | Set the `logLevel` variable name.
+| FOLIO_ENV_DEFAULTS_LOGLEVEL_TYPE        | literal                     | Set the `logLevel` variable type.
+| FOLIO_ENV_DEFAULTS_LOGLEVEL_VALUE       | INFO                        | Set the `logLevel` variable value.
+| FOLIO_ENV_DEFAULTS_GATEWAYURL_VALUE     | `http://localhost:9130`     | Set to the same value as `OKAPI_URL`, something like `https://kong:8000`.
+| FOLIO_LOGIN_PATH                        | `/authn/login-with-expiry`  | Set the log in path.
+| JAVA_OPTIONS                            | `-XX:MaxRAMPercentage=75.0` | Java options.
+| KAFKA_HOST                              | kafka                       | Kafka broker host name.
+| KAFKA_PORT                              | 9092                        | Kafka broker port.
+| KAFKA_SECURITY_PROTOCOL                 | PLAINTEXT                   | Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT).
+| KAFKA_SSL_KEYSTORE_LOCATION             | -                           | The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client.
+| KAFKA_SSL_KEYSTORE_PASSWORD             | -                           | The store password for the Kafka key store file. This is optional for client and only needed if `ssl.keystore.location` is configured.
+| KAFKA_SSL_TRUSTSTORE_LOCATION           | -                           | The location of the Kafka trust store file.
+| KAFKA_SSL_TRUSTSTORE_PASSWORD           | -                           | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.
+| OKAPI_AUTH_ACCESSCOOKIENAME             | `folioAccessToken`          | The OKAPI cookie name for the Access token; This is generally never changed.
+| OKAPI_AUTH_REFRESHCOOKIENAME            | `folioRefreshToken`         | The OKAPI cookie name for the Refresh token; This is generally never changed.
+| OKAPI_AUTH_TOKENHEADERNAME              | `x-okapi-token`             | The OKAPI header token name; This is generally never changed.
+| OKAPI_URL                               | `http://localhost:9130`     | Gateway URL, such as `https://kong:8000`.
+| OPERATON_BPM_ADMINUSER_EMAIL            | `admin@localhost`           | The e-mail address of the Operaton administration user.
+| OPERATON_BPM_ADMINUSER_ID               | admin                       | The account name of the Operaton administration user.
+| OPERATON_BPM_ADMINUSER_PASSWORD         | admin                       | The password of the Operaton administration user.
+| OPERATON_BPM_DATABASE_SCHEMAUPDATE      | true                        | If Operaton should auto-update the BPM database schema (may result in dropping existing data).
+| OPERATON_BPM_METRICS                    | false                       | Enable or disable **Operaton** metrics by default.
+| OPERATON_BPM_WEBAPP_APPLICATIONPATH     | `ui`                        | Set the **URL** path to listen under for the classic **UI**.
+| OPERATON_BPM_WEBAPP_NEO_ENABLED         | false                       | Enable or disable **Neo**.
+| OPERATON_BPM_WEBAPP_NEO_APPLICATIONPATH | `neo`                       | Set the **URL** path to listen under; If switching to `ui`, then be sure to change `OPERATON_BPM_WEBAPP_APPLICATIONPATH` to something else.
+| SERVER_PORT                             | 8081                        | The port the `mod-camunda` service listens on.
+| SERVER_SERVLET_CONTEXTPATH              | `/`                         | The context path, or base path, to host at.
+| SPRING_FLYWAY_ENABLED                   | false                       | Database migration support via Spring Flyway.
+| SPRING_JPA_HIBERNATE_DDLAUTO            | update                      | Auto-configure database on startup.
+| TENANT_DEFAULTTENANT                    | diku                        | The name of the default tenant to use.
+| TENANT_FORCETENANT                      | false                       | Forcibly add or overwrite the tenant name using the default tenant.
+| TENANT_INITIALIZEDEFAULTENANT           | true                        | Perform initial auto-creation of tenant in the database (schema, tables, etc..).
+| TENANT_RECREATEDEFAULTTENANT            | false                       | When `TENANT_INITIALIZEDEFAULTTENANT` is true and the database already exists, then drop and re-create the database on start.
 
 The `folio.env.defaults`, which maps to `FOLIO_ENV_DEFAULTS`, supports a set of named objects with a structure similar to the **JSON** below that is also shown in the table above:
 ```json

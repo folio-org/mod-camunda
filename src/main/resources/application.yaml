@@ -111,7 +111,7 @@ spring:
     mode: TEXT
     suffix: .sql
 
-  # Set this to `camunda` to allow the admin ui (see `camunda.bpm.webapp.application-path`) along side the module descriptor paths.
+  # Set this to `camunda` to allow the admin ui (see `operaton.bpm.webapp.application-path`) along side the module descriptor paths.
   # This is relative to the context path.
   jersey.application-path: camunda
 
@@ -119,6 +119,10 @@ operaton:
   # see: https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/
   bpm:
     webapp:
+      neo:
+        enabled: false
+        application-path: neo
+        index-redirect-enabled: false
       application-path: ui
       session-cookie-path-enforcement: true
     auto-deployment-enabled: false
