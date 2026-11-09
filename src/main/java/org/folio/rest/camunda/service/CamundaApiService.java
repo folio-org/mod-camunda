@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.service;
 
+import org.folio.rest.camunda.config.SpringConfig;
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
@@ -14,7 +15,6 @@ import org.operaton.bpm.engine.ProcessEngines;
 import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.exception.NotFoundException;
 import org.operaton.bpm.engine.exception.NotValidException;
-import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.model.bpmn.Bpmn;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
@@ -30,16 +30,19 @@ public class CamundaApiService {
 
   private static final LoggerStream debugStream = new LoggerStream(logger, Level.DEBUG);
 
-  private BpmnModelFactory bpmnModelFactory;
+  private final BpmnModelFactory bpmnModelFactory;
+
+  private final SpringConfig springConfig;
 
   /**
    * Initializer.
    *
    * @param bpmnModelFactory The model factory.
    */
-  public CamundaApiService(BpmnModelFactory bpmnModelFactory) {
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SpringConfig springConfig) {
 
     this.bpmnModelFactory = bpmnModelFactory;
+    this.springConfig = springConfig;
   }
 
   public Workflow deployWorkflow(Workflow workflow, String tenant)
@@ -58,6 +61,8 @@ public class CamundaApiService {
     BpmnModelInstance modelInstance = bpmnModelFactory.fromWorkflow(workflow);
 
     Bpmn.validateModel(modelInstance);
+    
+    // EXISTENCE CHECK HERE.
 
     ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
@@ -94,6 +99,8 @@ public class CamundaApiService {
     if (Boolean.FALSE.equals(workflow.getActive())) {
       return workflow;
     }
+    
+    // PROCESS HERE.
 
     ProcessEngine processEngine = getProcessEngine(tenant);
     RepositoryService repositoryService = processEngine.getRepositoryService();
@@ -116,14 +123,19 @@ public class CamundaApiService {
    * @param tenant The tenant to be associated with the engine.
    */
   private ProcessEngine getProcessEngine(String tenant) {
+
     ProcessEngine processEngine = ProcessEngines.getProcessEngine(tenant);
+
     if (processEngine == null) {
       processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
         .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE)
-        .setJdbcUrl()
+        .setJdbcUrl(springConfig.getSpringDatasourceConfig().getUrl())
+        .setJdbcUsername(springConfig.getSpringDatasourceConfig().getUsername())
+        .setJdbcPassword(springConfig.getSpringDatasourceConfig().getPassword())
         .setJobExecutorActivate(true)
         .buildProcessEngine();
     }
+
     return processEngine;
   }
 
