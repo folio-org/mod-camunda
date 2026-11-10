@@ -3,6 +3,7 @@ package org.folio.rest.camunda.delegate;
 import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
+import org.folio.rest.camunda.service.TenantProvisioningService;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -22,12 +23,15 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
   private Expression username;
   private Expression password;
 
+  private TenantProvisioningService tenantProvisioningService;
+
   /**
    * Initializer.
    */
-  public DatabaseConnectionDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService) {
+  public DatabaseConnectionDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, TenantProvisioningService tenantProvisioningService) {
 
     super(mapper, runtimeService, connectionService);
+    this.tenantProvisioningService = tenantProvisioningService;
   }
 
   /**
@@ -40,15 +44,17 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
   @Override
   protected void performExecute(DelegateExecution execution, String name, String id) {
 
-    String urlValue = this.url.getValue(execution).toString();
-    String key = this.designation.getValue(execution).toString();
+    final String urlValue = this.url.getValue(execution).toString();
+    final String key = this.designation.getValue(execution).toString();
+    final String tenant = execution.getTenantId();
 
     Properties info = new Properties();
     info.setProperty("user", this.username.getValue(execution).toString());
     info.setProperty("password", this.password.getValue(execution).toString());
-    info.setProperty("tenant", execution.getTenantId());
+    info.setProperty("tenant", tenant);
 
     try {
+      tenantProvisioningService.ensureSchema(tenant); // Need to validate this works correctly with Operaton
       connectionService.createPool(key, urlValue, info);
     } catch (Exception e) {
       throw new DelegateExecutionFailure(name, id, e.getMessage(), e);

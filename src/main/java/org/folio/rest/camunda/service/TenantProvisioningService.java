@@ -7,19 +7,21 @@ import java.sql.Statement;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.folio.rest.camunda.config.SpringConfig;
+import org.folio.rest.camunda.config.SpringDatasourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
+import org.springframework.stereotype.Service;
 
+@Service 
 public class TenantProvisioningService {
     
   private final SchemaService schemaService;
-  private final SpringConfig springConfig;
+  private final SpringDatasourceConfig springDatasourceConfig;
 
   private final Set<String> tenants;
 
-  public TenantProvisioningService(SchemaService schemaService, SpringConfig springConfig) {
+  public TenantProvisioningService(SchemaService schemaService, SpringDatasourceConfig springDatasourceConfig) {
     this.schemaService = schemaService;
-    this.springConfig = springConfig;
+    this.springDatasourceConfig = springDatasourceConfig;
     tenants = ConcurrentHashMap.newKeySet();
   }
 
@@ -30,9 +32,9 @@ public class TenantProvisioningService {
 
     try (
       final Connection connection = DriverManager.getConnection(
-        springConfig.getSpringDatasourceConfig().getUrl(),
-        springConfig.getSpringDatasourceConfig().getUsername(),
-        springConfig.getSpringDatasourceConfig().getPassword()
+        springDatasourceConfig.getUrl(),
+        springDatasourceConfig.getUsername(),
+        springDatasourceConfig.getPassword()
       );
       final Statement statement = connection.createStatement();
     ) {
