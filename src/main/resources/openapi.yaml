@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: OpenAPI definition
   version: v0
@@ -24,28 +24,28 @@ paths:
               $ref: "#/components/schemas/Workflow"
         required: true
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -59,40 +59,41 @@ paths:
       tags:
       - workflow-controller
       operationId: activateWorkflow
+      parameters:
+      - name: tenant
+        in: query
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                workflow:
-                  $ref: "#/components/schemas/Workflow"
-                tenant:
-                  type: string
+              $ref: "#/components/schemas/Workflow"
         required: true
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -107,6 +108,11 @@ paths:
       - tenant-controller
       operationId: create
       parameters:
+      - name: tenant
+        in: query
+        required: true
+        schema:
+          type: string
       - name: accept
         in: header
         required: false
@@ -116,42 +122,37 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                tenant:
-                  type: string
-                attributes:
-                  $ref: "#/components/schemas/TenantAttributes"
+              $ref: "#/components/schemas/TenantAttributes"
         required: true
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
           description: OK
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 type: string
     delete:
@@ -159,39 +160,39 @@ paths:
       - tenant-controller
       operationId: delete
       parameters:
+      - name: tenant
+        in: query
+        required: true
+        schema:
+          type: string
       - name: accept
         in: header
         required: false
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -203,28 +204,28 @@ paths:
       summary: Actuator root web endpoint
       operationId: links
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -258,28 +259,28 @@ paths:
       summary: Actuator web endpoint 'info'
       operationId: info
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -301,71 +302,28 @@ paths:
       summary: Actuator web endpoint 'health'
       operationId: health
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "200":
-          description: OK
-          content:
-            application/vnd.spring-boot.actuator.v3+json:
-              schema:
-                type: object
-            application/vnd.spring-boot.actuator.v2+json:
-              schema:
-                type: object
-            application/json:
-              schema:
-                type: object
-  /admin/health/**:
-    get:
-      tags:
-      - Actuator
-      summary: Actuator web endpoint 'health-path'
-      operationId: health-path
-      responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "500":
-          description: Internal Server Error
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "404":
-          description: Not Found
-          content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
@@ -402,34 +360,34 @@ paths:
         schema:
           type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
           description: OK
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 type: object
   /_/jsonSchemas:
@@ -454,41 +412,39 @@ paths:
         schema:
           type: string
       responses:
-        "400":
-          description: Bad Request
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
-        "204":
-          description: No Content
-          content:
-            application/hal+json:
-              schema:
-                $ref: "#/components/schemas/ResponseErrors"
         "500":
           description: Internal Server Error
           content:
-            application/hal+json:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/vnd.hal+json:
+              schema:
+                type: string
+        "204":
+          description: No Content
+          content:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "404":
           description: Not Found
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 $ref: "#/components/schemas/ResponseErrors"
         "200":
           description: OK
           content:
-            application/hal+json:
+            application/vnd.hal+json:
               schema:
                 type: object
 components:
   schemas:
     Error:
-      required:
-      - message
       type: object
       properties:
         message:
@@ -501,6 +457,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Parameter"
+      required:
+      - message
     Parameter:
       type: object
       properties:
@@ -520,20 +478,74 @@ components:
           format: int32
     JsonNode:
       type: object
+      properties:
+        empty:
+          type: boolean
+        array:
+          type: boolean
+        "null":
+          type: boolean
+        object:
+          type: boolean
+        float:
+          type: boolean
+        valueNode:
+          type: boolean
+        container:
+          type: boolean
+        missingNode:
+          type: boolean
+        nodeType:
+          type: string
+          enum:
+          - ARRAY
+          - BINARY
+          - BOOLEAN
+          - MISSING
+          - "NULL"
+          - NUMBER
+          - OBJECT
+          - POJO
+          - STRING
+        string:
+          type: boolean
+        integralNumber:
+          type: boolean
+        pojo:
+          type: boolean
+        floatingPointNumber:
+          type: boolean
+        short:
+          type: boolean
+        int:
+          type: boolean
+        long:
+          type: boolean
+        double:
+          type: boolean
+        bigDecimal:
+          type: boolean
+        bigInteger:
+          type: boolean
+        textual:
+          type: boolean
+          deprecated: true
+        boolean:
+          type: boolean
+        binary:
+          type: boolean
+        number:
+          type: boolean
+        embeddedValue:
+          type: boolean
     Node:
-      required:
-      - name
       type: object
       properties:
         id:
           type: string
         name:
-          maxLength: 64
-          minLength: 3
           type: string
         description:
-          maxLength: 512
-          minLength: 0
           type: string
         deserializeAs:
           type: string
@@ -548,32 +560,30 @@ components:
         asyncBefore:
           type: boolean
     Workflow:
-      required:
-      - name
-      - versionTag
       type: object
       properties:
         id:
           type: string
         active:
           type: boolean
+        checksum:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
         deploymentId:
           type: string
         description:
-          maxLength: 512
-          minLength: 0
           type: string
         historyTimeToLive:
-          minimum: 0
           type: integer
           format: int32
+          minimum: 0
         initialContext:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/JsonNode"
         name:
-          maxLength: 64
-          minLength: 4
           type: string
         nodes:
           type: array
@@ -581,9 +591,10 @@ components:
             $ref: "#/components/schemas/Node"
         setup:
           $ref: "#/components/schemas/Setup"
+        updatedOn:
+          type: string
+          format: date-time
         versionTag:
-          maxLength: 64
-          minLength: 1
           type: string
     TenantAttributes:
       type: object
@@ -611,4 +622,3 @@ components:
           type: string
         templated:
           type: boolean
-
