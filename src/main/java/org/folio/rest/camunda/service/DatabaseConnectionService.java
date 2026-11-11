@@ -1,32 +1,26 @@
 package org.folio.rest.camunda.service;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import org.folio.spring.tenant.service.SchemaService;
 import org.springframework.stereotype.Service;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 @Service
 public class DatabaseConnectionService {
 
   private final Map<String, HikariDataSource> pools;
 
-  private final SchemaService schemaService;
-
-  public DatabaseConnectionService(SchemaService schemaService) {
+  public DatabaseConnectionService() {
     this.pools = new HashMap<>();
-    this.schemaService = schemaService;
   }
 
   public synchronized void createPool(String key, String url, Properties info) throws SQLException {
     if (!this.pools.containsKey(key)) {
-      HikariConfig config = new HikariConfig();
+      final HikariConfig config = new HikariConfig();
 
       config.setLeakDetectionThreshold(0);
       config.setJdbcUrl(url);
@@ -34,19 +28,23 @@ public class DatabaseConnectionService {
       config.setPassword(info.getProperty("password"));
       // config.setDriverClassName();
       config.setMaximumPoolSize(8);
-      config.addDataSourceProperty("oracle.jdbc.implicitStatementCacheSize", 10);
+      //config.setDataSourceProperties(datasourceProperties);
+      //config.addDataSourceProperty("oracle.jdbc.implicitStatementCacheSize", 10);
 
       config.setConnectionTimeout(30000); // default
       config.setIdleTimeout(600000); // default
       config.setMaxLifetime(7200000); // 2 hours as default is 30 minutes
 
+      final String searchPath = info.getProperty("searchPath");
+
       // would be nice to just use this but have to ensure properties match
       // config.setDataSourceProperties(info);
 
-      HikariDataSource dataSource = new HikariDataSource(config);
+      final HikariDataSource dataSource = new HikariDataSource(config);
 
-      final String tenant = info.getProperty("tenant");
-      dataSource.setConnectionInitSql(String.format("SET search_path TO %s, public", schemaService.getSchema(tenant)));
+      if (searchPath != null) {
+        dataSource.setConnectionInitSql(String.format("SET search_path TO %s", searchPath));
+      }
 
       this.pools.put(key, dataSource);
     }
