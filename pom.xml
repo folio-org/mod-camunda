@@ -25,6 +25,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+    <folio-kafka-wrapper.version>4.1.0-SNAPSHOT</folio-kafka-wrapper.version>
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
     <graalvm.llvm.version>25.0.1</graalvm.llvm.version>
     <graalvm.polyglot.version>25.5.5.0.3</graalvm.polyglot.version>
@@ -53,6 +54,12 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-kafka-wrapper</artifactId>
+      <version>${folio-kafka-wrapper.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>spring-tenant</artifactId>
@@ -87,7 +94,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>data-import-processing-core</artifactId>
-      <version>5.0.1</version>
+      <version>5.0.2</version>
       <exclusions>
         <exclusion>
           <groupId>org.folio</groupId>
