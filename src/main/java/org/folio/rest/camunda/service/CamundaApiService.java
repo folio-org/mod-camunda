@@ -76,10 +76,12 @@ public class CamundaApiService {
       .setJobExecutorDeploymentAware(true);
 
     try {
-      Deployment deployment = repositoryService.createDeployment().name(workflow.getName())
+      final Deployment deployment = repositoryService.createDeployment()
+        .name(workflow.getName())
         .addModelInstance(workflow.getName().replace(" ", "") + ".bpmn", modelInstance)
         .source("mod-workflow")
-        .tenantId(tenant).deploy();
+        .tenantId(tenant)
+        .deploy();
 
       String deploymentId = deployment.getId();
 
@@ -103,11 +105,12 @@ public class CamundaApiService {
     if (Boolean.FALSE.equals(workflow.getActive())) {
       return workflow;
     }
-    
+
     // PROCESS HERE.
 
-    ProcessEngine processEngine = getProcessEngine(tenant);
-    RepositoryService repositoryService = processEngine.getRepositoryService();
+    final RepositoryService repositoryService = getProcessEngine(tenant)
+      .getRepositoryService();
+
     repositoryService.deleteDeployment(workflow.getDeploymentId(), true);
 
     workflow.setActive(false);

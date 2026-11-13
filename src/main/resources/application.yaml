@@ -83,7 +83,7 @@ spring:
 
     properties.hibernate:
       jdbc.lob.non_contextual_creation: true
-      default_schema: ${TENANT_DEFAULTTENANT:diku}_${DB_SCHEMA:mod_camunda}
+      default_schema: ${DB_SCHEMA:mod_camunda}
 
     generate-ddl: false
     hibernate.ddl-auto: update
@@ -123,9 +123,9 @@ operaton:
       session-cookie-path-enforcement: true
     auto-deployment-enabled: false
     database:
-      schema-name: ${TENANT_DEFAULTTENANT:diku}_${DB_SCHEMA:mod_camunda}
-      schema-update: true
-      table-prefix: ${TENANT_DEFAULTTENANT:diku}_${DB_SCHEMA:mod_camunda}.
+      schema-name:
+      schema-update: false
+      table-prefix:
       type: postgres
     filter:
       create: All Tasks
@@ -221,8 +221,6 @@ folio:
       folioRefreshTokenExpire: # Value will be overridden.
         name: folioRefreshTokenExpire
         type: literal
-
-  sql.schema: ${DB_SCHEMA:mod_camunda}
 
 tenant:
   header-name: X-Okapi-Tenant

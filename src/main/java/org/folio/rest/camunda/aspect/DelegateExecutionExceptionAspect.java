@@ -18,7 +18,7 @@ public class DelegateExecutionExceptionAspect {
 
   private static final Logger logger = LoggerFactory.getLogger(DelegateExecutionExceptionAspect.class);
 
-  private JavaMailSender emailSender;
+  private final JavaMailSender emailSender;
 
   @Value("${error.handling.environment:DEV}")
   private String errorHandlingEnvironment;
@@ -30,50 +30,49 @@ public class DelegateExecutionExceptionAspect {
   private String errorHandlingEmailTo;
 
   public DelegateExecutionExceptionAspect(JavaMailSender emailSender) {
+
     this.emailSender = emailSender;
   }
 
   @AfterThrowing(pointcut = "execution(* org.operaton.bpm.engine.delegate.JavaDelegate.execute (org.operaton.bpm.engine.delegate.DelegateExecution)) && args(execution))", throwing = "exception")
   public void afterDelegateExecutionThrowsException(DelegateExecution execution, Throwable exception) {
 
-    RepositoryService repositoryService = execution.getProcessEngineServices().getRepositoryService();
+    final RepositoryService repositoryService = execution.getProcessEngineServices().getRepositoryService();
 
-    String workflowName = repositoryService.createProcessDefinitionQuery()
-        .processDefinitionId(execution.getProcessDefinitionId())
-        .singleResult()
-        .getName();
+    final String workflowName = repositoryService.createProcessDefinitionQuery()
+      .processDefinitionId(execution.getProcessDefinitionId())
+      .singleResult()
+      .getName();
 
-    String taskName = execution.getCurrentActivityName();
+    final String taskName = execution.getCurrentActivityName();
 
-    String tenant = execution.getTenantId();
+    final String tenant = execution.getTenantId();
 
-    StringBuilder stackTraceBuilder = new StringBuilder();
+    final StringBuilder stackTraceBuilder = new StringBuilder();
     for (StackTraceElement stackTraceElement : exception.getStackTrace()) {
       stackTraceBuilder.append(stackTraceElement.toString());
       stackTraceBuilder.append("\n");
     }
 
-    StringBuilder subject = new StringBuilder();
+    final StringBuilder subject = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
+    final SimpleMailMessage message = new SimpleMailMessage();
 
-    subject
-        .append(errorHandlingEnvironment)
-        .append(": ")
-        .append(workflowName)
-        .append(" failed on ")
-        .append(taskName)
-        .append(" for tenant ")
-        .append(tenant);
-
-    StringBuilder text = new StringBuilder();
+    subject.append(errorHandlingEnvironment)
+      .append(": ")
+      .append(workflowName)
+      .append(" failed on ")
+      .append(taskName)
+      .append(" for tenant ")
+      .append(tenant);
 
     text.append(exception.getClass().getSimpleName())
-        .append("\n\n")
-        .append(exception.getMessage())
-        .append("\n\n")
-        .append(stackTraceBuilder.toString())
-        .append("\n");
+      .append("\n\n")
+      .append(exception.getMessage())
+      .append("\n\n")
+      .append(stackTraceBuilder.toString())
+      .append("\n");
 
-    SimpleMailMessage message = new SimpleMailMessage();
     message.setFrom(errorHandlingEmailFrom);
     message.setTo(errorHandlingEmailTo.split(","));
     message.setSubject(subject.toString());
