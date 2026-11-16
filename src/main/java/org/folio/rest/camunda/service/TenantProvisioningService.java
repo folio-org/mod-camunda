@@ -6,8 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.folio.rest.camunda.config.SpringDatasourceConfig;
+import org.folio.spring.tenant.config.SpringDatasourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
 import org.springframework.stereotype.Service;
 

@@ -83,7 +83,7 @@ public class FolioDelegateDatabaseConfig {
    *
    * @param maxLifetime The new value.
    */
-  public void setMaxPoolSize(Long maxLifetime) {
+  public void setMaxLifetime(Long maxLifetime) {
 
     this.maxLifetime = maxLifetime;
   }

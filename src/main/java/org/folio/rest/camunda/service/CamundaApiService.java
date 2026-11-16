@@ -1,12 +1,12 @@
 package org.folio.rest.camunda.service;
 
-import org.folio.rest.camunda.config.SpringDatasourceConfig;
 import org.folio.rest.camunda.exception.RequestMissingWorkflowException;
 import org.folio.rest.camunda.exception.ScriptTaskDeserializeCodeFailure;
 import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
+import org.folio.spring.tenant.config.SpringDatasourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;

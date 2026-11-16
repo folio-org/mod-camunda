@@ -102,7 +102,7 @@ public class DatabaseConnectionService {
 
       // config.setDriverClassName();
       config.setConnectionTimeout(folioDelegateDatabaseConfig.getConnectionTimeout());
-      config.setIdleTimeout(folioDelegateDatabaseConfig.getIdleTimeout()); 
+      config.setIdleTimeout(folioDelegateDatabaseConfig.getIdleTimeout());
       config.setMaximumPoolSize(folioDelegateDatabaseConfig.getMaxPoolSize());
       config.setMaxLifetime(folioDelegateDatabaseConfig.getMaxLifetime());
       //config.setDataSourceProperties(datasourceProperties);
