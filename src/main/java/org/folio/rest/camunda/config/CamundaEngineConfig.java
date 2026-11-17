@@ -11,6 +11,9 @@ import org.operaton.bpm.spring.boot.starter.configuration.OperatonProcessEngineC
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Provide custom configuration for Operaton process engines.
+ */
 public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  {
 
   private static final Logger logger = LoggerFactory.getLogger(CamundaEngineConfig.class);

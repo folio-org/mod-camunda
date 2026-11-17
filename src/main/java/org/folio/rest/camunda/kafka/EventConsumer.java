@@ -38,17 +38,23 @@ public class EventConsumer {
 
     String tenant = event.getTenant();
 
-    ThreadLocalStorage.setTenant(tenant);
+    try {
+      ThreadLocalStorage.setTenant(tenant);
 
-    logger.info("Correlating message {}", event.getPathPattern());
+      logger.info("Correlating message {}", event.getPathPattern());
 
-    Map<String, Object> variables = mapper.convertValue(event.getPayload(),
+      Map<String, Object> variables = mapper.convertValue(event.getPayload(),
         new TypeReference<Map<String, Object>>() {});
 
-    runtimeService.createMessageCorrelation(event.getPathPattern())
-      .tenantId(tenant)
-      .setVariables(variables)
-      .correlateStartMessage();
+      runtimeService.createMessageCorrelation(event.getPathPattern())
+        .tenantId(tenant)
+        .setVariables(variables)
+        .correlateStartMessage();
+    } finally {
+
+      // Must clear at the end because thread pools re-use the thread.
+      ThreadLocalStorage.unload();
+    }
   }
 
 }

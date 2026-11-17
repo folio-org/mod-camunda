@@ -10,8 +10,8 @@ import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_USER
 import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
-import org.folio.rest.camunda.service.TenantProvisioningService;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
+import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
@@ -26,7 +26,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Scope("prototype")
 public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
 
-  protected final TenantProvisioningService tenantProvisioningService;
+  protected final SchemaService schemaService;
 
   protected Expression password;
 
@@ -38,11 +38,19 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
 
   /**
    * Initializer.
+   *
+   * @param mapper            The JSON mapper.
+   * @param runtimeService    The run time service.
+   * @param connectionService The connection service.
+   * @param schemaService     The schema service.
    */
-  public DatabaseConnectionDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, TenantProvisioningService tenantProvisioningService) {
+  public DatabaseConnectionDelegate(
+    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService
+  ) {
 
     super(mapper, runtimeService, connectionService);
-    this.tenantProvisioningService = tenantProvisioningService;
+
+    this.schemaService = schemaService;
   }
 
   /**
@@ -136,7 +144,6 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
     final Properties properties = buildProperties(execution, searchPathString);
 
     try {
-      tenantProvisioningService.ensureSchema(execution.getTenantId());
       connectionService.createPool(false, properties);
     } catch (Exception e) {
       throw new DelegateExecutionFailure(name, id, e.getMessage(), e);

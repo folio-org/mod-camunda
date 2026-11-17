@@ -1,12 +1,10 @@
 package org.folio.rest.camunda.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Provide standard configuration settings for delegate related database connections.
  */
-@Component
 @ConfigurationProperties(prefix = "folio.delegate.database")
 public class FolioDelegateDatabaseConfig {
 

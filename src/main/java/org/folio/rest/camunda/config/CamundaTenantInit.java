@@ -10,6 +10,9 @@ import org.folio.spring.tenant.properties.TenantProperties;
 import org.folio.spring.tenant.service.SqlTemplateService;
 import org.springframework.stereotype.Component;
 
+/**
+ * Handle tenant initialization for Hibernate.
+ */
 @Component
 public class CamundaTenantInit implements HibernateTenantInit {
 

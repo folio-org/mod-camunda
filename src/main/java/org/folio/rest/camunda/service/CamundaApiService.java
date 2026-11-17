@@ -6,7 +6,7 @@ import org.folio.rest.camunda.exception.WorkflowAlreadyActiveException;
 import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
-import org.folio.spring.tenant.config.SpringDatasourceConfig;
+import org.folio.spring.tenant.config.SpringDataSourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
@@ -35,14 +35,14 @@ public class CamundaApiService {
 
   private final SchemaService schemaService;
 
-  private final SpringDatasourceConfig springDatasourceConfig;
+  private final SpringDataSourceConfig springDatasourceConfig;
 
   /**
    * Initializer.
    *
    * @param bpmnModelFactory The model factory.
    */
-  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SchemaService schemaService, SpringDatasourceConfig springDatasourceConfig) {
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
 
     this.bpmnModelFactory = bpmnModelFactory;
     this.schemaService = schemaService;

@@ -11,6 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
+/**
+ * Provide web client configuration.
+ */
 @Configuration
 public class WebClientConfig {
 

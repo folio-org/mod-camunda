@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.folio.spring.tenant.config.SpringDatasourceConfig;
+import org.folio.spring.tenant.config.SpringDataSourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class TenantProvisioningService {
 
   private final SchemaService schemaService;
 
-  private final SpringDatasourceConfig springDatasourceConfig;
+  private final SpringDataSourceConfig springDatasourceConfig;
 
   private final Set<String> tenants;
 
@@ -28,7 +28,7 @@ public class TenantProvisioningService {
    * @param schemaService          The schema service.
    * @param springDatasourceConfig The Spring data source configuration.
    */
-  public TenantProvisioningService(SchemaService schemaService, SpringDatasourceConfig springDatasourceConfig) {
+  public TenantProvisioningService(SchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
 
     this.schemaService = schemaService;
     this.springDatasourceConfig = springDatasourceConfig;

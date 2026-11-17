@@ -3,7 +3,6 @@ package org.folio.rest.camunda.delegate;
 import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
-import org.folio.rest.camunda.service.TenantProvisioningService;
 import org.folio.rest.workflow.model.FolioDatabaseConnectionTask;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.RuntimeService;
@@ -15,22 +14,25 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Database connection delegate specific to FOLIO connections.
  *
- * This brings in more specialized and automatic functionality.
+ * This brings in more specialized and automatic functionality, such as schema per tenant.
  */
 @Service
 @Scope("prototype")
 public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate {
 
-  private final SchemaService schemaService;
-
   /**
    * Initializer.
+   *
+   * @param mapper            The JSON mapper.
+   * @param runtimeService    The run time service.
+   * @param connectionService The connection service.
+   * @param schemaService     The schema service.
    */
-  public FolioDatabaseConnectionDelegate(JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService, TenantProvisioningService tenantProvisioningService) {
+  public FolioDatabaseConnectionDelegate(
+    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService
+  ) {
 
-    super(mapper, runtimeService, connectionService, tenantProvisioningService);
-
-    this.schemaService = schemaService;
+    super(mapper, runtimeService, connectionService, schemaService);
   }
 
   /**
@@ -55,6 +57,9 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
   protected void performExecute(DelegateExecution execution, String name, String id) {
 
     final String tenant = execution.getTenantId();
+    final String schema = schemaService.getSchema(tenant);
+
+    schemaService.ensureProvisionedSchema(schema, tenant);
 
     final Object searchPathExpr = this.searchPath.getValue(execution);
 
@@ -63,13 +68,12 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
       : searchPathExpr.toString();
 
     final String searchPathValue = searchPathString.isBlank()
-      ? schemaService.getSchema(tenant) + ", public"
+      ? schema + ", public"
       : searchPathString;
 
     final Properties properties = buildProperties(execution, searchPathValue);
 
     try {
-      tenantProvisioningService.ensureSchema(tenant);
       connectionService.createPool(true, properties);
     } catch (Exception e) {
       throw new DelegateExecutionFailure(name, id, e.getMessage(), e);
