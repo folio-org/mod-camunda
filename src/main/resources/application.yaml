@@ -5,18 +5,18 @@ logging:
   level:
     com:
       zaxxer:
-        hikari: INFO
+        hikari: ERROR
     org:
       apache.kafka.clients: ERROR
-      folio: INFO
-      hibernate: INFO
-      operaton: INFO
+      folio: WARN
+      hibernate: WARN
+      operaton: WARN
       operaton.bpm.engine.jobexecutor: ERROR
-      springframework: INFO
+      springframework: WARN
       springframework.test: WARN
 
-    # Enable logging of BPMN if activation fails.
-    #org.folio.rest.operaeton.service.OperatonApiService: DEBUG
+      # Enable logging of BPMN if activation fails.
+      #folio.rest.operaeton.service.OperatonApiService: DEBUG
 
 server:
   port: 8081
@@ -118,25 +118,37 @@ spring:
 operaton:
   # see: https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/
   bpm:
-    webapp:
-      application-path: ui
-      session-cookie-path-enforcement: true
-    auto-deployment-enabled: false
-    database:
-      schema-name:
-      schema-update: false
-      table-prefix:
-      type: postgres
-    filter:
-      create: All Tasks
     admin-user:
       id: admin
       password: admin
       first-name: Camunda
       last-name: Admin
       email: admin@localhost
-    # authorization.enabled: true
+
+    #authorization.enabled: true
+
+    auto-deployment-enabled: false
+
+    database:
+      schema-name:
+      schema-update: false
+      table-prefix:
+      type: postgres
+
     default-number-of-retries: 1
+
+    filter:
+      create: All Tasks
+
+    # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
+    generic-properties:
+      properties:
+        enable-script-compilation: true
+        enable-script-engine-nashorn-compatibility: true
+        enable-fetch-script-engine-from-process-application: false
+
+    history-level: "audit"
+
     job-execution:
       enabled: true
       backoff-decrease-threshold: 100
@@ -152,17 +164,16 @@ operaton:
       queue-capacity: 3
       wait-increase-factor: 2
       wait-time-in-millis: 15000
-    # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
-    generic-properties:
-      properties:
-        enable-script-compilation: true
-        enable-script-engine-nashorn-compatibility: true
-        enable-fetch-script-engine-from-process-application: false
+
     metrics:
       enabled: false
 
-   # Enable custom operaton health end point, see: https://docs.operaton.org/docs/documentation/reference/release-notes/2_1/#operaton-run--dedicated-health-endpoint .
-   #run.health.rest-endpoint.enabled: true
+    # Enable custom operaton health end point, see: https://docs.operaton.org/docs/documentation/reference/release-notes/2_1/#operaton-run--dedicated-health-endpoint .
+    #run.health.rest-endpoint.enabled: true
+
+    webapp:
+      application-path: ui
+      session-cookie-path-enforcement: true
 
 springdoc:
   api-docs:

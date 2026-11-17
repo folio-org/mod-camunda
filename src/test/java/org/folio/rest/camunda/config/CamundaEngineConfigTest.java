@@ -8,15 +8,20 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import org.folio.rest.camunda.resolver.ScriptEngineResolver;
+import org.folio.rest.camunda.service.TenantProvisioningService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 
 @ExtendWith(MockitoExtension.class)
 class CamundaEngineConfigTest {
+
+  @Mock
+  TenantProvisioningService tenantProvisioningService;
 
   @Spy
   ProcessEngineConfigurationImpl processEngineConfiguration;
@@ -25,7 +30,7 @@ class CamundaEngineConfigTest {
 
   @BeforeEach
   void beforeEach() {
-    camundaEngineConfig = new CamundaEngineConfig();
+    camundaEngineConfig = new CamundaEngineConfig(tenantProvisioningService);
   }
 
   @Test

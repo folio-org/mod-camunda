@@ -1,12 +1,5 @@
 package org.folio.rest.camunda.delegate;
 
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_ID;
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_PASS;
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_SEARCH_PATH;
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_TENANT;
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_URL;
-import static org.folio.rest.camunda.service.DatabaseConnectionService.POOL_USER;
-
 import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
@@ -15,7 +8,6 @@ import org.folio.rest.workflow.model.FolioDatabaseConnectionTask;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.operaton.bpm.engine.delegate.Expression;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;

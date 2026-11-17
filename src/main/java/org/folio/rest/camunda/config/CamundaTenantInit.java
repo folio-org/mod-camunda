@@ -36,9 +36,9 @@ public class CamundaTenantInit implements HibernateTenantInit {
 
   @Override
   public void initialize(Connection connection, String tenant) throws SQLException {
-    UUID uuid = UUID.randomUUID();
-    String id = uuid.toString();
-    CamundaTenant camundaTenant = new CamundaTenant(id, 1, tenant);
+
+    final String id = UUID.randomUUID().toString();
+    final CamundaTenant camundaTenant = new CamundaTenant(id, 1, tenant);
 
     try (Statement statement = connection.createStatement()) {
       statement.execute(sqlTemplateService.templateInitSql(SCHEMA_IMPORT_TENANT, TENANT_TEMPLATE_KEY, camundaTenant));

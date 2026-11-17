@@ -10,22 +10,46 @@ import org.folio.spring.tenant.config.SpringDatasourceConfig;
 import org.folio.spring.tenant.service.SchemaService;
 import org.springframework.stereotype.Service;
 
+/**
+ * Provision the tenant.
+ */
 @Service 
 public class TenantProvisioningService {
-    
+
   private final SchemaService schemaService;
+
   private final SpringDatasourceConfig springDatasourceConfig;
 
   private final Set<String> tenants;
 
+  /**
+   * Initializer.
+   *
+   * @param schemaService          The schema service.
+   * @param springDatasourceConfig The Spring data source configuration.
+   */
   public TenantProvisioningService(SchemaService schemaService, SpringDatasourceConfig springDatasourceConfig) {
+
     this.schemaService = schemaService;
     this.springDatasourceConfig = springDatasourceConfig;
+
     tenants = ConcurrentHashMap.newKeySet();
   }
 
-  public void ensureSchema(String tenant) throws SQLException {
-    if (tenants.contains(tenant)) return;
+  /**
+   * Ensure that the schema exists.
+   *
+   * @param tenant The tenant to use.
+   *
+   * @return The name of the schema that is ensured or NULL if no schema is ensured.
+   *
+   * @throws SQLException On error.
+   */
+  public String ensureSchema(String tenant) throws SQLException {
+
+    if (tenants.contains(tenant)) {
+      return null;
+    }
 
     final String schema = schemaService.getSchema(tenant);
 
@@ -42,8 +66,10 @@ public class TenantProvisioningService {
 
       tenants.add(tenant);
     } catch (SQLException e) {
-      throw new SQLException(String.format("Failed to provision a schema \"%s\" for tenant \"%s\": %s", schema, tenant, e.getMessage()));
+      throw new SQLException(String.format("Failed to provision a schema '%s' for tenant '%s': %s", schema, tenant, e.getMessage()));
     }
+
+    return schema;
   }
 
 }

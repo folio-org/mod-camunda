@@ -18,8 +18,8 @@ logging:
       # Uncomment to enable MockMvc unit test logging.
       #springframework.test.web.servlet.result: DEBUG
 
-    # Enable logging of BPMN if activation fails.
-    #org.folio.rest.operaeton.service.OperatonApiService: DEBUG
+      # Enable logging of BPMN if activation fails.
+      #folio.rest.operaeton.service.OperatonApiService: DEBUG
 
 server:
   port: 9100
@@ -103,27 +103,41 @@ spring:
   # this must be `camunda` to match module descriptor path patterns
   jersey.application-path: camunda
 
+
 operaton:
-  # see: https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/configuration/
+  # see: https://docs.operaton.org/docs/documentation/user-guide/spring-boot-integration/
   bpm:
-    webapp:
-      application-path: ui
-    auto-deployment-enabled: false
-    database:
-      schema-name: ${DB_SCHEMA:diku_mod_camunda}
-      schema-update: true
-      table-prefix: ${DB_SCHEMA:diku_mod_camunda}.
-      type: postgres
-    filter:
-      create: All Tasks
     admin-user:
       id: admin
       password: admin
       first-name: Camunda
       last-name: Admin
-      email: test@localhost
-    # authorization.enabled: true
+      email: admin@localhost
+
+    #authorization.enabled: true
+
+    auto-deployment-enabled: false
+
+    database:
+      schema-name:
+      schema-update: false
+      table-prefix:
+      type: postgres
+
     default-number-of-retries: 1
+
+    filter:
+      create: All Tasks
+
+    # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
+    generic-properties:
+      properties:
+        enable-script-compilation: true
+        enable-script-engine-nashorn-compatibility: true
+        enable-fetch-script-engine-from-process-application: false
+
+    history-level: "audit"
+
     job-execution:
       enabled: true
       backoff-decrease-threshold: 100
@@ -139,14 +153,16 @@ operaton:
       queue-capacity: 3
       wait-increase-factor: 2
       wait-time-in-millis: 15000
-    # see: https://docs.camunda.org/manual/7.20/user-guide/spring-boot-integration/configuration/#generic-properties
-    generic-properties:
-      properties:
-        enable-script-compilation: true
-        enable-script-engine-nashorn-compatibility: true
-        enable-fetch-script-engine-from-process-application: false
+
     metrics:
       enabled: false
+
+    # Enable custom operaton health end point, see: https://docs.operaton.org/docs/documentation/reference/release-notes/2_1/#operaton-run--dedicated-health-endpoint .
+    #run.health.rest-endpoint.enabled: true
+
+    webapp:
+      application-path: ui
+      session-cookie-path-enforcement: true
 
 springdoc:
   api-docs:
