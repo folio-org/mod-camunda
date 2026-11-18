@@ -4,6 +4,7 @@ import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.FolioDatabaseConnectionTask;
+import org.folio.spring.tenant.service.SchemaProvisionerService;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
@@ -20,6 +21,8 @@ import tools.jackson.databind.json.JsonMapper;
 @Scope("prototype")
 public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate {
 
+  private final SchemaProvisionerService schemaProvisionerService;
+
   /**
    * Initializer.
    *
@@ -29,10 +32,13 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
    * @param schemaService     The schema service.
    */
   public FolioDatabaseConnectionDelegate(
-    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService
+    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService,
+    SchemaProvisionerService schemaProvisionerService
   ) {
 
     super(mapper, runtimeService, connectionService, schemaService);
+
+    this.schemaProvisionerService = schemaProvisionerService;
   }
 
   /**
@@ -59,7 +65,7 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
     final String tenant = execution.getTenantId();
     final String schema = schemaService.getSchema(tenant);
 
-    schemaService.ensureProvisionedSchema(schema, tenant);
+    schemaProvisionerService.ensureProvisionedSchema(schema, tenant);
 
     final Object searchPathExpr = this.searchPath.getValue(execution);
 

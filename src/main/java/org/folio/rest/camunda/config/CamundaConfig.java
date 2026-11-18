@@ -2,17 +2,12 @@ package org.folio.rest.camunda.config;
 
 import java.time.Clock;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.DataSource;
 import org.folio.rest.camunda.provider.LoggerProvider;
 import org.folio.rest.camunda.service.TenantProvisioningService;
-import org.folio.spring.tenant.hibernate.HibernateRoutingDataSource;
-import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.operaton.bpm.spring.boot.starter.configuration.Ordering;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 
 @Configuration
@@ -30,12 +25,13 @@ public class CamundaConfig {
     return new ConcurrentHashMap<>();
   }
 
+  /*
   @Bean
   @Primary
   DataSource dataSource(DataSourceProperties props, SchemaService schemaService) {
 
     return new HibernateRoutingDataSource(props.initializeDataSourceBuilder().build(), schemaService);
-  }
+  }*/
 
   @Bean
   LoggerProvider loggerProvider() {
