@@ -19,7 +19,7 @@ public class WorkflowController {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkflowController.class);
 
-  private CamundaApiService camundaApiService;
+  private final CamundaApiService camundaApiService;
 
   public WorkflowController(CamundaApiService camundaApiService) {
     this.camundaApiService = camundaApiService;

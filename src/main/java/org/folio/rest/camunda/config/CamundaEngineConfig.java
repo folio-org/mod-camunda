@@ -1,9 +1,9 @@
 package org.folio.rest.camunda.config;
 
-import java.sql.SQLException;
 import javax.script.ScriptEngineManager;
 import org.folio.rest.camunda.resolver.ScriptEngineResolver;
-import org.folio.rest.camunda.service.TenantProvisioningService;
+import org.folio.spring.tenant.service.SchemaProvisionerService;
+import org.folio.spring.tenant.service.SchemaService;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.operaton.bpm.engine.ProcessEngine;
 import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
@@ -18,17 +18,21 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
 
   private static final Logger logger = LoggerFactory.getLogger(CamundaEngineConfig.class);
 
-  private final TenantProvisioningService tenantProvisioningService;
+  private final SchemaService schemaService;
+
+  private final SchemaProvisionerService schemaProvisionerService;
 
   /**
    * Initializer.
    *
+   * @param schemaService             The schema service.
    * @param tenantProvisioningService The provisioning service.
    */
-  public CamundaEngineConfig(TenantProvisioningService tenantProvisioningService) {
+  public CamundaEngineConfig(SchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
     super();
 
-    this.tenantProvisioningService = tenantProvisioningService;
+    this.schemaService = schemaService;
+    this.schemaProvisionerService = schemaProvisionerService;
   }
 
   @Override
@@ -51,18 +55,9 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
   public void postProcessEngineBuild(ProcessEngine engine) {
 
     final String tenant = ThreadLocalStorage.getTenant();
+    final String schema = schemaService.getSchema(tenant);
 
-    try {
-      final String schema = tenantProvisioningService.ensureSchema(tenant);
-
-      if (schema == null) {
-        logger.debug("Did not ensure schema, tenant is '{}'.", tenant);
-      } else {
-        logger.debug("Ensured schema '{}' with tenant of '{}'.", schema, tenant);
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(String.format("Failed to ensure schema for tenant '%s'.", tenant), e);
-    }
+    schemaProvisionerService.ensureProvisionedSchema(schema, tenant);
   }
 
 }
