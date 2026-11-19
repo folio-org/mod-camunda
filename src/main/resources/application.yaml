@@ -86,8 +86,7 @@ spring:
       default_schema: ${DB_SCHEMA:mod_camunda}
 
     generate-ddl: false
-    hibernate.ddl-auto: update
-    #hibernate.hbm2ddl.auto: none
+    hibernate.ddl-auto: none
     open-in-view: true
     show-sql: false
 

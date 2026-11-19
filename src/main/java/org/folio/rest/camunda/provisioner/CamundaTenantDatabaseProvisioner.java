@@ -1,5 +1,9 @@
 package org.folio.rest.camunda.provisioner;
 
+import static org.folio.spring.tenant.service.SchemaService.DIALECT;
+import static org.folio.spring.tenant.service.SchemaService.HIBERNATE_DDLAUTO;
+import static org.folio.spring.tenant.service.SchemaService.HIBERNATE_DEFAULT_SCHEMA;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -84,9 +88,9 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
     }
 
     final Map<String, Object> jpaProps = new HashMap<>();
-    jpaProps.put("hibernate.dialect", primaryEmf.getJpaPropertyMap().get("hibernate.dialect"));
-    jpaProps.put("hibernate.default_schema", schema);
-    jpaProps.put("hibernate.hbm2ddl.auto", "update"); // TODO: expose this as a custom configuration setting.
+    jpaProps.put(DIALECT, primaryEmf.getJpaPropertyMap().get(DIALECT));
+    jpaProps.put(HIBERNATE_DEFAULT_SCHEMA, schema);
+    jpaProps.put(HIBERNATE_DDLAUTO, "update"); // TODO: expose this as a custom configuration setting.
 
     // Must be explicitly set to override and take precedence.
     final DataSource tenantDataSource = new HibernateSchemaDataSource(dataSource, schemaService);
@@ -101,7 +105,6 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
 
     try {
       tenantEmf.afterPropertiesSet();
-      //final EntityManagerFactory emf = tenantEmf.getObject();
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to provision schema '%s'.", schema), e);
     } finally {

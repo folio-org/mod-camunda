@@ -26,14 +26,6 @@ public class CamundaConfig {
     return new ConcurrentHashMap<>();
   }
 
-  /*
-  @Bean
-  @Primary
-  DataSource dataSource(DataSourceProperties props, SchemaService schemaService) {
-
-    return new HibernateRoutingDataSource(props.initializeDataSourceBuilder().build(), schemaService);
-  }*/
-
   @Bean
   LoggerProvider loggerProvider() {
 
