@@ -1,8 +1,8 @@
 package org.folio.rest.camunda.provisioner;
 
-import static org.folio.spring.tenant.service.SchemaService.DIALECT;
-import static org.folio.spring.tenant.service.SchemaService.HIBERNATE_DDLAUTO;
-import static org.folio.spring.tenant.service.SchemaService.HIBERNATE_DEFAULT_SCHEMA;
+import static org.folio.spring.tenant.hibernate.HibernateSchemaService.DIALECT;
+import static org.folio.spring.tenant.hibernate.HibernateSchemaService.HIBERNATE_DDLAUTO;
+import static org.folio.spring.tenant.hibernate.HibernateSchemaService.HIBERNATE_DEFAULT_SCHEMA;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,8 +12,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.folio.spring.tenant.config.HibernateMultiTenantConfig;
 import org.folio.spring.tenant.hibernate.HibernateSchemaDataSource;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.folio.spring.tenant.interfaces.TenantDatabaseProvisioner;
-import org.folio.spring.tenant.service.SchemaService;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
 
   private final DataSource dataSource;
 
-  private final SchemaService schemaService;
+  private final HibernateSchemaService schemaService;
 
   /**
    * Initializer.
@@ -40,7 +40,7 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
    * @param dataSource         The provisioning data source.
    * @param schemaService      The schema service.
    */
-  public CamundaTenantDatabaseProvisioner(ApplicationContext applicationContext, DataSource dataSource, SchemaService schemaService) {
+  public CamundaTenantDatabaseProvisioner(ApplicationContext applicationContext, DataSource dataSource, HibernateSchemaService schemaService) {
 
     this.applicationContext = applicationContext;
     this.dataSource = dataSource;

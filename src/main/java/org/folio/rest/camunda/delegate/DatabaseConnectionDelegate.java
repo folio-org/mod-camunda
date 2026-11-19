@@ -11,7 +11,7 @@ import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.DatabaseConnectionTask;
-import org.folio.spring.tenant.service.SchemaService;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.Expression;
@@ -26,7 +26,7 @@ import tools.jackson.databind.json.JsonMapper;
 @Scope("prototype")
 public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
 
-  protected final SchemaService schemaService;
+  protected final HibernateSchemaService schemaService;
 
   protected Expression password;
 
@@ -45,7 +45,7 @@ public class DatabaseConnectionDelegate extends AbstractDatabaseDelegate {
    * @param schemaService     The schema service.
    */
   public DatabaseConnectionDelegate(
-    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService
+    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, HibernateSchemaService schemaService
   ) {
 
     super(mapper, runtimeService, connectionService);

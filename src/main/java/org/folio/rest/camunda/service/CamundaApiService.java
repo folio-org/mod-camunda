@@ -7,7 +7,7 @@ import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
 import org.folio.spring.tenant.config.SpringDataSourceConfig;
-import org.folio.spring.tenant.service.SchemaService;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
 import org.operaton.bpm.engine.ProcessEngine;
@@ -33,7 +33,7 @@ public class CamundaApiService {
 
   private final BpmnModelFactory bpmnModelFactory;
 
-  private final SchemaService schemaService;
+  private final HibernateSchemaService schemaService;
 
   private final SpringDataSourceConfig springDatasourceConfig;
 
@@ -42,7 +42,7 @@ public class CamundaApiService {
    *
    * @param bpmnModelFactory The model factory.
    */
-  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory, HibernateSchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
 
     this.bpmnModelFactory = bpmnModelFactory;
     this.schemaService = schemaService;
@@ -136,7 +136,7 @@ public class CamundaApiService {
     if (processEngine == null) {
 
       final String baseUrl = springDatasourceConfig.getUrl();
-      final String schema = schemaService.getSchema(tenant);
+      final String schema = schemaService.getTenantSchema(tenant);
 
       final String formattedUrl = baseUrl + "?currentSchema=" + schema + ",public";
 

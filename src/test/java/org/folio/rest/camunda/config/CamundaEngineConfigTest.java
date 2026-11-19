@@ -8,8 +8,8 @@ import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import org.folio.rest.camunda.resolver.ScriptEngineResolver;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.folio.spring.tenant.service.SchemaProvisionerService;
-import org.folio.spring.tenant.service.SchemaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 class CamundaEngineConfigTest {
 
   @Mock
-  SchemaService schemaService;
+  HibernateSchemaService schemaService;
 
   @Mock
   SchemaProvisionerService schemaProvisionerService;

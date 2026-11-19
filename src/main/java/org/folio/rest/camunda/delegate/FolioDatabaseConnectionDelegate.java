@@ -4,8 +4,8 @@ import java.util.Properties;
 import org.folio.rest.camunda.exception.DelegateExecutionFailure;
 import org.folio.rest.camunda.service.DatabaseConnectionService;
 import org.folio.rest.workflow.model.FolioDatabaseConnectionTask;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.folio.spring.tenant.service.SchemaProvisionerService;
-import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.RuntimeService;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.springframework.context.annotation.Scope;
@@ -32,7 +32,7 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
    * @param schemaService     The schema service.
    */
   public FolioDatabaseConnectionDelegate(
-    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, SchemaService schemaService,
+    JsonMapper mapper, RuntimeService runtimeService, DatabaseConnectionService connectionService, HibernateSchemaService schemaService,
     SchemaProvisionerService schemaProvisionerService
   ) {
 
@@ -63,7 +63,7 @@ public class FolioDatabaseConnectionDelegate extends DatabaseConnectionDelegate 
   protected void performExecute(DelegateExecution execution, String name, String id) {
 
     final String tenant = execution.getTenantId();
-    final String schema = schemaService.getSchema(tenant);
+    final String schema = schemaService.getTenantSchema(tenant);
 
     schemaProvisionerService.ensureProvisionedSchema(schema, tenant);
 

@@ -1,6 +1,6 @@
 package org.folio.rest.camunda.service;
 
-import static org.folio.spring.tenant.service.SchemaService.SCHEMA_REGEXP;
+import static org.folio.spring.tenant.hibernate.HibernateSchemaService.SCHEMA_REGEXP;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

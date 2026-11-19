@@ -3,8 +3,8 @@ package org.folio.rest.camunda.config;
 import java.time.Clock;
 import java.util.concurrent.ConcurrentHashMap;
 import org.folio.rest.camunda.provider.LoggerProvider;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.folio.spring.tenant.service.SchemaProvisionerService;
-import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.impl.cfg.ProcessEnginePlugin;
 import org.operaton.bpm.spring.boot.starter.configuration.Ordering;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +34,7 @@ public class CamundaConfig {
 
   @Bean
   @Order(Ordering.DEFAULT_ORDER + 1)
-  static ProcessEnginePlugin processEnginePlugin(SchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
+  static ProcessEnginePlugin processEnginePlugin(HibernateSchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
 
     return new CamundaEngineConfig(schemaService, schemaProvisionerService);
   }

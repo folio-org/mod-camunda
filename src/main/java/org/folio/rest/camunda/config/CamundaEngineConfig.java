@@ -2,8 +2,8 @@ package org.folio.rest.camunda.config;
 
 import javax.script.ScriptEngineManager;
 import org.folio.rest.camunda.resolver.ScriptEngineResolver;
+import org.folio.spring.tenant.hibernate.HibernateSchemaService;
 import org.folio.spring.tenant.service.SchemaProvisionerService;
-import org.folio.spring.tenant.service.SchemaService;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.operaton.bpm.engine.ProcessEngine;
 import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
@@ -18,7 +18,7 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
 
   private static final Logger logger = LoggerFactory.getLogger(CamundaEngineConfig.class);
 
-  private final SchemaService schemaService;
+  private final HibernateSchemaService schemaService;
 
   private final SchemaProvisionerService schemaProvisionerService;
 
@@ -28,7 +28,7 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
    * @param schemaService             The schema service.
    * @param tenantProvisioningService The provisioning service.
    */
-  public CamundaEngineConfig(SchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
+  public CamundaEngineConfig(HibernateSchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
     super();
 
     this.schemaService = schemaService;
@@ -55,7 +55,7 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
   public void postProcessEngineBuild(ProcessEngine engine) {
 
     final String tenant = ThreadLocalStorage.getTenant();
-    final String schema = schemaService.getSchema(tenant);
+    final String schema = schemaService.getTenantSchema(tenant);
 
     schemaProvisionerService.ensureProvisionedSchema(schema, tenant);
   }
