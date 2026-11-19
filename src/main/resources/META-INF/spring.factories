@@ -1,0 +1,2 @@
+org.folio.spring.tenant.interfaces.TenantDatabaseProvisioner=\
+org.folio.rest.camunda.provisioner.CamundaTenantDatabaseProvisioner

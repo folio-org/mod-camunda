@@ -1,5 +1,6 @@
 package org.folio.rest.camunda.handler;
 
+import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.operaton.bpm.engine.impl.interceptor.CommandContext;
 import org.operaton.bpm.engine.impl.jobexecutor.JobHandler;
 import org.operaton.bpm.engine.impl.jobexecutor.JobHandlerConfiguration;
@@ -23,15 +24,13 @@ public class TenantJobHandler implements JobHandler {
   }
 
   @Override
-  public void execute(JobHandlerConfiguration configuration, ExecutionEntity execution, CommandContext commandContext,
-    String tenantId) {
-    // TODO Auto-generated method stub
-    
+  public void execute(JobHandlerConfiguration configuration, ExecutionEntity execution, CommandContext commandContext, String tenant) {
+
+    ThreadLocalStorage.setTenant(tenant);
   }
 
   @Override
   public JobHandlerConfiguration newConfiguration(String canonicalString) {
-    // TODO Auto-generated method stub
     return null;
   }
 

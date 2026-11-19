@@ -67,7 +67,7 @@ public class BpmnModelFactory {
 
   private static final String START_EVENT = "start";
 
-  private static final Class<?>[] SERIALIZABLE_TYPES = new Class<?>[] {
+  private static final Class<?>[] SERIALIZABLE_TYPES = new Class[] {
     String.class,
     Number.class,
     Boolean.class,

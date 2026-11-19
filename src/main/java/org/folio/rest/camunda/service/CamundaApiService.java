@@ -7,6 +7,7 @@ import org.folio.rest.camunda.listener.ScriptListener;
 import org.folio.rest.camunda.utility.LoggerStream;
 import org.folio.rest.workflow.model.Workflow;
 import org.folio.spring.tenant.config.SpringDataSourceConfig;
+import org.folio.spring.tenant.service.SchemaProvisionerService;
 import org.folio.spring.tenant.service.SchemaService;
 import org.operaton.bpm.engine.AuthorizationException;
 import org.operaton.bpm.engine.ParseException;
@@ -33,6 +34,8 @@ public class CamundaApiService {
 
   private final BpmnModelFactory bpmnModelFactory;
 
+  private final SchemaProvisionerService schemaProvisionerService;
+
   private final SchemaService schemaService;
 
   private final SpringDataSourceConfig springDatasourceConfig;
@@ -42,9 +45,10 @@ public class CamundaApiService {
    *
    * @param bpmnModelFactory The model factory.
    */
-  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
+  public CamundaApiService(BpmnModelFactory bpmnModelFactory, SchemaProvisionerService schemaProvisionerService, SchemaService schemaService, SpringDataSourceConfig springDatasourceConfig) {
 
     this.bpmnModelFactory = bpmnModelFactory;
+    this.schemaProvisionerService = schemaProvisionerService;
     this.schemaService = schemaService;
     this.springDatasourceConfig = springDatasourceConfig;
   }
@@ -60,18 +64,21 @@ public class CamundaApiService {
       throw new WorkflowAlreadyActiveException(workflow.getId());
     }
 
-    logger.info("Deploying BPMN Model for Workflow '{}' with ID '{}'.", workflow.getName(), workflow.getId());
+    logger.info("Deploying BPMN Model for Workflow '{}' with ID '{}' and tenant '{}'.", workflow.getName(), workflow.getId(), tenant);
 
     BpmnModelInstance modelInstance = bpmnModelFactory.fromWorkflow(workflow);
 
     Bpmn.validateModel(modelInstance);
-    
-    // EXISTENCE CHECK HERE.
 
-    ProcessEngine processEngine = getProcessEngine(tenant);
-    RepositoryService repositoryService = processEngine.getRepositoryService();
+    final String schema = schemaService.getSchema(tenant);
+
+    schemaProvisionerService.ensureProvisionedSchema(schema, tenant);
+
+    final ProcessEngine processEngine = getProcessEngine(tenant);
+    final RepositoryService repositoryService = processEngine.getRepositoryService();
 
     processEngine.getProcessEngineConfiguration()
+      .setDataSource(schemaProvisionerService.getDataSource())
       .setClassLoader(ScriptListener.class.getClassLoader())
       .setJobExecutorDeploymentAware(true);
 
@@ -141,6 +148,7 @@ public class CamundaApiService {
       final String formattedUrl = baseUrl + "?currentSchema=" + schema + ",public";
 
       processEngine = ProcessEngineConfiguration.createStandaloneProcessEngineConfiguration()
+        .setDataSource(schemaProvisionerService.getDataSource())
         .setProcessEngineName(tenant)
         .setJdbcDriver(springDatasourceConfig.getDriverClassName())
         .setJdbcUrl(formattedUrl)
@@ -148,7 +156,6 @@ public class CamundaApiService {
         .setJdbcPassword(springDatasourceConfig.getPassword())
         // .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE) // need to provide value by configuration
         .setJobExecutorActivate(true)
-        // .setDataSource(datasource) // alternative possible method - just provide Hikari datasource?
 
         .buildProcessEngine();
     }

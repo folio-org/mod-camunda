@@ -11,6 +11,9 @@ import org.folio.spring.tenant.hibernate.HibernateSchemaDataSource;
 import org.folio.spring.tenant.interfaces.TenantDatabaseProvisioner;
 import org.folio.spring.tenant.service.SchemaService;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
+import org.operaton.bpm.engine.ProcessEngine;
+import org.operaton.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.operaton.bpm.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -46,9 +49,9 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
   @Override
   public void provisionSchema(String schema, String tenant) throws SQLException {
 
-    LOG.debug("Provisioning schema '{}' for tenant '{}'.", schema, tenant);
-
     final String originalTlsTenant = ThreadLocalStorage.getTenant();
+
+    LOG.debug("Provisioning schema '{}' for tenant '{}', original tenant is '{}'.", schema, tenant, originalTlsTenant);
 
     // Set the tenant context so the MultiTenantConnectionProvider routes correctly.
     ThreadLocalStorage.setTenant(tenant);
@@ -97,16 +100,26 @@ public class CamundaTenantDatabaseProvisioner implements TenantDatabaseProvision
     tenantEmf.setJpaVendorAdapter(primaryEmf.getJpaVendorAdapter());
     tenantEmf.setPackagesToScan(HibernateMultiTenantConfig.PACKAGES_TO_SCAN);
     tenantEmf.setJpaPropertyMap(jpaProps);
-    tenantEmf.setPersistenceUnitName(String.format("%s_%s", CamundaTenantDatabaseProvisioner.class, schema));
+    tenantEmf.setPersistenceUnitName(String.format("%s_%s", CamundaTenantDatabaseProvisioner.class.getSimpleName(), schema));
 
     try {
       tenantEmf.afterPropertiesSet();
-      //final EntityManagerFactory emf = tenantEmf.getObject();
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to provision schema '%s'.", schema), e);
     } finally {
       tenantEmf.destroy();
     }
+
+    final ProcessEngineConfigurationImpl operatonConfig =
+      new StandaloneProcessEngineConfiguration()
+        .setProcessEngineName(schema)
+        .setDataSource(tenantDataSource)
+        .setDatabaseSchemaUpdate(ProcessEngineConfigurationImpl.DB_SCHEMA_UPDATE_CREATE)
+        .setHistory(ProcessEngineConfigurationImpl.HISTORY_AUDIT)
+        .setJobExecutorActivate(false);
+
+    final ProcessEngine engine = operatonConfig.buildProcessEngine();
+    engine.close();
   }
 
 }

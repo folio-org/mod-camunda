@@ -1,5 +1,7 @@
 package org.folio.rest.camunda.config;
 
+import static org.operaton.bpm.engine.impl.history.HistoryLevel.HISTORY_LEVEL_AUDIT;
+
 import javax.script.ScriptEngineManager;
 import org.folio.rest.camunda.resolver.ScriptEngineResolver;
 import org.folio.spring.tenant.service.SchemaProvisionerService;
@@ -29,6 +31,7 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
    * @param tenantProvisioningService The provisioning service.
    */
   public CamundaEngineConfig(SchemaService schemaService, SchemaProvisionerService schemaProvisionerService) {
+
     super();
 
     this.schemaService = schemaService;
@@ -49,6 +52,7 @@ public class CamundaEngineConfig implements OperatonProcessEngineConfiguration  
 
     // The multi-tenancy approach design requires this.
     config.setUseSharedSqlSessionFactory(true);
+    config.setHistoryLevel(HISTORY_LEVEL_AUDIT);
   }
 
   @Override
