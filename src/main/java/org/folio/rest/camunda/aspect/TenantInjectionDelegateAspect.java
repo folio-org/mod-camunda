@@ -4,8 +4,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.DelegateTask;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.folio.spring.tenant.exception.NoTenantException;
-import org.folio.spring.tenant.properties.TenantProperties;
 import org.folio.spring.tenant.storage.ThreadLocalStorage;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantInjectionDelegateAspect {
 
-  private TenantProperties tenantProperties;
+  private TenantConfig tenantProperties;
 
-  public TenantInjectionDelegateAspect(TenantProperties tenantProperties) {
+  public TenantInjectionDelegateAspect(TenantConfig tenantProperties) {
     this.tenantProperties = tenantProperties;
   }
 

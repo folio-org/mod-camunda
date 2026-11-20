@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.folio.rest.camunda.config.CamundaTenantInit;
 import org.folio.rest.camunda.config.TokenConfig;
-import org.folio.spring.tenant.properties.TenantProperties;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.folio.spring.tenant.service.SqlTemplateService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
     CamundaTenantInit.class,
     SpringTemplateEngine.class,
     SqlTemplateService.class,
-    TenantProperties.class
+    TenantConfig.class
   },
   webEnvironment = WebEnvironment.MOCK
 )

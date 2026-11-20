@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.folio.spring.tenant.config.TenantConfig;
 import org.folio.spring.tenant.exception.NoTenantException;
-import org.folio.spring.tenant.properties.TenantProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,7 @@ class TenantInjectionDelegateAspectTest {
   private DelegateTask task;
 
   @Mock
-  private TenantProperties tenantProperties;
+  private TenantConfig tenantProperties;
 
   @InjectMocks
   private TenantInjectionDelegateAspect tenantInjectionDelegateAspect;

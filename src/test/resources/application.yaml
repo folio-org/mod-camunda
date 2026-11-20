@@ -78,9 +78,12 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
 
-    properties.hibernate.jdbc.lob.non_contextual_creation: true
+    properties.hibernate:
+      jdbc.lob.non_contextual_creation: true
+      default_schema: ${DB_SCHEMA:mod_camunda}
+
     generate-ddl: false
-    hibernate.ddl-auto: none
+    hibernate.ddl-auto: update
     open-in-view: true
     show-sql: false
 

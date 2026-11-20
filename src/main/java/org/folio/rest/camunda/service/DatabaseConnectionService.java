@@ -10,7 +10,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.folio.rest.camunda.config.FolioDelegateDatabaseConfig;
 import org.folio.spring.tenant.config.JpaPropertiesHibernateConfig;
-import org.folio.spring.tenant.properties.TenantProperties;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,14 +65,14 @@ public class DatabaseConnectionService {
 
   private final JpaPropertiesHibernateConfig jpaPropertiesHibernateConfig;
 
-  private final TenantProperties tenantProperties;
+  private final TenantConfig tenantProperties;
 
   /**
    * Initializer.
    *
    * @param tenantProperties The Tenant properties configuration.
    */
-  public DatabaseConnectionService(FolioDelegateDatabaseConfig folioDelegateDatabaseConfig, JpaPropertiesHibernateConfig jpaPropertiesHibernateConfig, TenantProperties tenantProperties) {
+  public DatabaseConnectionService(FolioDelegateDatabaseConfig folioDelegateDatabaseConfig, JpaPropertiesHibernateConfig jpaPropertiesHibernateConfig, TenantConfig tenantProperties) {
 
     this.folioDelegateDatabaseConfig = folioDelegateDatabaseConfig;
     this.jpaPropertiesHibernateConfig = jpaPropertiesHibernateConfig;

@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import org.folio.rest.camunda.service.CamundaApiService;
 import org.folio.rest.workflow.model.Setup;
 import org.folio.rest.workflow.model.Workflow;
-import org.folio.spring.tenant.properties.TenantProperties;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.folio.spring.test.helper.MapperHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,7 +83,7 @@ class WorkflowControllerTest {
   private CamundaApiService camundaApiService;
 
   @MockitoBean
-  private TenantProperties tenantProperties;
+  private TenantConfig tenantProperties;
 
   @BeforeEach
   void beforeEach() throws JacksonException {

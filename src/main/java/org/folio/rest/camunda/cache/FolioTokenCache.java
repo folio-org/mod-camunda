@@ -27,7 +27,7 @@ import org.folio.rest.camunda.request.FolioLoginRequest;
 import org.folio.rest.camunda.response.FolioLoginResponse;
 import org.folio.rest.camunda.utility.ClockUtility;
 import org.folio.rest.camunda.utility.DateTimeUtility;
-import org.folio.spring.tenant.properties.TenantProperties;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +109,7 @@ public class FolioTokenCache {
 
   private final JsonMapper mapper;
 
-  private final TenantProperties tenantProperties;
+  private final TenantConfig tenantProperties;
 
   /**
    * Class constructor.
@@ -123,7 +123,7 @@ public class FolioTokenCache {
    */
   public FolioTokenCache(
     ClockUtility clockUtility, FolioClient folioClient, FolioEnvConfig folioEnvConfig,
-    FolioGatewayConfig folioGatewayConfig, JsonMapper mapper, TenantProperties tenantProperties
+    FolioGatewayConfig folioGatewayConfig, JsonMapper mapper, TenantConfig tenantProperties
   ) {
 
     this.clockUtility = clockUtility;

@@ -5,8 +5,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
+import org.folio.spring.tenant.config.TenantConfig;
 import org.folio.spring.tenant.hibernate.HibernateTenantInit;
-import org.folio.spring.tenant.properties.TenantProperties;
 import org.folio.spring.tenant.service.SqlTemplateService;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +24,9 @@ public class CamundaTenantInit implements HibernateTenantInit {
 
   private final SqlTemplateService sqlTemplateService;
 
-  private final TenantProperties tenantProperties;
+  private final TenantConfig tenantProperties;
 
-  public CamundaTenantInit(SqlTemplateService sqlTemplateService, TenantProperties tenantProperties) {
+  public CamundaTenantInit(SqlTemplateService sqlTemplateService, TenantConfig tenantProperties) {
     this.sqlTemplateService = sqlTemplateService;
     this.tenantProperties = tenantProperties;
   }
